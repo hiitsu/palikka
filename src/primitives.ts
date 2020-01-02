@@ -1,5 +1,7 @@
 import { Shape } from "./shape";
 
+export type ColorGrid = Array<Array<number>>;
+
 export enum Slot {
   Empty = 0,
   Taken = 1

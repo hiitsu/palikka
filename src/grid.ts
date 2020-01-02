@@ -39,7 +39,10 @@ export class Grid {
       for (let j = 0; j < shapeHeight; j++) {
         const isInside =
           this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
-        if (isInside) this.slots[y + j][x + i] = shape[j][i];
+        const isTaken = shape[j][i] === Slot.Taken;
+        if (isInside && isTaken) {
+          this.slots[y + j][x + i] = shape[j][i];
+        }
       }
     }
   }

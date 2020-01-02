@@ -1,5 +1,7 @@
-import { shapes, allShapeVariations, PuzzleArea } from "../src/blocks";
-import { Shape } from "../src/primitives";
+import { shapes, Puzzle } from "../src/puzzle";
+import { Shape, allShapeVariations } from "../src/shape";
+import { Grid } from "../src/grid";
+import { ColorGrid } from "../src/primitives";
 
 export function SlotComponent(props: { key: number; value: number }) {
   const className = `slot slot-${props.value}`;
@@ -22,6 +24,33 @@ export function SlotComponent(props: { key: number; value: number }) {
         }
         .slot-2 {
           background: #e88;
+        }
+        .slot-3 {
+          background: #88e;
+        }
+        .slot-4 {
+          background: #4f4;
+        }
+        .slot-5 {
+          background: #8aa;
+        }
+        .slot-6 {
+          background: #8af;
+        }
+        .slot-7 {
+          background: #ffa;
+        }
+        .slot-8 {
+          background: #0f0;
+        }
+        .slot-9 {
+          background: #ff0;
+        }
+        .slot-10 {
+          background: #0ff;
+        }
+        .slot-11 {
+          background: #33f;
         }
       `}</style>
     </div>
@@ -59,12 +88,39 @@ export function ShapeListComponent(props: { shapes: Shape[] }) {
   );
 }
 
+export function GridComponent(props: { grid: ColorGrid }) {
+  return (
+    <div className="grid">
+      {props.grid.map((row, index) => {
+        return (
+          <div key={index} className="grid-row">
+            {row.map((value, index) => SlotComponent({ value, key: index }))}
+          </div>
+        );
+      })}
+      <style jsx>{`
+        .grid {
+          box-sizing: border-box;
+          padding: 1em;
+          background-color: #eee;
+        }
+        .grid-row {
+          box-sizing: border-box;
+          height: 1cm;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function HomePage() {
-  const puzzle = new PuzzleArea(10, 5);
+  const puzzle = new Puzzle(10, 5);
   puzzle.fillWith(allShapeVariations(shapes));
-  console.log(puzzle);
+  const colorGrid = puzzle.renderColorGrid();
+  console.log(colorGrid);
   return (
     <>
+      <GridComponent grid={colorGrid} />
       <ShapeListComponent shapes={allShapeVariations(shapes)} />
       <style jsx global>
         {`
