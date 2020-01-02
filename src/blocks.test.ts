@@ -1,13 +1,13 @@
+import { Shape } from "./primitives";
 import {
-  randomInt,
-  randomGrid,
-  Shape,
+  shapes,
   flipX,
   flipY,
   rotateClockWise90,
   shapeVariations,
+  allShapeVariations,
   sizeOf,
-  arrayWith
+  PuzzleArea
 } from "./blocks";
 
 const shape: Shape = [
@@ -15,13 +15,6 @@ const shape: Shape = [
   [1, 2, 3, 4, 6]
 ];
 
-console.log("arrayWith number", arrayWith(2, 2));
-console.log("randomInt", randomInt(2, 2));
-console.log("randomGrid", randomGrid(5, 10));
-console.log(
-  "arrayWith callback",
-  arrayWith(2, () => "yo")
-);
 console.log("shape", shape);
 console.log("size", sizeOf(shape));
 console.log("rotateClockWise90", rotateClockWise90(shape));
@@ -32,3 +25,7 @@ console.log(
 console.log("flipX", flipX(shape));
 console.log("flipY", flipY(shape));
 console.log("shapeVariations", shapeVariations(shape));
+
+const p = new PuzzleArea(10, 5);
+p.fillWith(allShapeVariations(shapes));
+console.log("puzzle", p);

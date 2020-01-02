@@ -1,21 +1,10 @@
-import {
-  randomInt,
-  randomGrid,
-  Shape,
-  shapes,
-  flipX,
-  flipY,
-  rotateClockWise90,
-  shapeVariations,
-  sizeOf,
-  arrayWith,
-  allShapeVariations
-} from "../src/blocks";
+import { shapes, allShapeVariations, PuzzleArea } from "../src/blocks";
+import { Shape } from "../src/primitives";
 
-export function SlotComponent(props: { value: number }) {
+export function SlotComponent(props: { key: number; value: number }) {
   const className = `slot slot-${props.value}`;
   return (
-    <div className={className}>
+    <div key={props.key} className={className}>
       <style jsx>{`
         .slot {
           width: 1cm;
@@ -39,13 +28,13 @@ export function SlotComponent(props: { value: number }) {
   );
 }
 
-export function ShapeComponent(props: { shape: Shape }) {
+export function ShapeComponent(props: { key: number; shape: Shape }) {
   return (
-    <div className="shape">
-      {props.shape.map(row => {
+    <div key={props.key} className="shape">
+      {props.shape.map((row, index) => {
         return (
-          <div className="shape-row">
-            {row.map(value => SlotComponent({ value }))}
+          <div key={index} className="shape-row">
+            {row.map((value, index) => SlotComponent({ value, key: index }))}
           </div>
         );
       })}
@@ -65,12 +54,17 @@ export function ShapeComponent(props: { shape: Shape }) {
 }
 
 export function ShapeListComponent(props: { shapes: Shape[] }) {
-  return props.shapes.map(shape => ShapeComponent({ shape }));
+  return props.shapes.map((shape, index) =>
+    ShapeComponent({ shape, key: index })
+  );
 }
 
 function HomePage() {
+  const puzzle = new PuzzleArea(10, 5);
+  puzzle.fillWith(allShapeVariations(shapes));
+  console.log(puzzle);
   return (
-    <div>
+    <>
       <ShapeListComponent shapes={allShapeVariations(shapes)} />
       <style jsx global>
         {`
@@ -80,7 +74,7 @@ function HomePage() {
           }
         `}
       </style>
-    </div>
+    </>
   );
 }
 

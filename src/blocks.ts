@@ -1,12 +1,6 @@
-export const arrayWith = (size: number, valueOrPredicate: any): Array<any> => {
-  if (typeof valueOrPredicate === "number")
-    return new Array(size).fill(valueOrPredicate);
-  const arr = [];
-  for (let i = 0; i < size; i++) arr.push(valueOrPredicate(i));
-  return arr;
-};
+import { Shape, XY, Grid, Block } from "./primitives";
+import { arrayWith, randomInt } from "./util";
 
-export type Shape = Array<Array<number>>;
 export const shapes: Shape[] = [
   [[1]],
   [[1], [1]],
@@ -128,98 +122,40 @@ export const allShapeVariations = (shapes: Shape[]): Shape[] => {
   return [...new Set(stringifiedShapes)].map(s => JSON.parse(s));
 };
 
-type XY = { x: number; y: number };
-
-export const randomInt = (from: number, to: number): number =>
-  from + Math.floor(Math.random() * to - from);
-
-export const randomGrid = (min: number, max: number): Grid => {
-  const w = randomInt(min, max);
-  const h = randomInt(min, max);
-  return arrayWith(h, 1).map(() => arrayWith(w, 1));
-};
-
-export const gridWith = (w: number, h: number): Grid => {
-  return arrayWith(h, 1).map(() => arrayWith(w, 1));
-};
-
-export const mergeGrids = (target: Grid, source: Grid): Grid => {
-  return [];
-};
-
-class Block {
-  shape: Shape;
-  position: XY;
-  constructor(shape: Shape, position: XY) {
-    this.shape = shape;
-    this.position = position;
-  }
-  hasTileAt(xy: XY): boolean {
-    return this.valueAt(xy) > 0;
-  }
-  valueAt(xy: XY): number {
-    const _xy = { x: xy.x - this.position.x, y: xy.y - this.position.y };
-    return this.shape[_xy.x]?.[_xy.y];
-  }
-}
-
-type Grid = Array<Array<number>>;
-
-class Area {
+export class PuzzleArea {
   grid: Grid;
-  width: number;
-  height: number;
-  constructor(width: number, height: number) {
-    this.width = width;
-    this.height = height;
-  }
-}
-
-class Arena {
   blocks: Array<Block>;
-  grid: Grid;
-  width: number;
 
-  constructor() {
-    this.width = 5;
-    this.grid = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => [0, 0, 0, 0, 0]);
+  constructor(width: number, height: number) {
+    this.reset(width, height);
+  }
+
+  reset(width: number, height: number) {
+    this.grid = new Grid(width, height);
     this.blocks = [];
   }
 
-  addRandomBlock() {
-    const n = randomInt(0, shapes.length);
-    const shape = shapes[n];
-    const x = randomInt(0, this.width - shapes[0].length);
-    const y = -shape.length;
-    this.blocks.push(new Block(shape, { x, y }));
-  }
+  fillWith(shapes: Shape[]) {
+    const width = this.grid.width;
+    const height = this.grid.height;
+    this.reset(width, height);
 
-  tick() {
-    this.blocks.forEach(block => {
-      block.position.y += 1;
-    });
-  }
+    shapes.sort((a, b) => sizeOf(a) - sizeOf(b));
+    const groups = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(size =>
+      shapes.filter(shape => sizeOf(shape) < size + 1 && sizeOf(shape) >= size)
+    );
 
-  draw(): Grid {
-    return this.grid.map((row, y) => {
-      return row.map((gridValue, x) => {
-        const block = this.blocks.find(block => {
-          return block.hasTileAt({ y, x });
-        });
-        const finalValue = block ? block.valueAt({ y, x }) : gridValue;
-        return finalValue;
-      });
+    groups.forEach(shapeGroup => {
+      for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+          shapeGroup.forEach(shape => {
+            if (this.grid.canFit(i, j, shape)) {
+              this.grid.mergeShape(i, j, shape);
+              this.blocks.push({ shape, x: i, y: j });
+            }
+          });
+        }
+      }
     });
   }
 }
-/*
-const arena = new Arena();
-arena.addRandomBlock();
-arena.addRandomBlock();
-arena.addRandomBlock();
-[0, 1, 2, 3].forEach(n => {
-  const step0 = arena.draw();
-  console.log(step0);
-  arena.tick();
-});
-*/
