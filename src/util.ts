@@ -6,5 +6,19 @@ export const arrayWith = (size: number, valueOrPredicate: any): Array<any> => {
   return arr;
 };
 
+export const arrayShuffle = (list: Array<any>) => {
+  return list.slice().sort(() => Math.random() - 0.5);
+};
+
+export const arrayOfPoints = (width: number, height: number) => {
+  const points = [];
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      points.push({ x: i, y: j });
+    }
+  }
+  return points;
+};
+
 export const randomInt = (from: number, to: number): number =>
   from + Math.floor(Math.random() * to - from);

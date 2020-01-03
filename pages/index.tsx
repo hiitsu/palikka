@@ -1,56 +1,23 @@
 import { shapes, Puzzle } from "../src/puzzle";
-import { Shape, allShapeVariations } from "../src/shape";
+import { Shape, allShapeVariations, sizeOf } from "../src/shape";
 import { Grid } from "../src/grid";
 import { ColorGrid } from "../src/primitives";
+import { colors } from "../src/colors";
 
 export function SlotComponent(props: { key: number; value: number }) {
   const className = `slot slot-${props.value}`;
   return (
-    <div key={props.key} className={className}>
+    <div
+      key={props.key}
+      className={className}
+      style={{ background: colors[props.value] }}
+    >
       <style jsx>{`
         .slot {
           width: 1cm;
           height: 1cm;
-          border: 1px solid #777;
           display: inline-block;
           box-sizing: border-box;
-          margin: -1px 0 0 -1px;
-        }
-        .slot-0 {
-          background: #ddd;
-        }
-        .slot-1 {
-          background: #999;
-        }
-        .slot-2 {
-          background: #e88;
-        }
-        .slot-3 {
-          background: #88e;
-        }
-        .slot-4 {
-          background: #4f4;
-        }
-        .slot-5 {
-          background: #8aa;
-        }
-        .slot-6 {
-          background: #8af;
-        }
-        .slot-7 {
-          background: #ffa;
-        }
-        .slot-8 {
-          background: #0f0;
-        }
-        .slot-9 {
-          background: #ff0;
-        }
-        .slot-10 {
-          background: #0ff;
-        }
-        .slot-11 {
-          background: #33f;
         }
       `}</style>
     </div>
@@ -113,14 +80,86 @@ export function GridComponent(props: { grid: ColorGrid }) {
   );
 }
 
+function randomPuzzle(w: number = 8, h: number = 5, maxShapeSize = 5) {
+  const puzzle = new Puzzle(w, h);
+  const shapesWithMatchingSize = shapes.filter(
+    shape => sizeOf(shape) <= maxShapeSize
+  );
+  puzzle.fillWith(allShapeVariations(shapesWithMatchingSize));
+  return puzzle;
+}
+
 function HomePage() {
-  const puzzle = new Puzzle(10, 5);
-  puzzle.fillWith(allShapeVariations(shapes));
-  const colorGrid = puzzle.renderColorGrid();
-  console.log(colorGrid);
   return (
     <>
-      <GridComponent grid={colorGrid} />
+      <h1>Puzzles</h1>
+
+      <h2>Size 4x4</h2>
+      <GridComponent grid={randomPuzzle(4, 4, 3).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(4, 4, 4).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(4, 4, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(4, 4, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(4, 4, 7).renderColorGrid()} />
+
+      <h2>Size 5x5</h2>
+      <GridComponent grid={randomPuzzle(5, 5, 4).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(5, 5, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(5, 5, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(5, 5, 7).renderColorGrid()} />
+
+      <h2>Size 6x6</h2>
+      <GridComponent grid={randomPuzzle(6, 6, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(6, 6, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(6, 6, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(6, 6, 8).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(6, 6, 9).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(6, 6, 10).renderColorGrid()} />
+
+      <h2>Size 8x8</h2>
+      <GridComponent grid={randomPuzzle(8, 8, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 8, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 8, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 8, 8).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 8, 9).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 8, 10).renderColorGrid()} />
+
+      <h2>Size 8x5</h2>
+      <GridComponent grid={randomPuzzle(8, 5, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 5, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 5, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 5, 8).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 5, 9).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(8, 5, 10).renderColorGrid()} />
+
+      <h2>Size 10x4</h2>
+      <GridComponent grid={randomPuzzle(10, 4, 4).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 4, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 4, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 4, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 4, 8).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 4, 9).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 4, 10).renderColorGrid()} />
+
+      <h2>Size 10x5</h2>
+      <GridComponent grid={randomPuzzle(10, 5, 4).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 8).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 9).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 10).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(10, 5, 11).renderColorGrid()} />
+
+      <h2>Size 12x6</h2>
+      <GridComponent grid={randomPuzzle(12, 6, 5).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 6).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 8).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 9).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 10).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 11).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(12, 6, 12).renderColorGrid()} />
+
       <ShapeListComponent shapes={allShapeVariations(shapes)} />
       <style jsx global>
         {`
