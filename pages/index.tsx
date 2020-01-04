@@ -95,17 +95,18 @@ function HomePage() {
       <h1>Puzzles</h1>
 
       <h2>Size 4x4</h2>
-      <GridComponent grid={randomPuzzle(4, 4, 3).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(4, 4, 4).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(4, 4, 5).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(4, 4, 6).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(4, 4, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(4, 4, 8).renderColorGrid()} />
 
       <h2>Size 5x5</h2>
       <GridComponent grid={randomPuzzle(5, 5, 4).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(5, 5, 5).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(5, 5, 6).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(5, 5, 7).renderColorGrid()} />
+      <GridComponent grid={randomPuzzle(5, 5, 8).renderColorGrid()} />
 
       <h2>Size 6x6</h2>
       <GridComponent grid={randomPuzzle(6, 6, 5).renderColorGrid()} />
@@ -122,43 +123,6 @@ function HomePage() {
       <GridComponent grid={randomPuzzle(8, 8, 8).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(8, 8, 9).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(8, 8, 10).renderColorGrid()} />
-
-      <h2>Size 8x5</h2>
-      <GridComponent grid={randomPuzzle(8, 5, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 5, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 5, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 5, 8).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 5, 9).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 5, 10).renderColorGrid()} />
-
-      <h2>Size 10x4</h2>
-      <GridComponent grid={randomPuzzle(10, 4, 4).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 4, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 4, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 4, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 4, 8).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 4, 9).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 4, 10).renderColorGrid()} />
-
-      <h2>Size 10x5</h2>
-      <GridComponent grid={randomPuzzle(10, 5, 4).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 8).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 9).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 10).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(10, 5, 11).renderColorGrid()} />
-
-      <h2>Size 12x6</h2>
-      <GridComponent grid={randomPuzzle(12, 6, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 8).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 9).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 10).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 11).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(12, 6, 12).renderColorGrid()} />
 
       <ShapeListComponent shapes={allShapeVariations(shapes)} />
       <style jsx global>

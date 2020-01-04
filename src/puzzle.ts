@@ -43,6 +43,8 @@ export const shapes: Shape[] = [
     [0, 1, 0, 0],
     [1, 1, 1, 1]
   ],
+
+  [[1, 1, 1, 1, 1]],
   [
     [1, 1],
     [1, 1],
@@ -136,12 +138,6 @@ export const shapes: Shape[] = [
   // 10 squares
   [
     [1, 1, 1, 1],
-    [0, 0, 1, 0],
-    [0, 1, 0, 0],
-    [1, 1, 1, 1]
-  ],
-  [
-    [1, 1, 1, 1],
     [0, 1, 0, 0],
     [0, 1, 0, 0],
     [1, 1, 1, 1]
@@ -150,6 +146,12 @@ export const shapes: Shape[] = [
     [1, 1, 1, 1],
     [1, 0, 0, 0],
     [1, 0, 0, 0],
+    [1, 1, 1, 1]
+  ],
+  [
+    [1, 1, 1, 0],
+    [1, 0, 0, 0],
+    [1, 0, 0, 1],
     [1, 1, 1, 1]
   ],
   [
@@ -157,6 +159,18 @@ export const shapes: Shape[] = [
     [1, 1, 1, 0],
     [1, 1, 0, 0],
     [1, 0, 0, 0]
+  ],
+  [
+    [1, 1, 1, 0],
+    [1, 1, 1, 1],
+    [1, 1, 0, 0],
+    [1, 0, 0, 0]
+  ],
+  [
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 0, 0]
   ]
 ];
 
@@ -200,20 +214,45 @@ export class Puzzle {
     const width = this.grid.width;
     const height = this.grid.height;
     this.reset(width, height);
+    const points = arrayShuffle(arrayOfPoints(width, height));
+    const grid = new Grid(width, height);
 
     const shapeGroups = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(size => {
-      return shapes.filter(
-        shape => sizeOf(shape) < size + 1 && sizeOf(shape) >= size
-      );
+      return shapes
+        .sort((a, b) => sizeOf(b) - sizeOf(a))
+        .filter(shape => sizeOf(shape) < size + 1 && sizeOf(shape) >= size);
     });
 
-    const points = arrayShuffle(arrayOfPoints(width, height));
+    const biggerShapeGroups = shapeGroups.slice(0, 3);
+    const smallerShapeGroups = shapeGroups.slice(3, 6);
+    const tinyShapeGroups = shapeGroups.slice(6, 9);
 
-    const grid = new Grid(width, height);
     points.forEach(({ x, y }) => {
-      shapeGroups.forEach(shapeGroup => {
+      biggerShapeGroups.forEach(shapeGroup => {
         const shuffledShapeGroup = arrayShuffle(shapeGroup);
         shuffledShapeGroup.forEach(shape => {
+          if (grid.canFit(x, y, shape)) {
+            grid.mergeShape(x, y, shape);
+            this.blocks.push({ shape, x, y });
+          }
+        });
+      });
+    });
+
+    smallerShapeGroups.forEach(shapeGroup => {
+      shapeGroup.forEach(shape => {
+        points.forEach(({ x, y }) => {
+          if (grid.canFit(x, y, shape)) {
+            grid.mergeShape(x, y, shape);
+            this.blocks.push({ shape, x, y });
+          }
+        });
+      });
+    });
+
+    tinyShapeGroups.forEach(shapeGroup => {
+      shapeGroup.forEach(shape => {
+        points.forEach(({ x, y }) => {
           if (grid.canFit(x, y, shape)) {
             grid.mergeShape(x, y, shape);
             this.blocks.push({ shape, x, y });
