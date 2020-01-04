@@ -1,5 +1,7 @@
 import { randomInt } from "./util";
-import { Shape, XY, Grid } from "./primitives";
+import { XY } from "./primitives";
+import { Shape } from "./shape";
+import { Grid } from "./grid";
 
 export const shapes: Shape[] = [
   [
