@@ -1,3 +1,5 @@
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import Backend from "react-dnd-html5-backend";
 import { shapes, Puzzle } from "../src/puzzle";
 import { Shape, allShapeVariations, sizeOf } from "../src/shape";
 import { Grid } from "../src/grid";
@@ -18,6 +20,34 @@ export function SlotComponent(props: { key: number; value: number }) {
           height: 1cm;
           display: inline-block;
           box-sizing: border-box;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export function DraggableShapeComponent(props: { key: number; shape: Shape }) {
+  const [collectedProps, drag] = useDrag({
+    item: { id: 1, type: "a" }
+  });
+  return (
+    <div ref={drag} key={props.key} className="shape">
+      {props.shape.map((row, index) => {
+        return (
+          <div key={index} className="shape-row">
+            {row.map((value, index) => SlotComponent({ value, key: index }))}
+          </div>
+        );
+      })}
+      <style jsx>{`
+        .shape {
+          box-sizing: border-box;
+          padding: 1em;
+          background-color: #eee;
+        }
+        .shape-row {
+          box-sizing: border-box;
+          height: 1cm;
         }
       `}</style>
     </div>
@@ -55,6 +85,34 @@ export function ShapeListComponent(props: { shapes: Shape[] }) {
   );
 }
 
+export function DroppableGridComponent(props: { grid: ColorGrid }) {
+  const [collectedProps, drop] = useDrop({
+    accept: "a"
+  });
+  return (
+    <div ref={drop} className="grid">
+      {props.grid.map((row, index) => {
+        return (
+          <div key={index} className="grid-row">
+            {row.map((value, index) => SlotComponent({ value, key: index }))}
+          </div>
+        );
+      })}
+      <style jsx>{`
+        .grid {
+          box-sizing: border-box;
+          padding: 1em;
+          background-color: #eee;
+        }
+        .grid-row {
+          box-sizing: border-box;
+          height: 1cm;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export function GridComponent(props: { grid: ColorGrid }) {
   return (
     <div className="grid">
@@ -88,6 +146,8 @@ function randomPuzzle(w: number = 8, h: number = 5, maxShapeSize = 5) {
   puzzle.fillWith(allShapeVariations(shapesWithMatchingSize));
   return puzzle;
 }
+
+const colorGrid = new Puzzle(5, 5).renderColorGrid();
 
 function HomePage() {
   return (
@@ -124,7 +184,11 @@ function HomePage() {
       <GridComponent grid={randomPuzzle(8, 8, 9).renderColorGrid()} />
       <GridComponent grid={randomPuzzle(8, 8, 10).renderColorGrid()} />
 
-      <ShapeListComponent shapes={allShapeVariations(shapes)} />
+      <DndProvider backend={Backend}>
+        <DroppableGridComponent grid={colorGrid} />
+        <DraggableShapeComponent key={123} shape={shapes[0]} />
+      </DndProvider>
+
       <style jsx global>
         {`
           body {
