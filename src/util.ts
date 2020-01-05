@@ -22,3 +22,13 @@ export const arrayOfPoints = (width: number, height: number) => {
 
 export const randomInt = (from: number, to: number): number =>
   from + Math.floor(Math.random() * to - from);
+
+export default function snapToGrid(
+  x: number,
+  y: number,
+  gridSize: number = 32
+) {
+  const snappedX = Math.round(x / gridSize) * gridSize;
+  const snappedY = Math.round(y / gridSize) * gridSize;
+  return [snappedX, snappedY];
+}
