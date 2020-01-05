@@ -1,18 +1,32 @@
-import { DndProvider, useDrag, useDrop } from "react-dnd";
-import Backend from "react-dnd-html5-backend";
+import Draggable from "react-draggable";
 import { shapes, Puzzle } from "../src/puzzle";
-import { Shape, allShapeVariations, sizeOf } from "../src/shape";
+import {
+  Shape,
+  allShapeVariations,
+  sizeOf,
+  flipX,
+  flipY,
+  rotateClockWise90
+} from "../src/shape";
 import { Grid } from "../src/grid";
 import { ColorGrid } from "../src/primitives";
 import { colors } from "../src/colors";
+import { useState } from "react";
 
-export function SlotComponent(props: { key: number; value: number }) {
-  const className = `slot slot-${props.value}`;
+export function SlotComponent(props: {
+  key: number | string;
+  value: number;
+  color: number;
+}) {
+  const className = `slot`;
   return (
     <div
       key={props.key}
       className={className}
-      style={{ background: colors[props.value] }}
+      style={{
+        background:
+          props.value == 0 ? "transparent" : colors[props.color % colors.length]
+      }}
     >
       <style jsx>{`
         .slot {
@@ -26,85 +40,40 @@ export function SlotComponent(props: { key: number; value: number }) {
   );
 }
 
-export function DraggableShapeComponent(props: { key: number; shape: Shape }) {
-  const [collectedProps, drag] = useDrag({
-    item: { id: 1, type: "a" }
-  });
+export function ShapeComponent(props: {
+  key?: number;
+  shape: Shape;
+  color: number;
+}) {
+  const [shape, setShape] = useState(props.shape);
   return (
-    <div ref={drag} key={props.key} className="shape">
-      {props.shape.map((row, index) => {
+    <div
+      key={props.key}
+      className="shape"
+      onContextMenu={ev => {
+        setShape(rotateClockWise90(shape));
+        ev.preventDefault();
+        return false;
+      }}
+    >
+      {shape.map((row, index) => {
         return (
           <div key={index} className="shape-row">
-            {row.map((value, index) => SlotComponent({ value, key: index }))}
+            {row.map((value, index) =>
+              SlotComponent({ value, color: props.color, key: index })
+            )}
           </div>
         );
       })}
       <style jsx>{`
         .shape {
           box-sizing: border-box;
-          padding: 1em;
-          background-color: #eee;
+          padding: 0;
+          background-color: transparent;
+          position: absolute;
+          display: inline-block;
         }
         .shape-row {
-          box-sizing: border-box;
-          height: 1cm;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-export function ShapeComponent(props: { key: number; shape: Shape }) {
-  return (
-    <div key={props.key} className="shape">
-      {props.shape.map((row, index) => {
-        return (
-          <div key={index} className="shape-row">
-            {row.map((value, index) => SlotComponent({ value, key: index }))}
-          </div>
-        );
-      })}
-      <style jsx>{`
-        .shape {
-          box-sizing: border-box;
-          padding: 1em;
-          background-color: #eee;
-        }
-        .shape-row {
-          box-sizing: border-box;
-          height: 1cm;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-export function ShapeListComponent(props: { shapes: Shape[] }) {
-  return props.shapes.map((shape, index) =>
-    ShapeComponent({ shape, key: index })
-  );
-}
-
-export function DroppableGridComponent(props: { grid: ColorGrid }) {
-  const [collectedProps, drop] = useDrop({
-    accept: "a"
-  });
-  return (
-    <div ref={drop} className="grid">
-      {props.grid.map((row, index) => {
-        return (
-          <div key={index} className="grid-row">
-            {row.map((value, index) => SlotComponent({ value, key: index }))}
-          </div>
-        );
-      })}
-      <style jsx>{`
-        .grid {
-          box-sizing: border-box;
-          padding: 1em;
-          background-color: #eee;
-        }
-        .grid-row {
           box-sizing: border-box;
           height: 1cm;
         }
@@ -151,44 +120,17 @@ const colorGrid = new Puzzle(5, 5).renderColorGrid();
 
 function HomePage() {
   return (
-    <>
-      <h1>Puzzles</h1>
-
-      <h2>Size 4x4</h2>
-      <GridComponent grid={randomPuzzle(4, 4, 4).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(4, 4, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(4, 4, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(4, 4, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(4, 4, 8).renderColorGrid()} />
-
-      <h2>Size 5x5</h2>
-      <GridComponent grid={randomPuzzle(5, 5, 4).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(5, 5, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(5, 5, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(5, 5, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(5, 5, 8).renderColorGrid()} />
-
-      <h2>Size 6x6</h2>
-      <GridComponent grid={randomPuzzle(6, 6, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(6, 6, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(6, 6, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(6, 6, 8).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(6, 6, 9).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(6, 6, 10).renderColorGrid()} />
-
-      <h2>Size 8x8</h2>
-      <GridComponent grid={randomPuzzle(8, 8, 5).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 8, 6).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 8, 7).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 8, 8).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 8, 9).renderColorGrid()} />
-      <GridComponent grid={randomPuzzle(8, 8, 10).renderColorGrid()} />
-
-      <DndProvider backend={Backend}>
-        <DroppableGridComponent grid={colorGrid} />
-        <DraggableShapeComponent key={123} shape={shapes[0]} />
-      </DndProvider>
-
+    <div className="puzzle">
+      {shapes.map((shape, index) => {
+        return (
+          <Draggable key={index}>
+            <div>
+              <ShapeComponent shape={shape} color={index} />
+            </div>
+          </Draggable>
+        );
+      })}
+      ;
       <style jsx global>
         {`
           body {
@@ -197,7 +139,7 @@ function HomePage() {
           }
         `}
       </style>
-    </>
+    </div>
   );
 }
 
