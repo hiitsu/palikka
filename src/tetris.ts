@@ -1,9 +1,8 @@
 import { randomInt } from "./util";
-import { XY } from "./primitives";
-import { Shape } from "./shape";
+import { Block, PositionedBlock } from "./primitives";
 import { Grid } from "./grid";
 
-export const shapes: Shape[] = [
+export const blocks: Block[] = [
   [
     [1, 1],
     [1, 1]
@@ -26,24 +25,8 @@ export const shapes: Shape[] = [
   [[1, 1, 1, 1]]
 ];
 
-class Block {
-  shape: Shape;
-  position: XY;
-  constructor(shape: Shape, position: XY) {
-    this.shape = shape;
-    this.position = position;
-  }
-  hasTileAt(xy: XY): boolean {
-    return this.valueAt(xy) > 0;
-  }
-  valueAt(xy: XY): number {
-    const _xy = { x: xy.x - this.position.x, y: xy.y - this.position.y };
-    return this.shape[_xy.x]?.[_xy.y];
-  }
-}
-
 class Arena {
-  blocks: Array<Block>;
+  blocks: Array<PositionedBlock>;
   grid: Grid;
   width: number;
 
@@ -54,26 +37,24 @@ class Arena {
   }
 
   addRandomBlock() {
-    const n = randomInt(0, shapes.length);
-    const shape = shapes[n];
-    const x = randomInt(0, this.width - shapes[0].length);
-    const y = -shape.length;
-    this.blocks.push(new Block(shape, { x, y }));
+    const n = randomInt(0, blocks.length);
+    const block = blocks[n];
+    const x = randomInt(0, this.width - blocks[0].length);
+    const y = -block.length;
+    this.blocks.push({ block, x, y });
   }
 
   tick() {
     this.blocks.forEach(block => {
-      block.position.y += 1;
+      block.y += 1;
     });
   }
 
   draw() {
     return this.grid.slots.map((row, y) => {
       return row.map((gridValue, x) => {
-        const block = this.blocks.find(block => {
-          return block.hasTileAt({ y, x });
-        });
-        const finalValue = block ? block.valueAt({ y, x }) : gridValue;
+        const value = 0;
+        const finalValue = value || gridValue;
         return finalValue;
       });
     });

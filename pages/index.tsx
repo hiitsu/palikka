@@ -1,15 +1,14 @@
-import Draggable from "react-draggable";
-import { shapes, Puzzle } from "../src/puzzle";
+import React from "react";
+import { blocks, Puzzle, randomPuzzle } from "../src/puzzle";
 import {
-  Shape,
-  allShapeVariations,
+  allBlockVariations,
   sizeOf,
   flipX,
   flipY,
   rotateClockWise90
-} from "../src/shape";
+} from "../src/block";
 import { Grid } from "../src/grid";
-import { ColorGrid } from "../src/primitives";
+import { ColorGrid, Block } from "../src/primitives";
 import { colors } from "../src/colors";
 import { useState } from "react";
 
@@ -17,15 +16,19 @@ export function SlotComponent(props: {
   key: number | string;
   value: number;
   color: number;
+  border?: boolean;
 }) {
-  const className = `slot`;
+  const className = `slot slot-${props.value > 0 ? "handle" : "0"}`;
   return (
     <div
       key={props.key}
       className={className}
       style={{
         background:
-          props.value == 0 ? "transparent" : colors[props.color % colors.length]
+          props.value == 0
+            ? "transparent"
+            : colors[props.color % colors.length],
+        border: props.border ? "1px solid #999" : "0px"
       }}
     >
       <style jsx>{`
@@ -34,31 +37,32 @@ export function SlotComponent(props: {
           height: 1cm;
           display: inline-block;
           box-sizing: border-box;
+          z-index: 10;
         }
       `}</style>
     </div>
   );
 }
 
-export function ShapeComponent(props: {
+export function BlockComponent(props: {
   key?: number;
-  shape: Shape;
+  block: Block;
   color: number;
 }) {
-  const [shape, setShape] = useState(props.shape);
+  const [block, setBlock] = useState(props.block);
   return (
     <div
       key={props.key}
-      className="shape"
+      className="block"
       onContextMenu={ev => {
-        setShape(rotateClockWise90(shape));
+        setBlock(rotateClockWise90(block));
         ev.preventDefault();
         return false;
       }}
     >
-      {shape.map((row, index) => {
+      {block.map((row, index) => {
         return (
-          <div key={index} className="shape-row">
+          <div key={index} className="block-row">
             {row.map((value, index) =>
               SlotComponent({ value, color: props.color, key: index })
             )}
@@ -66,16 +70,18 @@ export function ShapeComponent(props: {
         );
       })}
       <style jsx>{`
-        .shape {
+        .block {
           box-sizing: border-box;
           padding: 0;
           background-color: transparent;
-          position: absolute;
+          position: relative;
           display: inline-block;
+          z-index: 10;
         }
-        .shape-row {
+        .block-row {
           box-sizing: border-box;
           height: 1cm;
+          z-index: 10;
         }
       `}</style>
     </div>
@@ -88,15 +94,19 @@ export function GridComponent(props: { grid: ColorGrid }) {
       {props.grid.map((row, index) => {
         return (
           <div key={index} className="grid-row">
-            {row.map((value, index) => SlotComponent({ value, key: index }))}
+            {row.map((value, index) =>
+              SlotComponent({ value: 0, key: index, color: 1, border: true })
+            )}
           </div>
         );
       })}
       <style jsx>{`
         .grid {
+          position: absolute;
           box-sizing: border-box;
-          padding: 1em;
+          padding: 0;
           background-color: #eee;
+          z-index: -1;
         }
         .grid-row {
           box-sizing: border-box;
@@ -107,40 +117,34 @@ export function GridComponent(props: { grid: ColorGrid }) {
   );
 }
 
-function randomPuzzle(w: number = 8, h: number = 5, maxShapeSize = 5) {
-  const puzzle = new Puzzle(w, h);
-  const shapesWithMatchingSize = shapes.filter(
-    shape => sizeOf(shape) <= maxShapeSize
-  );
-  puzzle.fillWith(allShapeVariations(shapesWithMatchingSize));
-  return puzzle;
+class PuzzleComponent extends React.Component<{}, { puzzle: Puzzle }> {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      puzzle: randomPuzzle()
+    };
+  }
+
+  render() {
+    return (
+      <div className="puzzle" style={{ position: "relative" }}>
+        {this.state.puzzle.positionedBlocks.map((block, index) => {
+          return <BlockComponent block={block.block} color={index} />;
+        })}
+        <GridComponent grid={this.state.puzzle.renderColorGrid()} />
+
+        <style jsx global>
+          {`
+            body {
+              margin: 0;
+              padding: 0;
+            }
+          `}
+        </style>
+      </div>
+    );
+  }
 }
 
-const colorGrid = new Puzzle(5, 5).renderColorGrid();
-
-function HomePage() {
-  return (
-    <div className="puzzle">
-      {shapes.map((shape, index) => {
-        return (
-          <Draggable key={index}>
-            <div>
-              <ShapeComponent shape={shape} color={index} />
-            </div>
-          </Draggable>
-        );
-      })}
-      ;
-      <style jsx global>
-        {`
-          body {
-            margin: 0;
-            padding: 0;
-          }
-        `}
-      </style>
-    </div>
-  );
-}
-
-export default HomePage;
+export default PuzzleComponent;

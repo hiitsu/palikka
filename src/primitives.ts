@@ -1,5 +1,3 @@
-import { Shape } from "./shape";
-
 export type ColorGrid = Array<Array<number>>;
 
 export enum Slot {
@@ -7,10 +5,12 @@ export enum Slot {
   Taken = 1
 }
 
+export type Block = Array<Array<Slot>>;
+
 export type XY = { x: number; y: number };
 
-export type Block = {
+export type PositionedBlock = {
   x: number;
   y: number;
-  shape: Shape;
+  block: Block;
 };

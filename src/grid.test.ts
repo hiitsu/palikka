@@ -1,8 +1,8 @@
 import { Grid } from "./grid";
-import { Shape } from "./shape";
+import { Block } from "./primitives";
 
 describe("Grid", () => {
-  const shape: Shape = [
+  const block: Block = [
     [0, 0, 1],
     [1, 1, 1]
   ];
@@ -11,17 +11,17 @@ describe("Grid", () => {
     expect(new Grid(1, 1).slots[0][0]).toBe(0);
   });
 
-  it("canFit return true shape is fully and all empty", () => {
-    expect(new Grid(3, 3).canFit(0, 0, shape)).toBe(true);
+  it("canFit should return true when block is fully inside grid", () => {
+    expect(new Grid(3, 3).canFit(0, 0, block)).toBe(true);
   });
 
-  it("canFit return false when shape goes slightly out", () => {
-    expect(new Grid(3, 3).canFit(1, 0, shape)).toBe(false);
+  it("canFit return false when block goes slightly out", () => {
+    expect(new Grid(3, 3).canFit(1, 0, block)).toBe(false);
   });
 
   it("canFit return false overlaps", () => {
     const grid = new Grid(3, 3);
-    grid.mergeShape(0, 0, shape);
-    expect(grid.canFit(1, 0, shape)).toBe(false);
+    grid.mergeBlock(0, 0, block);
+    expect(grid.canFit(1, 0, block)).toBe(false);
   });
 });

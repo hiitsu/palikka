@@ -1,14 +1,13 @@
-import { shapes, Puzzle } from "../src/puzzle";
+import { randomPuzzle, Puzzle, blocks } from "../src/puzzle";
 import {
-  Shape,
-  allShapeVariations,
+  allBlockVariations,
   sizeOf,
   flipX,
   flipY,
   rotateClockWise90
-} from "../src/shape";
+} from "../src/block";
 import { Grid } from "../src/grid";
-import { ColorGrid } from "../src/primitives";
+import { ColorGrid, Block } from "../src/primitives";
 import { colors } from "../src/colors";
 
 export function SlotComponent(props: { key: number | string; value: number }) {
@@ -33,23 +32,23 @@ export function SlotComponent(props: { key: number | string; value: number }) {
   );
 }
 
-export function ShapeComponent(props: { key: number; shape: Shape }) {
+export function BlockComponent(props: { key: number; block: Block }) {
   return (
-    <div key={props.key} className="shape">
-      {props.shape.map((row, index) => {
+    <div key={props.key} className="block">
+      {props.block.map((row, index) => {
         return (
-          <div key={index} className="shape-row">
+          <div key={index} className="block-row">
             {row.map((value, index) => SlotComponent({ value, key: index }))}
           </div>
         );
       })}
       <style jsx>{`
-        .shape {
+        .block {
           box-sizing: border-box;
           padding: 1em;
           background-color: #eee;
         }
-        .shape-row {
+        .block-row {
           box-sizing: border-box;
           height: 1cm;
         }
@@ -58,9 +57,9 @@ export function ShapeComponent(props: { key: number; shape: Shape }) {
   );
 }
 
-export function ShapeListComponent(props: { shapes: Shape[] }) {
-  return props.shapes.map((shape, index) =>
-    ShapeComponent({ shape, key: index })
+export function BlockListComponent(props: { blocks: Block[] }) {
+  return props.blocks.map((block, index) =>
+    BlockComponent({ block, key: index })
   );
 }
 
@@ -88,17 +87,6 @@ export function GridComponent(props: { grid: ColorGrid }) {
     </div>
   );
 }
-
-function randomPuzzle(w: number = 8, h: number = 5, maxShapeSize = 5) {
-  const puzzle = new Puzzle(w, h);
-  const shapesWithMatchingSize = shapes.filter(
-    shape => sizeOf(shape) <= maxShapeSize
-  );
-  puzzle.fillWith(allShapeVariations(shapesWithMatchingSize));
-  return puzzle;
-}
-
-const colorGrid = new Puzzle(5, 5).renderColorGrid();
 
 function HomePage() {
   return (
