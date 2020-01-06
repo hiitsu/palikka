@@ -88,7 +88,7 @@ export function GridComponent(props: { grid: ColorGrid }) {
   );
 }
 
-function HomePage() {
+function RandomPuzzles() {
   return (
     <>
       <h1>Puzzles</h1>
@@ -126,4 +126,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default RandomPuzzles;

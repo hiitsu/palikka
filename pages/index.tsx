@@ -8,7 +8,7 @@ import {
   rotateClockWise90
 } from "../src/block";
 import { Grid } from "../src/grid";
-import { ColorGrid, Block } from "../src/primitives";
+import { ColorGrid, Block, PositionedBlock } from "../src/primitives";
 import { colors } from "../src/colors";
 import { useState } from "react";
 
@@ -18,7 +18,7 @@ export function SlotComponent(props: {
   color: number;
   border?: boolean;
 }) {
-  const className = `slot slot-${props.value > 0 ? "handle" : "0"}`;
+  const className = `slot slot-${props.value}`;
   return (
     <div
       key={props.key}
@@ -39,6 +39,9 @@ export function SlotComponent(props: {
           box-sizing: border-box;
           z-index: 10;
         }
+        .slot-0 {
+          //pointer-events: none;
+        }
       `}</style>
     </div>
   );
@@ -48,23 +51,24 @@ export function BlockComponent(props: {
   key?: number;
   block: Block;
   color: number;
+  x: number;
+  y: number;
 }) {
-  const [block, setBlock] = useState(props.block);
   return (
     <div
       key={props.key}
       className="block"
-      onContextMenu={ev => {
-        setBlock(rotateClockWise90(block));
-        ev.preventDefault();
-        return false;
-      }}
+      style={{ left: props.x, top: props.y }}
     >
-      {block.map((row, index) => {
+      {props.block.map((row, index) => {
         return (
           <div key={index} className="block-row">
             {row.map((value, index) =>
-              SlotComponent({ value, color: props.color, key: index })
+              SlotComponent({
+                value: props.color + 1,
+                color: props.color,
+                key: index
+              })
             )}
           </div>
         );
@@ -74,7 +78,7 @@ export function BlockComponent(props: {
           box-sizing: border-box;
           padding: 0;
           background-color: transparent;
-          position: relative;
+          position: absolute;
           display: inline-block;
           z-index: 10;
         }
@@ -117,22 +121,52 @@ export function GridComponent(props: { grid: ColorGrid }) {
   );
 }
 
-class PuzzleComponent extends React.Component<{}, { puzzle: Puzzle }> {
+class PuzzleComponent extends React.Component<
+  {},
+  { puzzle: Puzzle; positionedBlocks: PositionedBlock[] }
+> {
   constructor(props) {
     super(props);
 
+    const puzzle = randomPuzzle();
     this.state = {
-      puzzle: randomPuzzle()
+      puzzle,
+      positionedBlocks: puzzle.positionedBlocks.map(p => {
+        return { ...p, x: 0, y: 0 };
+      })
     };
+
+    this.handleMouseDown.bind(this);
+    this.handleMouseMove.bind(this);
+    this.handleMouseUp.bind(this);
+  }
+
+  handleMouseDown(ev) {
+    console.log(ev.target);
+  }
+  handleMouseMove(ev) {}
+  handleMouseUp(ev) {
+    console.log("mouseMove: movementX,movementY", ev.movementX, ev.movementY);
   }
 
   render() {
     return (
-      <div className="puzzle" style={{ position: "relative" }}>
-        {this.state.puzzle.positionedBlocks.map((block, index) => {
-          return <BlockComponent block={block.block} color={index} />;
+      <div
+        onMouseMove={this.handleMouseMove}
+        onMouseDown={this.handleMouseDown}
+        className="puzzle"
+        style={{ position: "relative" }}
+      >
+        {this.state.positionedBlocks.map((block, index) => {
+          return (
+            <BlockComponent
+              block={block.block}
+              color={index}
+              x={block.x}
+              y={block.y}
+            />
+          );
         })}
-        <GridComponent grid={this.state.puzzle.renderColorGrid()} />
 
         <style jsx global>
           {`
