@@ -1,6 +1,10 @@
 import { Block } from "./primitives";
 import { arrayWith } from "./util";
 
+export const clone = (block: Block): Block => {
+  return JSON.parse(JSON.stringify(block)) as Block;
+};
+
 export const sizeOf = (block: Block): number => {
   return block.reduce((memo, row) => {
     return memo + row.filter(column => column > 0).length;

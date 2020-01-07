@@ -13,15 +13,14 @@ import { colors } from "../src/colors";
 import { useState } from "react";
 
 export function SlotComponent(props: {
-  key: number | string;
   value: number;
   color: number;
   border?: boolean;
+  //slotId: string;
 }) {
   const className = `slot slot-${props.value}`;
   return (
     <div
-      key={props.key}
       className={className}
       style={{
         background:
@@ -48,28 +47,21 @@ export function SlotComponent(props: {
 }
 
 export function BlockComponent(props: {
-  key?: number;
-  block: Block;
+  block: PositionedBlock;
   color: number;
-  x: number;
-  y: number;
 }) {
   return (
-    <div
-      key={props.key}
-      className="block"
-      style={{ left: props.x, top: props.y }}
-    >
-      {props.block.map((row, index) => {
+    <div className="block" style={{ left: props.block.x, top: props.block.y }}>
+      {props.block.block.map((row, index) => {
         return (
           <div key={index} className="block-row">
-            {row.map((value, index) =>
-              SlotComponent({
-                value: props.color + 1,
-                color: props.color,
-                key: index
-              })
-            )}
+            {row.map((value, index) => (
+              <SlotComponent
+                value={props.color + 1}
+                color={props.color}
+                key={index}
+              />
+            ))}
           </div>
         );
       })}
@@ -98,9 +90,9 @@ export function GridComponent(props: { grid: ColorGrid }) {
       {props.grid.map((row, index) => {
         return (
           <div key={index} className="grid-row">
-            {row.map((value, index) =>
-              SlotComponent({ value: 0, key: index, color: 1, border: true })
-            )}
+            {row.map((value, index) => (
+              <SlotComponent key={index} value={0} color={1} border={true} />
+            ))}
           </div>
         );
       })}
@@ -123,49 +115,47 @@ export function GridComponent(props: { grid: ColorGrid }) {
 
 class PuzzleComponent extends React.Component<
   {},
-  { puzzle: Puzzle; positionedBlocks: PositionedBlock[] }
+  { puzzle: Puzzle; positionedBlocks: PositionedBlock[]; drawCount: number }
 > {
   constructor(props) {
     super(props);
 
     const puzzle = randomPuzzle();
+
     this.state = {
+      drawCount: 0,
       puzzle,
       positionedBlocks: puzzle.positionedBlocks.map(p => {
         return { ...p, x: 0, y: 0 };
       })
     };
 
-    this.handleMouseDown.bind(this);
-    this.handleMouseMove.bind(this);
-    this.handleMouseUp.bind(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseUp = this.handleMouseUp.bind(this);
   }
 
-  handleMouseDown(ev) {
-    console.log(ev.target);
+  handleMouseDown(ev) {}
+
+  handleMouseMove(ev) {
+    this.state.positionedBlocks[0].x += ev.movementX;
+    this.state.positionedBlocks[0].y += ev.movementY;
+    this.setState({ drawCount: Date.now() });
   }
-  handleMouseMove(ev) {}
-  handleMouseUp(ev) {
-    console.log("mouseMove: movementX,movementY", ev.movementX, ev.movementY);
-  }
+
+  handleMouseUp(ev) {}
 
   render() {
     return (
       <div
         onMouseMove={this.handleMouseMove}
         onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
         className="puzzle"
         style={{ position: "relative" }}
       >
         {this.state.positionedBlocks.map((block, index) => {
-          return (
-            <BlockComponent
-              block={block.block}
-              color={index}
-              x={block.x}
-              y={block.y}
-            />
-          );
+          return <BlockComponent key={index} block={block} color={index} />;
         })}
 
         <style jsx global>
@@ -173,6 +163,11 @@ class PuzzleComponent extends React.Component<
             body {
               margin: 0;
               padding: 0;
+            }
+            .puzzle {
+              background: #efe;
+              width: 480px;
+              height: 480px;
             }
           `}
         </style>

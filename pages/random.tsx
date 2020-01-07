@@ -1,12 +1,4 @@
-import { randomPuzzle, Puzzle, blocks } from "../src/puzzle";
-import {
-  allBlockVariations,
-  sizeOf,
-  flipX,
-  flipY,
-  rotateClockWise90
-} from "../src/block";
-import { Grid } from "../src/grid";
+import { randomPuzzle } from "../src/puzzle";
 import { ColorGrid, Block } from "../src/primitives";
 import { colors } from "../src/colors";
 
