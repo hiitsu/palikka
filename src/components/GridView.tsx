@@ -48,6 +48,9 @@ export function GridView(props: {
           background-color: #eee;
           z-index: 1;
           user-select: none;
+          top: 25%;
+          left: 25%;
+          border: 1px solid black;
         }
         .grid-row {
           box-sizing: border-box;

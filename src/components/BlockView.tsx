@@ -6,6 +6,7 @@ export function BlockView(props: {
   block: PositionedBlock;
   color: number;
   canSelect: boolean;
+  zIndex: number;
 }) {
   return (
     <div
@@ -13,7 +14,8 @@ export function BlockView(props: {
       draggable="false"
       style={{
         left: props.block.x,
-        top: props.block.y
+        top: props.block.y,
+        zIndex: props.zIndex
       }}
     >
       {props.block.block.map((row, y) => {

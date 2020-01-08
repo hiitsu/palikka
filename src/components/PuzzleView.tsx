@@ -23,6 +23,7 @@ export default class PuzzleComponent extends React.Component<
     puzzle: Puzzle;
     positionedBlocks: PositionedBlock[];
     drawCount: number;
+    zIndices: number[];
   }
 > {
   constructor(props) {
@@ -37,7 +38,8 @@ export default class PuzzleComponent extends React.Component<
       hoveredGridInfo: null,
       positionedBlocks: puzzle.positionedBlocks.map(p => {
         return { ...p, x: 0, y: 0 };
-      })
+      }),
+      zIndices: puzzle.positionedBlocks.map((p, index) => index + 2)
     };
 
     this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -51,7 +53,11 @@ export default class PuzzleComponent extends React.Component<
       return;
     }
     const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
-    this.setState({ draggedBlockInfo: { blockId, blockX, blockY } });
+    const maxZ = Math.max(...this.state.zIndices);
+    const zIndices = this.state.zIndices.map((zIndex, index) =>
+      index === blockId ? maxZ + 1 : zIndex
+    );
+    this.setState({ draggedBlockInfo: { blockId, blockX, blockY }, zIndices });
     //console.log(ev.target);
   }
 
@@ -94,6 +100,7 @@ export default class PuzzleComponent extends React.Component<
         {this.state.positionedBlocks.map((block, index) => {
           return (
             <BlockView
+              zIndex={this.state.zIndices[index]}
               canSelect={!this.state.draggedBlockInfo}
               blockId={index}
               key={index}
