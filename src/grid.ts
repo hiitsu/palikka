@@ -1,4 +1,4 @@
-import { arrayWith } from "./util";
+import { array2D } from "./util";
 import { Block, Slot } from "./primitives";
 
 export class Grid {
@@ -9,7 +9,7 @@ export class Grid {
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
-    this.slots = arrayWith(height, 1).map(() => arrayWith(width, Slot.Empty));
+    this.slots = array2D<Slot>(width, height, () => Slot.Empty);
   }
 
   canFit(x: number, y: number, block: Block) {

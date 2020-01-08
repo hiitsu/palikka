@@ -10,10 +10,16 @@ type DragInfo = {
   blockY: number;
 };
 
+type GridInfo = {
+  x: number;
+  y: number;
+};
+
 export default class PuzzleComponent extends React.Component<
   {},
   {
-    dragInfo: null | DragInfo;
+    draggedBlockInfo: null | DragInfo;
+    hoveredGridInfo: null | GridInfo;
     puzzle: Puzzle;
     positionedBlocks: PositionedBlock[];
     drawCount: number;
@@ -23,11 +29,12 @@ export default class PuzzleComponent extends React.Component<
     super(props);
 
     const puzzle = randomPuzzle();
-
+    console.log(puzzle);
     this.state = {
       drawCount: 0,
       puzzle,
-      dragInfo: null,
+      draggedBlockInfo: null,
+      hoveredGridInfo: null,
       positionedBlocks: puzzle.positionedBlocks.map(p => {
         return { ...p, x: 0, y: 0 };
       })
@@ -39,32 +46,40 @@ export default class PuzzleComponent extends React.Component<
   }
 
   handleMouseDown(ev: any) {
-    console.log(
-      "elementFromPoint",
-      window.document.elementFromPoint(ev.pageX, ev.pageY)
-    );
     const slotId = ev.target.getAttribute("data-slot-id");
     if (!slotId) {
       return;
     }
-    const [blockId, blockX, blockY] = slotId.split("-");
-    this.setState({ dragInfo: { blockId, blockX, blockY } });
+    const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
+    this.setState({ draggedBlockInfo: { blockId, blockX, blockY } });
     //console.log(ev.target);
   }
 
   handleMouseMove(ev) {
-    if (!this.state.dragInfo) {
+    if (!this.state.draggedBlockInfo) {
       return;
     }
-    const block = this.state.positionedBlocks[this.state.dragInfo.blockId];
+    const block = this.state.positionedBlocks[
+      this.state.draggedBlockInfo.blockId
+    ];
     block.y += ev.movementY;
     block.x += ev.movementX;
+    //console.log(ev.target);
+    if (window && window.document) {
+      const el = window.document.elementFromPoint(ev.pageX, ev.pageY);
+      const xy = el.getAttribute("data-square-id");
+      if (!xy) {
+        return;
+      }
+      const [x, y] = xy.split("-").map(s => parseInt(s));
+      console.log("hoveredGridInfo", { x, y });
+      this.setState({ hoveredGridInfo: { x, y } });
+    }
     this.setState({ drawCount: Date.now() });
-    console.log(ev.target);
   }
 
   handleMouseUp(ev) {
-    this.setState({ dragInfo: null });
+    this.setState({ draggedBlockInfo: null, hoveredGridInfo: null });
   }
 
   render() {
@@ -79,7 +94,7 @@ export default class PuzzleComponent extends React.Component<
         {this.state.positionedBlocks.map((block, index) => {
           return (
             <BlockView
-              canSelect={!this.state.dragInfo}
+              canSelect={!this.state.draggedBlockInfo}
               blockId={index}
               key={index}
               block={block}
@@ -88,15 +103,17 @@ export default class PuzzleComponent extends React.Component<
           );
         })}
         <GridView
-          grid={this.state.puzzle.grid.slots}
-          highlight={{
-            x: 0,
-            y: 0,
-            block: [
-              [1, 1],
-              [0, 1]
-            ]
-          }}
+          width={this.state.puzzle.width}
+          height={this.state.puzzle.height}
+          highlight={
+            this.state.hoveredGridInfo
+              ? {
+                  x: this.state.hoveredGridInfo.x,
+                  y: this.state.hoveredGridInfo.y,
+                  block: [[1]]
+                }
+              : null
+          }
         />
         <style jsx global>
           {`

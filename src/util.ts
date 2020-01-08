@@ -1,9 +1,17 @@
-export const arrayWith = (size: number, valueOrPredicate: any): Array<any> => {
-  if (typeof valueOrPredicate === "number")
-    return new Array(size).fill(valueOrPredicate);
-  const arr = [];
-  for (let i = 0; i < size; i++) arr.push(valueOrPredicate(i));
-  return arr;
+type ArrayFillFunction<T> = (x: number, y: number) => T;
+export const array2D = <T>(
+  width: number,
+  height: number,
+  fillFunction: ArrayFillFunction<T>
+): Array<Array<T>> => {
+  const array = [];
+  for (var i = 0; i < height; i++) {
+    array[i] = [];
+    for (var j = 0; j < width; j++) {
+      array[i][j] = fillFunction(j, i);
+    }
+  }
+  return array;
 };
 
 export const arrayShuffle = (list: Array<any>) => {

@@ -1,7 +1,7 @@
 import { Block, Slot, PositionedBlock } from "./primitives";
 import { sizeOf, allBlockVariations } from "./block";
 import { Grid } from "./grid";
-import { arrayWith, arrayShuffle, arrayOfPoints, randomInt } from "./util";
+import { array2D, arrayShuffle, randomInt, arrayOfPoints } from "./util";
 
 export const blocks: Block[] = [
   [[1]],
@@ -179,27 +179,37 @@ export function randomPuzzle(w: number = 6, h: number = 6, maxBlockSize = 10) {
   const blocksWithMatchingSize = blocks.filter(
     block => sizeOf(block) <= maxBlockSize
   );
-  puzzle.fillWith(allBlockVariations(blocksWithMatchingSize));
+  puzzle.randomizeWith(allBlockVariations(blocksWithMatchingSize));
   return puzzle;
 }
 
 export class Puzzle {
-  grid: Grid;
   positionedBlocks: Array<PositionedBlock>;
+  width: number;
+  height: number;
 
   constructor(width: number, height: number) {
-    this.reset(width, height);
-  }
-
-  reset(width: number, height: number) {
-    this.grid = new Grid(width, height);
+    this.width = width;
+    this.height = height;
     this.positionedBlocks = [];
   }
 
-  renderColorGrid() {
-    const w = this.grid.width;
-    const h = this.grid.height;
-    const colorGrid: number[][] = arrayWith(h, 1).map(() => arrayWith(w, 0));
+  canFit(x: number, y: number, block: Block) {
+    const grid = new Grid(this.width, this.height);
+    this.positionedBlocks.forEach(positionedBlock =>
+      grid.mergeBlock(
+        positionedBlock.x,
+        positionedBlock.y,
+        positionedBlock.block
+      )
+    );
+    return grid.canFit(x, y, block);
+  }
+
+  renderColorGrid(): number[][] {
+    const w = this.width;
+    const h = this.height;
+    const colorGrid: number[][] = array2D(w, h, () => 0);
     this.positionedBlocks.forEach((positionedBlock, index) => {
       const block = positionedBlock.block;
       const blockWidth = block[0].length;
@@ -220,12 +230,9 @@ export class Puzzle {
     return colorGrid;
   }
 
-  fillWith(blocks: Block[]) {
-    const width = this.grid.width;
-    const height = this.grid.height;
-    this.reset(width, height);
-    const points = arrayShuffle(arrayOfPoints(width, height));
-    const grid = new Grid(width, height);
+  randomizeWith(blocks: Block[]): void {
+    const grid = new Grid(this.width, this.height);
+    const points = arrayShuffle(arrayOfPoints(this.width, this.height));
 
     const blockGroups = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(size => {
       return blocks

@@ -1,5 +1,4 @@
 import { Block } from "./primitives";
-import { arrayWith } from "./util";
 
 export const clone = (block: Block): Block => {
   return JSON.parse(JSON.stringify(block)) as Block;
@@ -17,7 +16,9 @@ export const flipX = (block: Block): Block => {
 
 export const flipY = (block: Block): Block => {
   const w = block[0].length;
-  const columns: Block = arrayWith(w, () => [] as number[]);
+  const columns: Block = Array(w)
+    .fill(0)
+    .map(() => []);
   block.forEach(row => {
     row.forEach((value: number, i: number) => {
       columns[i].push(value);
@@ -35,7 +36,9 @@ export const flipY = (block: Block): Block => {
 
 export const rotateClockWise90 = (block: Block): Block => {
   const w = block[0].length;
-  const columns: Block = new Array(w).fill(1).map(_ => []);
+  const columns: Block = Array(w)
+    .fill(1)
+    .map(_ => []);
   block.forEach(row => {
     row.forEach((value: number, i: number) => {
       columns[i].push(value);
