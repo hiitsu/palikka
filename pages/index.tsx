@@ -1,27 +1,21 @@
-import React from "react";
-import { blocks, Puzzle, randomPuzzle } from "../src/puzzle";
-import {
-  allBlockVariations,
-  sizeOf,
-  flipX,
-  flipY,
-  rotateClockWise90
-} from "../src/block";
+import React, { SyntheticEvent } from "react";
+import { Puzzle, randomPuzzle } from "../src/puzzle";
 import { Grid } from "../src/grid";
-import { ColorGrid, Block, PositionedBlock } from "../src/primitives";
+import { ColorGrid, PositionedBlock, Slot } from "../src/primitives";
 import { colors } from "../src/colors";
-import { useState } from "react";
 
 export function SlotComponent(props: {
   value: number;
   color: number;
   border?: boolean;
-  //slotId: string;
+  slotId: string;
 }) {
   const className = `slot slot-${props.value}`;
   return (
     <div
+      data-slot-id={props.slotId}
       className={className}
+      draggable="false"
       style={{
         background:
           props.value == 0
@@ -37,9 +31,10 @@ export function SlotComponent(props: {
           display: inline-block;
           box-sizing: border-box;
           z-index: 10;
+          user-select: none;
         }
         .slot-0 {
-          //pointer-events: none;
+          pointer-events: none;
         }
       `}</style>
     </div>
@@ -47,19 +42,30 @@ export function SlotComponent(props: {
 }
 
 export function BlockComponent(props: {
+  blockId: number;
   block: PositionedBlock;
   color: number;
+  canSelect: boolean;
 }) {
   return (
-    <div className="block" style={{ left: props.block.x, top: props.block.y }}>
-      {props.block.block.map((row, index) => {
+    <div
+      className="block"
+      draggable="false"
+      style={{
+        left: props.block.x,
+        top: props.block.y,
+        pointerEvents: props.canSelect ? "auto" : "none"
+      }}
+    >
+      {props.block.block.map((row, y) => {
         return (
-          <div key={index} className="block-row">
-            {row.map((value, index) => (
+          <div key={y} className="block-row" draggable="false">
+            {row.map((value, x) => (
               <SlotComponent
-                value={props.color + 1}
+                slotId={`${props.blockId}-${x}-${y}`}
+                value={value}
                 color={props.color}
-                key={index}
+                key={x}
               />
             ))}
           </div>
@@ -67,32 +73,79 @@ export function BlockComponent(props: {
       })}
       <style jsx>{`
         .block {
+          cursor: move;
           box-sizing: border-box;
           padding: 0;
           background-color: transparent;
           position: absolute;
           display: inline-block;
           z-index: 10;
+          user-select: none;
         }
         .block-row {
           box-sizing: border-box;
           height: 1cm;
           z-index: 10;
+          user-select: none;
         }
       `}</style>
     </div>
   );
 }
 
-export function GridComponent(props: { grid: ColorGrid }) {
+export function Square(props: { highlight?: boolean; squareId: string }) {
   return (
-    <div className="grid">
-      {props.grid.map((row, index) => {
+    <div
+      data-square-id={props.squareId}
+      className="square"
+      draggable="false"
+      style={{ background: props.highlight ? "red" : "transparent" }}
+    >
+      <style jsx>{`
+        .square {
+          width: 1cm;
+          height: 1cm;
+          display: inline-block;
+          box-sizing: border-box;
+          z-index: 1;
+          border: 1px solid black;
+          user-select: none;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export function GridComponent(props: {
+  grid: Array<Array<any>>;
+  highlight?: PositionedBlock;
+}) {
+  return (
+    <div className="grid" draggable={false}>
+      {props.grid.map((row, y) => {
         return (
-          <div key={index} className="grid-row">
-            {row.map((value, index) => (
-              <SlotComponent key={index} value={0} color={1} border={true} />
-            ))}
+          <div key={y} className="grid-row" draggable={false}>
+            {row.map((value, x) => {
+              const matchX =
+                x >= props.highlight.x &&
+                x < props.highlight.x + props.highlight.block[0].length;
+              const matchY =
+                y >= props.highlight.y &&
+                y < props.highlight.y + props.highlight.block.length;
+              const shouldHighlight =
+                matchX &&
+                matchY &&
+                props.highlight.block[y - props.highlight.y][
+                  x - props.highlight.x
+                ] === Slot.Taken;
+              return (
+                <Square
+                  key={x}
+                  squareId={`${x}-${y}`}
+                  highlight={shouldHighlight}
+                />
+              );
+            })}
           </div>
         );
       })}
@@ -102,11 +155,13 @@ export function GridComponent(props: { grid: ColorGrid }) {
           box-sizing: border-box;
           padding: 0;
           background-color: #eee;
-          z-index: -1;
+          z-index: 1;
+          user-select: none;
         }
         .grid-row {
           box-sizing: border-box;
           height: 1cm;
+          user-select: none;
         }
       `}</style>
     </div>
@@ -115,7 +170,12 @@ export function GridComponent(props: { grid: ColorGrid }) {
 
 class PuzzleComponent extends React.Component<
   {},
-  { puzzle: Puzzle; positionedBlocks: PositionedBlock[]; drawCount: number }
+  {
+    draggedBlockId: null | number;
+    puzzle: Puzzle;
+    positionedBlocks: PositionedBlock[];
+    drawCount: number;
+  }
 > {
   constructor(props) {
     super(props);
@@ -125,6 +185,7 @@ class PuzzleComponent extends React.Component<
     this.state = {
       drawCount: 0,
       puzzle,
+      draggedBlockId: null,
       positionedBlocks: puzzle.positionedBlocks.map(p => {
         return { ...p, x: 0, y: 0 };
       })
@@ -135,15 +196,33 @@ class PuzzleComponent extends React.Component<
     this.handleMouseUp = this.handleMouseUp.bind(this);
   }
 
-  handleMouseDown(ev) {}
-
-  handleMouseMove(ev) {
-    this.state.positionedBlocks[0].x += ev.movementX;
-    this.state.positionedBlocks[0].y += ev.movementY;
-    this.setState({ drawCount: Date.now() });
+  handleMouseDown(ev: any) {
+    console.log(
+      "elementFromPoint",
+      window.document.elementFromPoint(ev.pageX, ev.pageY)
+    );
+    const slotId = ev.target.getAttribute("data-slot-id");
+    if (!slotId) {
+      return;
+    }
+    const [blockId, blockX, blockY] = slotId.split("-");
+    this.setState({ draggedBlockId: blockId });
+    //console.log(ev.target);
   }
 
-  handleMouseUp(ev) {}
+  handleMouseMove(ev) {
+    if (this.state.draggedBlockId != null) {
+      const block = this.state.positionedBlocks[this.state.draggedBlockId];
+      block.y += ev.movementY;
+      block.x += ev.movementX;
+      this.setState({ drawCount: Date.now() });
+      console.log(ev.target);
+    }
+  }
+
+  handleMouseUp(ev) {
+    this.setState({ draggedBlockId: null });
+  }
 
   render() {
     return (
@@ -155,9 +234,27 @@ class PuzzleComponent extends React.Component<
         style={{ position: "relative" }}
       >
         {this.state.positionedBlocks.map((block, index) => {
-          return <BlockComponent key={index} block={block} color={index} />;
+          return (
+            <BlockComponent
+              canSelect={this.state.draggedBlockId === null}
+              blockId={index}
+              key={index}
+              block={block}
+              color={index}
+            />
+          );
         })}
-
+        <GridComponent
+          grid={this.state.puzzle.grid.slots}
+          highlight={{
+            x: 0,
+            y: 0,
+            block: [
+              [1, 1],
+              [0, 1]
+            ]
+          }}
+        />
         <style jsx global>
           {`
             body {
