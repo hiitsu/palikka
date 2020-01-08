@@ -1,8 +1,8 @@
 import { randomPuzzle } from "../src/puzzle";
 import { ColorGrid, Block } from "../src/primitives";
-import { colors } from "../src/colors";
+import { colors } from "../src/components/colors";
 
-export function SlotComponent(props: { key: number | string; value: number }) {
+function SlotComponent(props: { key: number | string; value: number }) {
   const className = `slot slot-${props.value}`;
   return (
     <div
@@ -24,7 +24,7 @@ export function SlotComponent(props: { key: number | string; value: number }) {
   );
 }
 
-export function BlockComponent(props: { key: number; block: Block }) {
+function BlockComponent(props: { key: number; block: Block }) {
   return (
     <div key={props.key} className="block">
       {props.block.map((row, index) => {
@@ -49,13 +49,7 @@ export function BlockComponent(props: { key: number; block: Block }) {
   );
 }
 
-export function BlockListComponent(props: { blocks: Block[] }) {
-  return props.blocks.map((block, index) =>
-    BlockComponent({ block, key: index })
-  );
-}
-
-export function GridComponent(props: { grid: ColorGrid }) {
+function GridComponent(props: { grid: ColorGrid }) {
   return (
     <div className="grid">
       {props.grid.map((row, index) => {
