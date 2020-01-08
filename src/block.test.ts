@@ -4,6 +4,7 @@ import {
   rotateClockWise90,
   blockVariations,
   allBlockVariations,
+  clone,
   sizeOf
 } from "./block";
 import { Block } from "./primitives";
@@ -19,6 +20,18 @@ describe("Block", () => {
 
   it("sizeOf", () => {
     expect(sizeOf(block)).toBe(4);
+  });
+
+  describe("clone", () => {
+    it("clones deeply", () => {
+      const cloned = clone(block);
+      expect(cloned).not.toBe(block);
+      expect(cloned[0]).not.toBe(block[0]);
+    });
+    it("copied values exactly", () => {
+      const cloned = clone(block);
+      expect(cloned).toStrictEqual(block);
+    });
   });
 
   describe("flipX", () => {
