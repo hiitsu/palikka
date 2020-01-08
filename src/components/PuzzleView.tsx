@@ -22,6 +22,7 @@ export default class PuzzleComponent extends React.Component<
     hoveredGridInfo: null | GridInfo;
     puzzle: Puzzle;
     positionedBlocks: PositionedBlock[];
+    highlightedPosition: PositionedBlock;
     drawCount: number;
     zIndices: number[];
   }
@@ -29,13 +30,14 @@ export default class PuzzleComponent extends React.Component<
   constructor(props) {
     super(props);
 
-    const puzzle = randomPuzzle();
+    const puzzle = randomPuzzle(6, 6);
     console.log(puzzle);
     this.state = {
       drawCount: 0,
-      puzzle,
+      puzzle: new Puzzle(6, 6),
       draggedBlockInfo: null,
       hoveredGridInfo: null,
+      highlightedPosition: null,
       positionedBlocks: puzzle.positionedBlocks.map(p => {
         return { ...p, x: 0, y: 0 };
       }),
@@ -78,14 +80,35 @@ export default class PuzzleComponent extends React.Component<
         return;
       }
       const [x, y] = xy.split("-").map(s => parseInt(s));
-      console.log("hoveredGridInfo", { x, y });
+      //console.log("hoveredGridInfo", { x, y });
       this.setState({ hoveredGridInfo: { x, y } });
+      const { blockX, blockY } = this.state.draggedBlockInfo;
+      const fitX = x - blockX;
+      const fitY = y - blockY;
+      if (this.state.puzzle.canFit(fitX, fitY, block.block)) {
+        const highlightedPosition = { x: fitX, y: fitY, block: block.block };
+        this.setState({ highlightedPosition });
+        console.log("highlightedPosition", highlightedPosition);
+      } else {
+        this.setState({ highlightedPosition: null });
+      }
     }
     this.setState({ drawCount: Date.now() });
   }
 
   handleMouseUp(ev) {
-    this.setState({ draggedBlockInfo: null, hoveredGridInfo: null });
+    if (this.state.draggedBlockInfo && this.state.highlightedPosition) {
+      const block = this.state.positionedBlocks[
+        this.state.draggedBlockInfo.blockId
+      ];
+      block.x = this.state.highlightedPosition.x;
+      block.y = this.state.highlightedPosition.y;
+    }
+    this.setState({
+      draggedBlockInfo: null,
+      hoveredGridInfo: null,
+      highlightedPosition: null
+    });
   }
 
   render() {
@@ -112,15 +135,7 @@ export default class PuzzleComponent extends React.Component<
         <GridView
           width={this.state.puzzle.width}
           height={this.state.puzzle.height}
-          highlight={
-            this.state.hoveredGridInfo
-              ? {
-                  x: this.state.hoveredGridInfo.x,
-                  y: this.state.hoveredGridInfo.y,
-                  block: [[1]]
-                }
-              : null
-          }
+          highlight={this.state.highlightedPosition}
         />
         <style jsx global>
           {`
