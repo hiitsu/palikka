@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Puzzle, randomPuzzle, blocks } from "../puzzle";
 import { PositionedBlock, Block, XY } from "../primitives";
 import { BlockView } from "./BlockView";
@@ -16,7 +17,7 @@ type GridInfo = {
   y: number;
 };
 
-type BlockTracker = {
+export type BlockTracker = {
   zIndex: number;
   screenX: number;
   screenY: number;
@@ -24,19 +25,35 @@ type BlockTracker = {
   blockId: number;
 };
 
-export default class PuzzleComponent extends React.Component<
-  { blocks: Block[] },
-  {
-    draggedBlockInfo: null | DragInfo;
-    hoveredGridInfo: null | GridInfo;
-    width: number;
-    height: number;
-    positionedBlocks: PositionedBlock[];
-    highlightedPosition: PositionedBlock;
-    drawCount: number;
-    blockTrackers: BlockTracker[];
-  }
-> {
+type PuzzleState = {
+  draggedBlockInfo: null | DragInfo;
+  hoveredGridInfo: null | GridInfo;
+  width: number;
+  height: number;
+  positionedBlocks: PositionedBlock[];
+  highlightedPosition: PositionedBlock;
+  drawCount: number;
+  blockTrackers: BlockTracker[];
+};
+
+type PuzzleProps = {
+  blocks: Block[];
+};
+
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+};
+
+function mutateBlockTrackers(trackers: BlockTracker[], blockId: number, update: Partial<BlockTracker>): BlockTracker[] {
+  return trackers.slice().map(tracker => {
+    if (tracker.blockId == blockId) {
+      return { ...tracker, ...update };
+    }
+    return tracker;
+  });
+}
+
+export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
   constructor(props) {
     super(props);
 
@@ -62,6 +79,13 @@ export default class PuzzleComponent extends React.Component<
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.handleBlockChange = this.handleBlockChange.bind(this);
+  }
+
+  componentDidMount() {}
+
+  handleBlockChange(blockId, block) {
+    this.setState({ blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block }) });
   }
 
   handleMouseDown(ev: any) {
@@ -71,10 +95,8 @@ export default class PuzzleComponent extends React.Component<
     }
     const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
     const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-    const zIndices = this.state.zIndices.map((zIndex, index) =>
-      index === blockId ? maxZ + 1 : zIndex
-    );
-    this.setState({ draggedBlockInfo: { blockId, blockX, blockY }, zIndices });
+    const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1 });
+    this.setState({ draggedBlockInfo: { blockId, blockX, blockY }, blockTrackers });
     //console.log(ev.target);
   }
 
@@ -82,16 +104,20 @@ export default class PuzzleComponent extends React.Component<
     if (!this.state.draggedBlockInfo) {
       return;
     }
-    const block = this.state.positionedBlocks[
-      this.state.draggedBlockInfo.blockId
-    ];
-    block.y += ev.movementY;
-    block.x += ev.movementX;
+    const { blockId } = this.state.draggedBlockInfo;
+    const { screenX, screenY } = this.state.blockTrackers[blockId];
+    this.setState({
+      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
+        screenX: screenX + ev.movementX,
+        screenY: screenY + ev.movementY
+      })
+    });
     //console.log(ev.target);
     if (window && window.document) {
       const el = window.document.elementFromPoint(ev.pageX, ev.pageY);
       const xy = el.getAttribute("data-square-id");
       if (!xy) {
+        this.setState({ highlightedPosition: null });
         return;
       }
       const [x, y] = xy.split("-").map(s => parseInt(s));
@@ -100,15 +126,10 @@ export default class PuzzleComponent extends React.Component<
       const { blockX, blockY } = this.state.draggedBlockInfo;
       const fitX = x - blockX;
       const fitY = y - blockY;
+      const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId);
       //if (canFit(fitX, fitY, block.block)) {
-      if (
-        new Grid(this.state.width, this.state.height).canFit(
-          fitX,
-          fitY,
-          block.block
-        )
-      ) {
-        const highlightedPosition = { x: fitX, y: fitY, block: block.block };
+      if (new Grid(this.state.width, this.state.height).canFit(fitX, fitY, tracker.block)) {
+        const highlightedPosition = { x: fitX, y: fitY, block: tracker.block };
         this.setState({ highlightedPosition });
         console.log("highlightedPosition", highlightedPosition);
       } else {
@@ -120,11 +141,22 @@ export default class PuzzleComponent extends React.Component<
 
   handleMouseUp(ev) {
     if (this.state.draggedBlockInfo && this.state.highlightedPosition) {
-      const block = this.state.positionedBlocks[
-        this.state.draggedBlockInfo.blockId
-      ];
-      //block.x = this.state.highlightedPosition.x;
-      //block.y = this.state.highlightedPosition.y;
+      if (window && window.document) {
+        const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
+        const el = window.document.elementFromPoint(ev.pageX, ev.pageY);
+        const xy = el.getAttribute("data-square-id");
+        if (xy) {
+          const [x, y] = xy.split("-").map(s => parseInt(s));
+          const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
+          const rect = squareTopLeft.getBoundingClientRect();
+          this.setState({
+            blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
+              screenX: rect.left,
+              screenY: rect.top
+            })
+          });
+        }
+      }
     }
     this.setState({
       draggedBlockInfo: null,
@@ -142,23 +174,18 @@ export default class PuzzleComponent extends React.Component<
         className="puzzle"
         style={{ position: "relative" }}
       >
-        {this.props.blocks.map((block, index) => {
+        {this.state.blockTrackers.map((tracker, index) => {
           return (
             <BlockView
-              zIndex={this.state.zIndices[index]}
+              tracker={tracker}
+              onBlockChange={this.handleBlockChange}
               canSelect={!this.state.draggedBlockInfo}
-              blockId={index}
               key={index}
-              block={block}
               color={index}
             />
           );
         })}
-        <GridView
-          width={this.state.width}
-          height={this.state.height}
-          highlight={this.state.highlightedPosition}
-        />
+        <GridView width={this.state.width} height={this.state.height} highlight={this.state.highlightedPosition} />
         <style jsx global>
           {`
             body {

@@ -3,7 +3,11 @@ import { colors } from "./colors";
 function handleMouseDown(ev) {
   console.log("SlotView::handleMouseDown", ev.target);
 }
-
+function onContextMenu(ev) {
+  console.log("SlotView::onContextMenu");
+  ev.preventDefault();
+  return false;
+}
 export function SlotView(props: {
   value: number;
   color: number;
@@ -15,14 +19,12 @@ export function SlotView(props: {
   return (
     <div
       onMouseDown={handleMouseDown}
+      onContextMenu={onContextMenu}
       data-slot-id={props.slotId}
       className={className}
       draggable="false"
       style={{
-        background:
-          props.value == 0
-            ? "transparent"
-            : colors[props.color % colors.length],
+        background: props.value == 0 ? "transparent" : colors[props.color % colors.length],
         border: props.border ? "1px solid #999" : "0px",
         pointerEvents: !props.canSelect ? "none" : undefined
       }}

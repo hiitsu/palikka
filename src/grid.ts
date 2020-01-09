@@ -9,7 +9,11 @@ export class Grid {
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
-    this.slots = array2D<Slot>(width, height, () => Slot.Empty);
+    this.reset();
+  }
+
+  reset() {
+    this.slots = array2D<Slot>(this.width, this.height, () => Slot.Empty);
   }
 
   canFit(x: number, y: number, block: Block) {
@@ -17,14 +21,8 @@ export class Grid {
     const blockHeight = block.length;
     for (let i = 0; i < blockWidth; i++) {
       for (let j = 0; j < blockHeight; j++) {
-        const isInside =
-          this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
-        if (
-          isInside &&
-          this.slots[y + j][x + i] === Slot.Taken &&
-          block[j][i] === Slot.Taken
-        )
-          return false;
+        const isInside = this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
+        if (isInside && this.slots[y + j][x + i] === Slot.Taken && block[j][i] === Slot.Taken) return false;
         if (!isInside && block[j][i] === Slot.Taken) return false;
       }
     }
@@ -36,8 +34,7 @@ export class Grid {
     const blockHeight = block.length;
     for (let i = 0; i < blockWidth; i++) {
       for (let j = 0; j < blockHeight; j++) {
-        const isInside =
-          this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
+        const isInside = this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
         const isTaken = block[j][i] === Slot.Taken;
         if (isInside && isTaken) {
           this.slots[y + j][x + i] = block[j][i];

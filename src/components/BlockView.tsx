@@ -1,38 +1,31 @@
 import { PositionedBlock } from "../primitives";
 import { SlotView } from "./SlotView";
+import { BlockTracker } from "./PuzzleView";
+import { flipX } from "../block";
 
-export function BlockView(props: {
-  blockId: number;
-  block: PositionedBlock;
-  color: number;
-  canSelect: boolean;
-  zIndex: number;
-}) {
+export function BlockView(props: { onBlockChange: any; tracker: BlockTracker; color: number; canSelect: boolean }) {
   return (
     <div
-      key={`block-${props.blockId}`}
+      key={`block-${props.tracker.blockId}`}
       className="block"
       draggable="false"
+      onDoubleClick={() => props.onBlockChange(props.tracker.blockId, flipX(props.tracker.block))}
       style={{
-        left: props.block.x,
-        top: props.block.y,
-        zIndex: props.zIndex
+        left: props.tracker.screenX,
+        top: props.tracker.screenY,
+        zIndex: props.tracker.zIndex
       }}
     >
-      {props.block.block.map((row, y) => {
+      {props.tracker.block.map((row, y) => {
         return (
-          <div
-            key={`block-${props.blockId}-row-${y}`}
-            className="block-row"
-            draggable="false"
-          >
+          <div key={`block-${props.tracker.blockId}-row-${y}`} className="block-row" draggable="false">
             {row.map((value, x) => (
               <SlotView
                 canSelect={props.canSelect}
-                slotId={`${props.blockId}-${x}-${y}`}
+                slotId={`${props.tracker.blockId}-${x}-${y}`}
                 value={value}
                 color={props.color}
-                key={`${props.blockId}-${x}-${y}`}
+                key={`${props.tracker.blockId}-${x}-${y}`}
               />
             ))}
           </div>
