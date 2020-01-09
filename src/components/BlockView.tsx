@@ -10,6 +10,7 @@ export function BlockView(props: {
 }) {
   return (
     <div
+      key={`block-${props.blockId}`}
       className="block"
       draggable="false"
       style={{
@@ -20,14 +21,18 @@ export function BlockView(props: {
     >
       {props.block.block.map((row, y) => {
         return (
-          <div key={y} className="block-row" draggable="false">
+          <div
+            key={`block-${props.blockId}-row-${y}`}
+            className="block-row"
+            draggable="false"
+          >
             {row.map((value, x) => (
               <SlotView
                 canSelect={props.canSelect}
                 slotId={`${props.blockId}-${x}-${y}`}
                 value={value}
                 color={props.color}
-                key={x}
+                key={`${props.blockId}-${x}-${y}`}
               />
             ))}
           </div>

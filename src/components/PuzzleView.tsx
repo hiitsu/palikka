@@ -1,8 +1,9 @@
 import React from "react";
-import { Puzzle, randomPuzzle } from "../puzzle";
-import { PositionedBlock } from "../primitives";
+import { Puzzle, randomPuzzle, blocks } from "../puzzle";
+import { PositionedBlock, Block, XY } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
+import { Grid } from "../grid";
 
 type DragInfo = {
   blockId: number;
@@ -15,33 +16,47 @@ type GridInfo = {
   y: number;
 };
 
+type BlockTracker = {
+  zIndex: number;
+  screenX: number;
+  screenY: number;
+  block: Block;
+  blockId: number;
+};
+
 export default class PuzzleComponent extends React.Component<
-  {},
+  { blocks: Block[] },
   {
     draggedBlockInfo: null | DragInfo;
     hoveredGridInfo: null | GridInfo;
-    puzzle: Puzzle;
+    width: number;
+    height: number;
     positionedBlocks: PositionedBlock[];
     highlightedPosition: PositionedBlock;
     drawCount: number;
-    zIndices: number[];
+    blockTrackers: BlockTracker[];
   }
 > {
   constructor(props) {
     super(props);
 
-    const puzzle = randomPuzzle(6, 6);
-    console.log(puzzle);
     this.state = {
       drawCount: 0,
-      puzzle: new Puzzle(6, 6),
+      width: 6,
+      height: 6,
       draggedBlockInfo: null,
       hoveredGridInfo: null,
       highlightedPosition: null,
-      positionedBlocks: puzzle.positionedBlocks.map(p => {
-        return { ...p, x: 0, y: 0 };
-      }),
-      zIndices: puzzle.positionedBlocks.map((p, index) => index + 2)
+      positionedBlocks: [],
+      blockTrackers: props.blocks.map((block, index) => {
+        return {
+          screenX: 30 * index,
+          screenY: 5 * index,
+          zIndex: index + 2,
+          block,
+          blockId: index
+        };
+      })
     };
 
     this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -55,7 +70,7 @@ export default class PuzzleComponent extends React.Component<
       return;
     }
     const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
-    const maxZ = Math.max(...this.state.zIndices);
+    const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
     const zIndices = this.state.zIndices.map((zIndex, index) =>
       index === blockId ? maxZ + 1 : zIndex
     );
@@ -85,7 +100,14 @@ export default class PuzzleComponent extends React.Component<
       const { blockX, blockY } = this.state.draggedBlockInfo;
       const fitX = x - blockX;
       const fitY = y - blockY;
-      if (this.state.puzzle.canFit(fitX, fitY, block.block)) {
+      //if (canFit(fitX, fitY, block.block)) {
+      if (
+        new Grid(this.state.width, this.state.height).canFit(
+          fitX,
+          fitY,
+          block.block
+        )
+      ) {
         const highlightedPosition = { x: fitX, y: fitY, block: block.block };
         this.setState({ highlightedPosition });
         console.log("highlightedPosition", highlightedPosition);
@@ -101,8 +123,8 @@ export default class PuzzleComponent extends React.Component<
       const block = this.state.positionedBlocks[
         this.state.draggedBlockInfo.blockId
       ];
-      block.x = this.state.highlightedPosition.x;
-      block.y = this.state.highlightedPosition.y;
+      //block.x = this.state.highlightedPosition.x;
+      //block.y = this.state.highlightedPosition.y;
     }
     this.setState({
       draggedBlockInfo: null,
@@ -120,7 +142,7 @@ export default class PuzzleComponent extends React.Component<
         className="puzzle"
         style={{ position: "relative" }}
       >
-        {this.state.positionedBlocks.map((block, index) => {
+        {this.props.blocks.map((block, index) => {
           return (
             <BlockView
               zIndex={this.state.zIndices[index]}
@@ -133,8 +155,8 @@ export default class PuzzleComponent extends React.Component<
           );
         })}
         <GridView
-          width={this.state.puzzle.width}
-          height={this.state.puzzle.height}
+          width={this.state.width}
+          height={this.state.height}
           highlight={this.state.highlightedPosition}
         />
         <style jsx global>
