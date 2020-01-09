@@ -1,11 +1,11 @@
 import React from "react";
-
+import Hammer from "react-hammerjs";
 import { Puzzle, randomPuzzle, blocks } from "../puzzle";
 import { PositionedBlock, Block, XY } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { Grid } from "../grid";
-import { flipX, flipY } from "../block";
+import { flipX, flipY, rotateClockWise90 } from "../block";
 
 type DragInfo = {
   blockId: number;
@@ -27,6 +27,7 @@ export type BlockTracker = {
 };
 
 type PuzzleState = {
+  blockSize: null | number;
   draggedBlockInfo: null | DragInfo;
   hoveredGridInfo: null | GridInfo;
   width: number;
@@ -66,6 +67,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       hoveredGridInfo: null,
       highlightedPosition: null,
       positionedBlocks: [],
+      blockSize: null,
       blockTrackers: props.blocks.map((block, index) => {
         return {
           screenX: 30 * index,
@@ -77,19 +79,32 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       })
     };
 
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseUp = this.handleMouseUp.bind(this);
-    this.handleBlockChange = this.handleBlockChange.bind(this);
+    this.handlePanStart = this.handlePanStart.bind(this);
+    this.handlePan = this.handlePan.bind(this);
+    this.handlePanEnd = this.handlePanEnd.bind(this);
+    this.handleDoubleTap = this.handleDoubleTap.bind(this);
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    const { width: blockSize } = document.querySelector(".square").getBoundingClientRect();
 
-  handleBlockChange(blockId, block) {
-    this.setState({ blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block }) });
+    this.setState({ blockSize });
   }
 
-  handleMouseDown(ev: any) {
+  handleDoubleTap(ev) {
+    const slotId = ev.target.getAttribute("data-slot-id");
+    if (!slotId) {
+      return;
+    }
+    const [blockId] = slotId.split("-").map(s => parseInt(s));
+    const { block } = this.state.blockTrackers.find(t => blockId == t.blockId);
+    this.setState({
+      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block: rotateClockWise90(block) })
+    });
+  }
+
+  handlePanStart(ev: any) {
+    console.log("handlePanStart", ev);
     const slotId = ev.target.getAttribute("data-slot-id");
     if (!slotId) {
       return;
@@ -101,31 +116,22 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     //console.log(ev.target);
   }
 
-  handleMouseMove(ev) {
+  handlePan(ev) {
+    console.log("handlePan", ev);
     if (!this.state.draggedBlockInfo) {
       return;
     }
-    const { blockId } = this.state.draggedBlockInfo;
+    const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
     const { screenX, screenY, block } = this.state.blockTrackers[blockId];
-    if (Math.abs(ev.movementX) > 20) {
-      this.handleBlockChange(blockId, flipX(block));
-      this.setState({ highlightedPosition: null, draggedBlockInfo: null });
-      return;
-    }
-    if (Math.abs(ev.movementY) > 20) {
-      this.handleBlockChange(blockId, flipY(block));
-      this.setState({ highlightedPosition: null, draggedBlockInfo: null });
-      return;
-    }
     this.setState({
       blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
-        screenX: screenX + ev.movementX,
-        screenY: screenY + ev.movementY
+        screenX: ev.center.x - this.state.blockSize * blockX,
+        screenY: ev.center.y - this.state.blockSize * blockY
       })
     });
     //console.log(ev.target);
     if (window && window.document) {
-      const el = window.document.elementFromPoint(ev.pageX, ev.pageY);
+      const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
       const xy = el.getAttribute("data-square-id");
       if (!xy) {
         this.setState({ highlightedPosition: null });
@@ -150,11 +156,12 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.setState({ drawCount: Date.now() });
   }
 
-  handleMouseUp(ev) {
+  handlePanEnd(ev) {
+    console.log("handlePanEnd", ev);
     if (this.state.draggedBlockInfo && this.state.highlightedPosition) {
       if (window && window.document) {
         const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
-        const el = window.document.elementFromPoint(ev.pageX, ev.pageY);
+        const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
         const xy = el.getAttribute("data-square-id");
         if (xy) {
           const [x, y] = xy.split("-").map(s => parseInt(s));
@@ -178,39 +185,35 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   render() {
     return (
-      <div
-        onMouseMove={this.handleMouseMove}
-        onMouseDown={this.handleMouseDown}
-        onMouseUp={this.handleMouseUp}
-        className="puzzle"
-        style={{ position: "relative" }}
+      <Hammer
+        onPanStart={this.handlePanStart}
+        onPanEnd={this.handlePanEnd}
+        onPan={this.handlePan}
+        onDoubleTap={this.handleDoubleTap}
+        onSwipe={() => console.log("PuzzleView:onSwipe")}
+        onTap={() => console.log("PuzzleView:onTap")}
+        onPress={() => console.log("PuzzleView:onPress")}
       >
-        {this.state.blockTrackers.map((tracker, index) => {
-          return (
-            <BlockView
-              tracker={tracker}
-              onBlockChange={this.handleBlockChange}
-              canSelect={!this.state.draggedBlockInfo}
-              key={index}
-              color={index}
-            />
-          );
-        })}
-        <GridView width={this.state.width} height={this.state.height} highlight={this.state.highlightedPosition} />
-        <style jsx global>
-          {`
-            body {
-              margin: 0;
-              padding: 0;
-            }
-            .puzzle {
-              background: #efe;
-              width: 480px;
-              height: 480px;
-            }
-          `}
-        </style>
-      </div>
+        <div className="puzzle" style={{ position: "relative" }}>
+          {this.state.blockTrackers.map((tracker, index) => {
+            return <BlockView tracker={tracker} canSelect={!this.state.draggedBlockInfo} key={index} color={index} />;
+          })}
+          <GridView width={this.state.width} height={this.state.height} highlight={this.state.highlightedPosition} />
+          <style jsx global>
+            {`
+              body {
+                margin: 0;
+                padding: 0;
+              }
+              .puzzle {
+                background: #efe;
+                width: 480px;
+                height: 480px;
+              }
+            `}
+          </style>
+        </div>
+      </Hammer>
     );
   }
 }

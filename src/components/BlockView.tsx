@@ -3,13 +3,12 @@ import { SlotView } from "./SlotView";
 import { BlockTracker } from "./PuzzleView";
 import { flipX } from "../block";
 
-export function BlockView(props: { onBlockChange: any; tracker: BlockTracker; color: number; canSelect: boolean }) {
+export function BlockView(props: { tracker: BlockTracker; color: number; canSelect: boolean }) {
   return (
     <div
       key={`block-${props.tracker.blockId}`}
       className="block"
       draggable="false"
-      onDoubleClick={() => props.onBlockChange(props.tracker.blockId, flipX(props.tracker.block))}
       style={{
         left: props.tracker.screenX,
         top: props.tracker.screenY,
