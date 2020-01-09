@@ -1,13 +1,5 @@
 import { colors } from "./colors";
 
-function handleMouseDown(ev) {
-  console.log("SlotView::handleMouseDown", ev.target);
-}
-function onContextMenu(ev) {
-  console.log("SlotView::onContextMenu");
-  ev.preventDefault();
-  return false;
-}
 export function SlotView(props: {
   value: number;
   color: number;
@@ -18,8 +10,6 @@ export function SlotView(props: {
   const className = `slot slot-${props.value}`;
   return (
     <div
-      onMouseDown={handleMouseDown}
-      onContextMenu={onContextMenu}
       data-slot-id={props.slotId}
       className={className}
       draggable="false"

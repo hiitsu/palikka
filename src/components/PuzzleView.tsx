@@ -5,6 +5,7 @@ import { PositionedBlock, Block, XY } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { Grid } from "../grid";
+import { flipX, flipY } from "../block";
 
 type DragInfo = {
   blockId: number;
@@ -105,7 +106,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       return;
     }
     const { blockId } = this.state.draggedBlockInfo;
-    const { screenX, screenY } = this.state.blockTrackers[blockId];
+    const { screenX, screenY, block } = this.state.blockTrackers[blockId];
+    if (Math.abs(ev.movementX) > 20) {
+      this.handleBlockChange(blockId, flipX(block));
+      this.setState({ highlightedPosition: null, draggedBlockInfo: null });
+      return;
+    }
+    if (Math.abs(ev.movementY) > 20) {
+      this.handleBlockChange(blockId, flipY(block));
+      this.setState({ highlightedPosition: null, draggedBlockInfo: null });
+      return;
+    }
     this.setState({
       blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
         screenX: screenX + ev.movementX,
