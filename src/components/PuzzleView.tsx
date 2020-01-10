@@ -1,6 +1,6 @@
 import React from "react";
 import Hammer from "react-hammerjs";
-import { randomPuzzle, blocks } from "../puzzle";
+import { randomPuzzle, blocks, isComplete } from "../puzzle";
 import { PositionedBlock, Block, XY, Size } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
@@ -36,8 +36,8 @@ type PuzzleState = {
   gridSize: Size;
   positionedBlocks: PositionedBlock[];
   highlightedPosition: PositionedBlock;
-  drawCount: number;
   blockTrackers: BlockTracker[];
+  isPuzzleComplete: boolean;
 };
 
 type PuzzleProps = {
@@ -62,7 +62,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     super(props);
 
     this.state = {
-      drawCount: 0,
+      isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
       draggedBlockInfo: null,
       hoveredGridInfo: null,
@@ -131,7 +131,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     }
     const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
     const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-    const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1 });
+    const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1, isPlaced: false });
     this.setState({ draggedBlockInfo: { blockId, blockX, blockY }, blockTrackers });
   }
 
@@ -184,15 +184,26 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           const [x, y] = xy.split("-").map(s => parseInt(s));
           const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
           const rect = squareTopLeft.getBoundingClientRect();
+          const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, {
+            screenX: rect.left,
+            screenY: rect.top,
+            isPlaced: true,
+            gridX: x - blockX,
+            gridY: y - blockY
+          });
           this.setState(
             {
-              blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
-                screenX: rect.left,
-                screenY: rect.top,
-                isPlaced: true,
-                gridX: x - blockX,
-                gridY: y - blockY
-              })
+              isPuzzleComplete: isComplete(
+                this.state.gridSize,
+                blockTrackers.map(t => {
+                  return {
+                    x: t.gridX,
+                    y: t.gridY,
+                    block: t.block
+                  };
+                })
+              ),
+              blockTrackers
             },
             () => console.log(this.state.blockTrackers)
           );
@@ -218,6 +229,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         onPress={() => console.log("PuzzleView:onPress")}
       >
         <div className="puzzle" style={{ position: "relative" }}>
+          <label className="is-complete">Complete:{this.state.isPuzzleComplete ? "yes" : "no"}</label>
           {this.state.blockTrackers.map((tracker, index) => {
             return <BlockView tracker={tracker} canSelect={!this.state.draggedBlockInfo} key={index} color={index} />;
           })}
@@ -240,6 +252,14 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 width: 480px;
                 height: 480px;
                 touch-action: manipulation;
+              }
+              .puzzle .is-complete {
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 100000;
+                width: 150px;
+                text-align: center;
               }
             `}
           </style>

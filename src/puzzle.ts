@@ -221,14 +221,14 @@ export function randomPuzzle(size: Size, maxBlockSize = 10) {
       });
     });
   });
-
+  console.log("isComplete", isComplete(size, positionedBlocks));
   const p = {
     positionedBlocks,
     size,
     blocks: positionedBlocks.map(p => p.block),
     colorGrid: colorGrid(size, positionedBlocks, colors)
   };
-  console.log(p);
+
   return p;
 }
 
