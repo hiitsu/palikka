@@ -1,7 +1,8 @@
-import { Block, Slot, PositionedBlock } from "./primitives";
+import { Block, Slot, PositionedBlock, Size } from "./primitives";
 import { sizeOf, allBlockVariations } from "./block";
-import { Grid } from "./grid";
 import { array2D, arrayShuffle, randomInt, arrayOfPoints } from "./util";
+import { canFit, colorGrid } from "./grid";
+import { colors } from "./colors";
 
 export const blocks: Block[] = [
   [[1]],
@@ -174,108 +175,59 @@ export const blocks: Block[] = [
   ]
 ];
 
-export function randomPuzzle(w: number = 6, h: number = 6, maxBlockSize = 10) {
-  const puzzle = new Puzzle(w, h);
-  const blocksWithMatchingSize = blocks.filter(
-    block => sizeOf(block) <= maxBlockSize
-  );
-  puzzle.randomizeWith(allBlockVariations(blocksWithMatchingSize));
-  return puzzle;
-}
+export function randomPuzzle(size: Size, maxBlockSize = 10) {
+  const blocksWithMatchingSize = allBlockVariations(blocks.filter(block => sizeOf(block) <= maxBlockSize));
+  const positionedBlocks: Array<PositionedBlock> = [];
 
-export class Puzzle {
-  positionedBlocks: Array<PositionedBlock>;
-  width: number;
-  height: number;
+  const points = arrayShuffle(arrayOfPoints(size.w, size.h));
 
-  constructor(width: number, height: number) {
-    this.width = width;
-    this.height = height;
-    this.positionedBlocks = [];
-  }
+  const blockGroups = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(size => {
+    return blocksWithMatchingSize
+      .sort((a, b) => sizeOf(b) - sizeOf(a))
+      .filter(block => sizeOf(block) < size + 1 && sizeOf(block) >= size);
+  });
 
-  canFit(x: number, y: number, block: Block) {
-    const grid = new Grid(this.width, this.height);
-    this.positionedBlocks.forEach(positionedBlock =>
-      grid.mergeBlock(
-        positionedBlock.x,
-        positionedBlock.y,
-        positionedBlock.block
-      )
-    );
-    return grid.canFit(x, y, block);
-  }
+  const biggerBlockGroups = blockGroups.slice(0, 3);
+  const smallerBlockGroups = blockGroups.slice(3, 6);
+  const tinyBlockGroups = blockGroups.slice(6, 9);
 
-  renderColorGrid(): number[][] {
-    const w = this.width;
-    const h = this.height;
-    const colorGrid: number[][] = array2D(w, h, () => 0);
-    this.positionedBlocks.forEach((positionedBlock, index) => {
-      const block = positionedBlock.block;
-      const blockWidth = block[0].length;
-      const blockHeight = block.length;
-      for (let i = 0; i < blockWidth; i++) {
-        for (let j = 0; j < blockHeight; j++) {
-          const isInside =
-            colorGrid[positionedBlock.y + j] &&
-            typeof colorGrid[positionedBlock.y + j][positionedBlock.x + i] ===
-              "number";
-          const isTaken = block[j][i] === Slot.Taken;
-          if (isInside && isTaken) {
-            colorGrid[positionedBlock.y + j][positionedBlock.x + i] = index + 1;
-          }
+  points.forEach(({ x, y }) => {
+    biggerBlockGroups.forEach(blockGroup => {
+      const shuffledBlockGroup = arrayShuffle(blockGroup);
+      shuffledBlockGroup.forEach(block => {
+        if (canFit(size, positionedBlocks, { block, x, y })) {
+          positionedBlocks.push({ block, x, y });
         }
-      }
-    });
-    return colorGrid;
-  }
-
-  randomizeWith(blocks: Block[]): void {
-    const grid = new Grid(this.width, this.height);
-    const points = arrayShuffle(arrayOfPoints(this.width, this.height));
-
-    const blockGroups = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(size => {
-      return blocks
-        .sort((a, b) => sizeOf(b) - sizeOf(a))
-        .filter(block => sizeOf(block) < size + 1 && sizeOf(block) >= size);
-    });
-
-    const biggerBlockGroups = blockGroups.slice(0, 3);
-    const smallerBlockGroups = blockGroups.slice(3, 6);
-    const tinyBlockGroups = blockGroups.slice(6, 9);
-
-    points.forEach(({ x, y }) => {
-      biggerBlockGroups.forEach(blockGroup => {
-        const shuffledBlockGroup = arrayShuffle(blockGroup);
-        shuffledBlockGroup.forEach(block => {
-          if (grid.canFit(x, y, block)) {
-            grid.mergeBlock(x, y, block);
-            this.positionedBlocks.push({ block, x, y });
-          }
-        });
       });
     });
+  });
 
-    smallerBlockGroups.forEach(blockGroup => {
-      blockGroup.forEach(block => {
-        points.forEach(({ x, y }) => {
-          if (grid.canFit(x, y, block)) {
-            grid.mergeBlock(x, y, block);
-            this.positionedBlocks.push({ block, x, y });
-          }
-        });
+  smallerBlockGroups.forEach(blockGroup => {
+    blockGroup.forEach(block => {
+      points.forEach(({ x, y }) => {
+        if (canFit(size, positionedBlocks, { block, x, y })) {
+          positionedBlocks.push({ block, x, y });
+        }
       });
     });
+  });
 
-    tinyBlockGroups.forEach(blockGroup => {
-      blockGroup.forEach(block => {
-        points.forEach(({ x, y }) => {
-          if (grid.canFit(x, y, block)) {
-            grid.mergeBlock(x, y, block);
-            this.positionedBlocks.push({ block, x, y });
-          }
-        });
+  tinyBlockGroups.forEach(blockGroup => {
+    blockGroup.forEach(block => {
+      points.forEach(({ x, y }) => {
+        if (canFit(size, positionedBlocks, { block, x, y })) {
+          positionedBlocks.push({ block, x, y });
+        }
       });
     });
-  }
+  });
+
+  const p = {
+    positionedBlocks,
+    size,
+    blocks: positionedBlocks.map(p => p.block),
+    colorGrid: colorGrid(size, positionedBlocks, colors)
+  };
+  console.log(p);
+  return p;
 }

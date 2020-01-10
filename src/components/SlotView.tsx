@@ -1,4 +1,4 @@
-import { colors } from "./colors";
+import { colors } from "../colors";
 
 export function SlotView(props: {
   value: number;

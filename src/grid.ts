@@ -1,51 +1,58 @@
 import { array2D } from "./util";
-import { Block, Slot } from "./primitives";
+import { Block, Slot, AllocationGrid, PositionedBlock, Size, Color, ColorGrid } from "./primitives";
 
-export class Grid {
-  slots: Array<Array<Slot>>;
-  width: number;
-  height: number;
-
-  constructor(width: number, height: number) {
-    this.width = width;
-    this.height = height;
-    this.reset();
-  }
-
-  reset() {
-    this.slots = array2D<Slot>(this.width, this.height, () => Slot.Empty);
-  }
-
-  canFit(x: number, y: number, block: Block) {
+export function allocationGrid(size: Size, positionedBlocks: PositionedBlock[]): AllocationGrid {
+  const grid: AllocationGrid = array2D<Slot>(size.w, size.h, () => Slot.Empty);
+  positionedBlocks.forEach(({ x, y, block }) => {
     const blockWidth = block[0].length;
     const blockHeight = block.length;
     for (let i = 0; i < blockWidth; i++) {
       for (let j = 0; j < blockHeight; j++) {
-        const isInside = this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
-        if (isInside && this.slots[y + j][x + i] === Slot.Taken && block[j][i] === Slot.Taken) return false;
-        if (!isInside && block[j][i] === Slot.Taken) return false;
-      }
-    }
-    return true;
-  }
-
-  mergeBlock(x: number, y: number, block: Block) {
-    const blockWidth = block[0].length;
-    const blockHeight = block.length;
-    for (let i = 0; i < blockWidth; i++) {
-      for (let j = 0; j < blockHeight; j++) {
-        const isInside = this.slots[y + j] && typeof this.slots[y + j][x + i] === "number";
-        const isTaken = block[j][i] === Slot.Taken;
-        if (isInside && isTaken) {
-          this.slots[y + j][x + i] = block[j][i];
+        const isInside = grid[y + j] && typeof grid[y + j][x + i] === "number";
+        const isTaken = isInside && grid[y + j][x + i] == Slot.Taken;
+        const isBlockPieceThere = block[j][i] === Slot.Taken;
+        if (isInside && !isTaken && isBlockPieceThere) {
+          grid[y + j][x + i] = Slot.Taken;
         }
       }
     }
-  }
+  });
+  return grid;
+}
 
-  forEach(x: number, y: number, w: number, h: number, callback: () => void) {}
-
-  isEmpty(x: number, y: number) {
-    return this.slots[x][y] === Slot.Empty;
+export function canFit(size: Size, positionedBlocks: PositionedBlock[], proposedBlock: PositionedBlock): boolean {
+  const grid: AllocationGrid = allocationGrid(size, positionedBlocks);
+  const { block, x, y } = proposedBlock;
+  const blockWidth = block[0].length;
+  const blockHeight = block.length;
+  for (let i = 0; i < blockWidth; i++) {
+    for (let j = 0; j < blockHeight; j++) {
+      const isInside = grid[y + j] && typeof grid[y + j][x + i] === "number";
+      const isTakenAlready = isInside && grid[y + j][x + i] === Slot.Taken;
+      const isBlockPieceThere = block[j][i] === Slot.Taken;
+      if (isInside && isTakenAlready && isBlockPieceThere) return false;
+      if (!isInside && isBlockPieceThere) return false;
+    }
   }
+  return true;
+}
+
+export function colorGrid(size: Size, positionedBlocks: PositionedBlock[], colors: Color[]): ColorGrid {
+  const grid: ColorGrid = array2D<Color>(size.w, size.h, () => 0);
+  positionedBlocks.forEach(({ x, y, block }, blockIndex) => {
+    const blockWidth = block[0].length;
+    const blockHeight = block.length;
+    for (let i = 0; i < blockWidth; i++) {
+      for (let j = 0; j < blockHeight; j++) {
+        const isVerticallyInside = y + j < size.h;
+        const isHorizontallyInside = x + i < size.w;
+        const isInside = isVerticallyInside && isHorizontallyInside;
+        const isBlockPieceThere = block[j][i] === Slot.Taken;
+        if (isInside && isBlockPieceThere) {
+          grid[y + j][x + i] = colors[blockIndex];
+        }
+      }
+    }
+  });
+  return grid;
 }
