@@ -29,6 +29,26 @@ describe("Grid", () => {
       expect(canFit({ w: 3, h: 2 }, [], { x: 0, y: 0, block })).toBe(true);
     });
 
+    it("true when there is exactly needed space left", () => {
+      expect(
+        canFit({ w: 4, h: 2 }, [{ x: 0, y: 0, block: [[1, 1, 1, 1]] }], { x: 0, y: 1, block: [[1, 1, 1, 1]] })
+      ).toBe(true);
+    });
+
+    it("true when there is one square space around", () => {
+      expect(canFit({ w: 3, h: 3 }, [], { x: 1, y: 1, block: [[1]] })).toBe(true);
+      expect(
+        canFit({ w: 4, h: 4 }, [], {
+          x: 1,
+          y: 1,
+          block: [
+            [1, 1],
+            [1, 1]
+          ]
+        })
+      ).toBe(true);
+    });
+
     it("false when block goes out from right", () => {
       expect(canFit({ w: 3, h: 2 }, [], { x: 1, y: 0, block })).toBe(false);
     });
@@ -39,6 +59,41 @@ describe("Grid", () => {
 
     it("false when block goes out from right and bottom", () => {
       expect(canFit({ w: 3, h: 3 }, [], { x: 2, y: 2, block })).toBe(false);
+    });
+
+    it("false when another one if blocking", () => {
+      expect(canFit({ w: 2, h: 2 }, [{ x: 0, y: 0, block: [[1]] }], { x: 0, y: 0, block: [[1]] })).toBe(false);
+      expect(
+        canFit({ w: 2, h: 2 }, [{ x: 0, y: 0, block: [[1, 1]] }], {
+          x: 0,
+          y: 0,
+          block: [
+            [0, 1],
+            [1, 1]
+          ]
+        })
+      ).toBe(false);
+      expect(
+        canFit(
+          { w: 3, h: 23 },
+          [
+            {
+              x: 0,
+              y: 0,
+              block: [
+                [0, 1, 0],
+                [1, 1, 1],
+                [0, 1, 0]
+              ]
+            }
+          ],
+          {
+            x: 2,
+            y: 0,
+            block: [[1], [1], [1]]
+          }
+        )
+      ).toBe(false);
     });
   });
 
