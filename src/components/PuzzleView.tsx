@@ -145,7 +145,12 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
     const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
     const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1, isPlaced: false });
-    this.setState({ panStartBlockId: blockId, draggedBlockInfo: { blockId, blockX, blockY }, blockTrackers });
+    this.setState({
+      panStartBlockId: blockId,
+      isPuzzleComplete: false,
+      draggedBlockInfo: { blockId, blockX, blockY },
+      blockTrackers
+    });
   }
 
   handlePan(ev) {
