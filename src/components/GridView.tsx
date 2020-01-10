@@ -2,11 +2,7 @@ import { PositionedBlock, Slot } from "../primitives";
 import { SquareView } from "./SquareView";
 import { array2D } from "../util";
 
-export function GridView(props: {
-  width: number;
-  height: number;
-  highlight?: PositionedBlock;
-}) {
+export function GridView(props: { width: number; height: number; highlight?: PositionedBlock }) {
   const grid = array2D(props.width, props.height, () => 0);
   return (
     <div className="grid" draggable={false}>
@@ -16,26 +12,14 @@ export function GridView(props: {
             {row.map((value, x) => {
               let shouldHighlight = false;
               if (props.highlight) {
-                const matchX =
-                  x >= props.highlight.x &&
-                  x < props.highlight.x + props.highlight.block[0].length;
-                const matchY =
-                  y >= props.highlight.y &&
-                  y < props.highlight.y + props.highlight.block.length;
+                const matchX = x >= props.highlight.x && x < props.highlight.x + props.highlight.block[0].length;
+                const matchY = y >= props.highlight.y && y < props.highlight.y + props.highlight.block.length;
                 shouldHighlight =
                   matchX &&
                   matchY &&
-                  props.highlight.block[y - props.highlight.y][
-                    x - props.highlight.x
-                  ] === Slot.Taken;
+                  props.highlight.block[y - props.highlight.y][x - props.highlight.x] === Slot.Taken;
               }
-              return (
-                <SquareView
-                  key={x}
-                  squareId={`${x}-${y}`}
-                  highlight={shouldHighlight}
-                />
-              );
+              return <SquareView key={`${x}-${y}`} squareId={`${x}-${y}`} highlight={shouldHighlight} />;
             })}
           </div>
         );

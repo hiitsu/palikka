@@ -1,6 +1,6 @@
 import React from "react";
 import Hammer from "react-hammerjs";
-import { Puzzle, randomPuzzle, blocks } from "../puzzle";
+import { randomPuzzle, blocks } from "../puzzle";
 import { PositionedBlock, Block, XY, Size } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
@@ -78,7 +78,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           blockId: index,
           isPlaced: false,
           gridX: null,
-          grixY: null
+          gridY: null
         };
       })
     };
@@ -86,6 +86,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handlePanStart = this.handlePanStart.bind(this);
     this.handlePan = this.handlePan.bind(this);
     this.handlePanEnd = this.handlePanEnd.bind(this);
+    this.handleTap = this.handleTap.bind(this);
     this.handleDoubleTap = this.handleDoubleTap.bind(this);
   }
 
@@ -97,6 +98,18 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     }
     const { width: blockSize = 0 } = square.getBoundingClientRect();
     this.setState({ blockSize });
+  }
+
+  handleTap(ev) {
+    const slotId = ev.target.getAttribute("data-slot-id");
+    if (!slotId) {
+      return;
+    }
+    const [blockId] = slotId.split("-").map(s => parseInt(s));
+    const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
+    this.setState({
+      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1 })
+    });
   }
 
   handleDoubleTap(ev) {
@@ -171,15 +184,18 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           const [x, y] = xy.split("-").map(s => parseInt(s));
           const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
           const rect = squareTopLeft.getBoundingClientRect();
-          this.setState({
-            blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
-              screenX: rect.left,
-              screenY: rect.top,
-              isPlaced: true,
-              gridX: x,
-              gridY: y
-            })
-          });
+          this.setState(
+            {
+              blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
+                screenX: rect.left,
+                screenY: rect.top,
+                isPlaced: true,
+                gridX: x - blockX,
+                gridY: y - blockY
+              })
+            },
+            () => console.log(this.state.blockTrackers)
+          );
         }
       }
     }
@@ -198,7 +214,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         onPan={this.handlePan}
         onDoubleTap={this.handleDoubleTap}
         onSwipe={() => console.log("PuzzleView:onSwipe")}
-        onTap={() => console.log("PuzzleView:onTap")}
+        onTap={this.handleTap}
         onPress={() => console.log("PuzzleView:onPress")}
       >
         <div className="puzzle" style={{ position: "relative" }}>
