@@ -217,11 +217,13 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 padding: 0;
                 position: fixed;
                 overflow: hidden;
+                touch-action: manipulation;
               }
               .puzzle {
                 background: #efe;
                 width: 480px;
                 height: 480px;
+                touch-action: manipulation;
               }
             `}
           </style>
