@@ -215,6 +215,8 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
               body {
                 margin: 0;
                 padding: 0;
+                position: fixed;
+                overflow: hidden;
               }
               .puzzle {
                 background: #efe;
