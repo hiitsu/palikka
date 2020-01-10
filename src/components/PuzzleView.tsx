@@ -30,6 +30,7 @@ export type BlockTracker = {
 };
 
 type PuzzleState = {
+  panStartBlockId: null | number;
   blockSize: null | number;
   draggedBlockInfo: null | DragInfo;
   hoveredGridInfo: null | GridInfo;
@@ -62,6 +63,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     super(props);
 
     this.state = {
+      panStartBlockId: null,
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
       draggedBlockInfo: null,
@@ -88,6 +90,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handlePanEnd = this.handlePanEnd.bind(this);
     this.handleTap = this.handleTap.bind(this);
     this.handleDoubleTap = this.handleDoubleTap.bind(this);
+    this.handleSwipe = this.handleSwipe.bind(this);
   }
 
   componentDidMount() {
@@ -98,6 +101,16 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     }
     const { width: blockSize = 0 } = square.getBoundingClientRect();
     this.setState({ blockSize });
+  }
+
+  handleSwipe(ev) {
+    console.log("handleSwipe", ev);
+    const blockId = this.state.panStartBlockId;
+    const { block } = this.state.blockTrackers.find(t => t.blockId == blockId);
+    const flippedBlock = ev.direction == 2 || ev.direction == 4 ? flipX(block) : flipY(block);
+    this.setState({
+      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block: flippedBlock })
+    });
   }
 
   handleTap(ev) {
@@ -132,7 +145,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
     const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
     const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1, isPlaced: false });
-    this.setState({ draggedBlockInfo: { blockId, blockX, blockY }, blockTrackers });
+    this.setState({ panStartBlockId: blockId, draggedBlockInfo: { blockId, blockX, blockY }, blockTrackers });
   }
 
   handlePan(ev) {
@@ -220,11 +233,12 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   render() {
     return (
       <Hammer
+        direction={"DIRECTION_ALL"}
         onPanStart={this.handlePanStart}
         onPanEnd={this.handlePanEnd}
         onPan={this.handlePan}
         onDoubleTap={this.handleDoubleTap}
-        onSwipe={() => console.log("PuzzleView:onSwipe")}
+        onSwipe={this.handleSwipe}
         onTap={this.handleTap}
         onPress={() => console.log("PuzzleView:onPress")}
       >
