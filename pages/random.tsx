@@ -29,7 +29,7 @@ function GridComponent(props: { grid: ColorGrid }) {
       {props.grid.map((row, index) => {
         return (
           <div key={index} className="grid-row">
-            {row.map((value, index) => SlotComponent({ value, key: index }))}
+            {row.map((value, index) => SlotComponent({ value: value as number, key: index }))}
           </div>
         );
       })}

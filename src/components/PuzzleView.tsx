@@ -1,7 +1,7 @@
 import React from "react";
 import Hammer from "react-hammerjs";
 import { isComplete } from "../puzzle";
-import { PositionedBlock, Block, XY, Size } from "../primitives";
+import { PositionedBlock, Block, Size } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90 } from "../block";
@@ -36,7 +36,7 @@ type PuzzleState = {
   hoveredGridInfo: null | GridInfo;
   gridSize: Size;
   positionedBlocks: PositionedBlock[];
-  highlightedPosition: PositionedBlock;
+  highlightedPosition: PositionedBlock | null;
   blockTrackers: BlockTracker[];
   isPuzzleComplete: boolean;
 };
@@ -59,7 +59,7 @@ function mutateBlockTrackers(trackers: BlockTracker[], blockId: number, update: 
 }
 
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
-  constructor(props) {
+  constructor(props: PuzzleProps) {
     super(props);
 
     this.state = {
@@ -103,38 +103,44 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.setState({ blockSize });
   }
 
-  handleSwipe(ev) {
+  handleSwipe(ev: any) {
     console.log("handleSwipe", ev);
     const blockId = this.state.panStartBlockId;
-    const { block } = this.state.blockTrackers.find(t => t.blockId == blockId);
-    const flippedBlock = ev.direction == 2 || ev.direction == 4 ? flipX(block) : flipY(block);
-    this.setState({
-      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block: flippedBlock })
-    });
+    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId);
+    if (blockTracker) {
+      const { block } = blockTracker;
+      const flippedBlock = ev.direction == 2 || ev.direction == 4 ? flipX(block) : flipY(block);
+      this.setState({
+        blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId as number, { block: flippedBlock })
+      });
+    }
   }
 
-  handleTap(ev) {
+  handleTap(ev: any) {
     const slotId = ev.target.getAttribute("data-slot-id");
     if (!slotId) {
       return;
     }
-    const [blockId] = slotId.split("-").map(s => parseInt(s));
+    const [blockId] = slotId.split("-").map((s: string) => parseInt(s));
     const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
     this.setState({
       blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1 })
     });
   }
 
-  handleDoubleTap(ev) {
+  handleDoubleTap(ev: any) {
     const slotId = ev.target.getAttribute("data-slot-id");
     if (!slotId) {
       return;
     }
-    const [blockId] = slotId.split("-").map(s => parseInt(s));
-    const { block } = this.state.blockTrackers.find(t => blockId == t.blockId);
-    this.setState({
-      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block: rotateClockWise90(block) })
-    });
+    const [blockId] = slotId.split("-").map((s: string) => parseInt(s));
+    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId);
+    if (blockTracker) {
+      const { block } = blockTracker;
+      this.setState({
+        blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block: rotateClockWise90(block) })
+      });
+    }
   }
 
   handlePanStart(ev: any) {
@@ -142,7 +148,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     if (!slotId) {
       return;
     }
-    const [blockId, blockX, blockY] = slotId.split("-").map(s => parseInt(s));
+    const [blockId, blockX, blockY] = slotId.split("-").map((s: string) => parseInt(s));
     const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
     const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1, isPlaced: false });
     this.setState({
@@ -153,12 +159,11 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     });
   }
 
-  handlePan(ev) {
-    if (!this.state.draggedBlockInfo) {
+  handlePan(ev: any) {
+    if (!this.state.draggedBlockInfo || !this.state.blockSize) {
       return;
     }
     const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
-    const { screenX, screenY, block } = this.state.blockTrackers[blockId];
     this.setState({
       blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
         screenX: ev.center.x - this.state.blockSize * blockX,
@@ -167,6 +172,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     });
     if (window && window.document) {
       const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+      if (!el) {
+        this.setState({ highlightedPosition: null });
+        return;
+      }
       const xy = el.getAttribute("data-square-id");
       if (!xy) {
         this.setState({ highlightedPosition: null });
@@ -178,13 +187,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       const fitX = x - blockX;
       const fitY = y - blockY;
       const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId);
+      if (!tracker) {
+        this.setState({ highlightedPosition: null });
+        return;
+      }
       const proposedBlock = { x: fitX, y: fitY, block: tracker.block };
       const positionedBlocks = this.state.blockTrackers
         .filter(tracker => tracker.blockId != blockId && tracker.isPlaced)
         .map(tracker => {
           return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
         });
-      if (canFit(this.state.gridSize, positionedBlocks, proposedBlock)) {
+      if (canFit(this.state.gridSize, positionedBlocks as PositionedBlock[], proposedBlock)) {
         this.setState({ highlightedPosition: proposedBlock });
       } else {
         this.setState({ highlightedPosition: null });
@@ -192,16 +205,16 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     }
   }
 
-  handlePanEnd(ev) {
+  handlePanEnd(ev: any) {
     if (this.state.draggedBlockInfo && this.state.highlightedPosition) {
       if (window && window.document) {
         const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
         const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-        const xy = el.getAttribute("data-square-id");
+        const xy = el && el.getAttribute("data-square-id");
         if (xy) {
           const [x, y] = xy.split("-").map(s => parseInt(s));
           const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
-          const rect = squareTopLeft.getBoundingClientRect();
+          const rect = (squareTopLeft as Element).getBoundingClientRect();
           const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, {
             screenX: rect.left,
             screenY: rect.top,
@@ -213,12 +226,12 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
             {
               isPuzzleComplete: isComplete(
                 this.state.gridSize,
-                blockTrackers.map(t => {
+                blockTrackers.map<PositionedBlock>(t => {
                   return {
                     x: t.gridX,
                     y: t.gridY,
                     block: t.block
-                  };
+                  } as PositionedBlock;
                 })
               ),
               blockTrackers
@@ -255,7 +268,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           <GridView
             width={this.state.gridSize.w}
             height={this.state.gridSize.h}
-            highlight={this.state.highlightedPosition}
+            highlight={this.state.highlightedPosition || undefined}
           />
           <style jsx global>
             {`
