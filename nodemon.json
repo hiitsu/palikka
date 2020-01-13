@@ -2,6 +2,6 @@
     "watch": [
         "src"
     ],
-    "exec": "ts-node --project tsconfig.server.json src/api.ts",
+    "exec": "ts-node --project tsconfig.server.json src/api/api-entrypoint.ts",
     "ext": "ts"
 }

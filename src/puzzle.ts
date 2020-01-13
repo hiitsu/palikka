@@ -221,7 +221,7 @@ export function randomPuzzle(size: Size, maxBlockSize = 10) {
       });
     });
   });
-  console.log("isComplete", isComplete(size, positionedBlocks));
+  //console.log("isComplete", isComplete(size, positionedBlocks));
   const p = {
     positionedBlocks,
     size,
