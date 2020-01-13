@@ -1,12 +1,4 @@
-import {
-  flipX,
-  flipY,
-  rotateClockWise90,
-  blockVariations,
-  allBlockVariations,
-  clone,
-  sizeOf
-} from "./block";
+import { flipX, flipY, rotateClockWise90, blockVariations, clone, sizeOf } from "./block";
 import { Block } from "./primitives";
 
 describe("Block", () => {

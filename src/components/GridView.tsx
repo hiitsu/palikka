@@ -9,7 +9,7 @@ export function GridView(props: { width: number; height: number; highlight?: Pos
       {grid.map((row, y) => {
         return (
           <div key={y} className="grid-row" draggable={false}>
-            {row.map((value, x) => {
+            {row.map((_value, x) => {
               let shouldHighlight = false;
               if (props.highlight) {
                 const matchX = x >= props.highlight.x && x < props.highlight.x + props.highlight.block[0].length;

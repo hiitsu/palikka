@@ -10,7 +10,7 @@ const opts = {
       200: {
         type: "object",
         properties: {
-          hello: {
+          puzzle: {
             type: "string"
           }
         }
@@ -19,9 +19,9 @@ const opts = {
   }
 };
 
-function handler(req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) {
+function handler(_req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) {
   reply.header("Content-Type", "application/json").code(200);
-  reply.send({ puzzle: "time" });
+  reply.send({ puzzle: "time", abc: 1 });
 }
 
 server.get("/", opts, handler);

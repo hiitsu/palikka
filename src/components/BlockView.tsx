@@ -1,7 +1,5 @@
-import { PositionedBlock } from "../primitives";
 import { SlotView } from "./SlotView";
 import { BlockTracker } from "./PuzzleView";
-import { flipX } from "../block";
 
 export function BlockView(props: { tracker: BlockTracker; color: number; canSelect: boolean }) {
   return (

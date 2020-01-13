@@ -1,6 +1,6 @@
 import { Block, Slot, PositionedBlock, Size } from "./primitives";
 import { sizeOf, allBlockVariations } from "./block";
-import { array2D, arrayShuffle, randomInt, arrayOfPoints } from "./util";
+import { arrayShuffle, arrayOfPoints } from "./util";
 import { canFit, colorGrid, allocationGrid } from "./grid";
 import { colors } from "./colors";
 
@@ -235,6 +235,8 @@ export function randomPuzzle(size: Size, maxBlockSize = 10) {
 export function isComplete(size: Size, positionedBlocks: PositionedBlock[]): boolean {
   const totalCount = size.w * size.h;
   const grid = allocationGrid(size, positionedBlocks);
-  const allocatedCount = [].concat(...grid).reduce((memo, slot) => (slot == Slot.Taken ? memo + 1 : memo));
+  const allocatedCount = new Array<Slot>()
+    .concat(...grid)
+    .reduce((memo, slot) => (slot == Slot.Taken ? memo + 1 : memo));
   return allocatedCount === totalCount;
 }

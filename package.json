@@ -15,15 +15,13 @@
     "@types/jest": "^24.0.25",
     "@types/node": "13.1.2",
     "@types/react": "16.9.17",
+    "nodemon": "^2.0.2",
     "jest": "^24.9.0",
     "ts-jest": "^24.2.0"
   },
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "export": "next build && next export",
-    "start": "next start",
-    "test": "jest"
+    "dev": "nodemon",
+    "build": "next build && next export && tsc --project tsconfig.server.json"
   },
   "keywords": [],
   "author": "",

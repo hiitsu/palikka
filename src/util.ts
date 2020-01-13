@@ -1,10 +1,6 @@
 type ArrayFillFunction<T> = (x: number, y: number) => T;
-export const array2D = <T>(
-  width: number,
-  height: number,
-  fillFunction: ArrayFillFunction<T>
-): Array<Array<T>> => {
-  const array = [];
+export const array2D = <T>(width: number, height: number, fillFunction: ArrayFillFunction<T>): Array<Array<T>> => {
+  const array: Array<Array<T>> = [];
   for (var i = 0; i < height; i++) {
     array[i] = [];
     for (var j = 0; j < width; j++) {
@@ -28,14 +24,9 @@ export const arrayOfPoints = (width: number, height: number) => {
   return points;
 };
 
-export const randomInt = (from: number, to: number): number =>
-  from + Math.floor(Math.random() * to - from);
+export const randomInt = (from: number, to: number): number => from + Math.floor(Math.random() * to - from);
 
-export default function snapToGrid(
-  x: number,
-  y: number,
-  gridSize: number = 32
-) {
+export default function snapToGrid(x: number, y: number, gridSize: number = 32) {
   const snappedX = Math.round(x / gridSize) * gridSize;
   const snappedY = Math.round(y / gridSize) * gridSize;
   return [snappedX, snappedY];

@@ -1,5 +1,5 @@
 import { array2D } from "./util";
-import { Block, Slot, AllocationGrid, PositionedBlock, Size, Color, ColorGrid } from "./primitives";
+import { Slot, AllocationGrid, PositionedBlock, Size, Color, ColorGrid } from "./primitives";
 
 export function allocationGrid(size: Size, positionedBlocks: PositionedBlock[]): AllocationGrid {
   const grid: AllocationGrid = array2D<Slot>(size.w, size.h, () => Slot.Empty);

@@ -1,6 +1,5 @@
 import { randomPuzzle } from "../src/puzzle";
-import { ColorGrid, Block } from "../src/primitives";
-import { colors } from "../src/colors";
+import { ColorGrid } from "../src/primitives";
 
 function SlotComponent(props: { key: number | string; value: number }) {
   const className = `slot slot-${props.value}`;
@@ -18,31 +17,6 @@ function SlotComponent(props: { key: number | string; value: number }) {
           height: 1cm;
           display: inline-block;
           box-sizing: border-box;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function BlockComponent(props: { key: number; block: Block }) {
-  return (
-    <div key={props.key} className="block">
-      {props.block.map((row, index) => {
-        return (
-          <div key={index} className="block-row">
-            {row.map((value, index) => SlotComponent({ value, key: index }))}
-          </div>
-        );
-      })}
-      <style jsx>{`
-        .block {
-          box-sizing: border-box;
-          padding: 1em;
-          background-color: #eee;
-        }
-        .block-row {
-          box-sizing: border-box;
-          height: 1cm;
         }
       `}</style>
     </div>

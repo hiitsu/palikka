@@ -1,6 +1,6 @@
 import React from "react";
 import Hammer from "react-hammerjs";
-import { randomPuzzle, blocks, isComplete } from "../puzzle";
+import { isComplete } from "../puzzle";
 import { PositionedBlock, Block, XY, Size } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
