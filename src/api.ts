@@ -26,8 +26,8 @@ function handler(_req: fastify.FastifyRequest<http.IncomingMessage>, reply: fast
 
 server.get("/", opts, handler);
 
-const port = process.env.PORT || "3001";
-server.listen(port, (err: Error) => {
+const port = parseInt(process.env.PORT || "3001");
+server.listen(port, "0.0.0.0", (err: Error) => {
   if (err) throw err;
   console.log(`server listening on ${(server.server.address() as AddressInfo).port}`);
 });
