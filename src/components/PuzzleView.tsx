@@ -6,7 +6,7 @@ import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90 } from "../block";
 import { canFit } from "../grid";
-import { elementWidth } from "src/dom";
+import { elementWidth } from "../dom";
 
 type DragInfo = {
   blockId: number;
@@ -68,9 +68,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       positionedBlocks: [],
       blockSize: null,
       blockTrackers: props.blocks.map((block, index) => {
+        const offsetY = Math.floor((120.0 * index) / 320.0);
         return {
-          screenX: 120 * index,
-          screenY: 20 * index,
+          screenX: (120 * index) % 320,
+          screenY: 10 + 120 * offsetY,
           zIndex: index + 2,
           block,
           blockId: index,
