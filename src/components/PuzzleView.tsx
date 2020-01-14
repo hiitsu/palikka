@@ -8,7 +8,7 @@ import { flipX, flipY, rotateClockWise90 } from "../block";
 import { canFit } from "../grid";
 import { elementWidth } from "../dom";
 
-type DragInfo = {
+type BlockInfo = {
   blockId: number;
   blockX: number;
   blockY: number;
@@ -28,7 +28,7 @@ export type BlockTracker = {
 type PuzzleState = {
   panStartBlockId: null | number;
   blockSize: null | number;
-  dragInfo: null | DragInfo;
+  dragInfo: null | BlockInfo;
   hoverXY: null | XY;
   gridSize: Size;
   positionedBlocks: PositionedBlock[];
@@ -52,6 +52,15 @@ function mutateBlockTrackers(trackers: BlockTracker[], blockId: number, update: 
     }
     return tracker;
   });
+}
+
+function blockInfo(el: Element): BlockInfo | null {
+  const slotId = el.getAttribute("data-slot-id");
+  if (!slotId) {
+    return null;
+  }
+  const [blockId, blockX, blockY] = slotId.split("-").map((s: string) => parseInt(s));
+  return { blockId, blockX, blockY };
 }
 
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
@@ -109,46 +118,45 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handleTap(ev: any) {
-    const slotId = ev.target.getAttribute("data-slot-id");
-    if (!slotId) {
-      return;
-    }
-    const [blockId] = slotId.split("-").map((s: string) => parseInt(s));
-    const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-    this.setState({
-      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1 })
-    });
-  }
-
-  handleDoubleTap(ev: any) {
-    const slotId = ev.target.getAttribute("data-slot-id");
-    if (!slotId) {
-      return;
-    }
-    const [blockId] = slotId.split("-").map((s: string) => parseInt(s));
-    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId);
-    if (blockTracker) {
-      const { block } = blockTracker;
+    const info = blockInfo(ev.target);
+    if (info) {
+      const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
       this.setState({
-        blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, { block: rotateClockWise90(block) })
+        blockTrackers: mutateBlockTrackers(this.state.blockTrackers, info.blockId, { zIndex: maxZ + 1 })
       });
     }
   }
 
-  handlePanStart(ev: any) {
-    const slotId = ev.target.getAttribute("data-slot-id");
-    if (!slotId) {
-      return;
+  handleDoubleTap(ev: any) {
+    const info = blockInfo(ev.target);
+    if (info) {
+      const blockTracker = this.state.blockTrackers.find(t => t.blockId == info.blockId);
+      if (blockTracker) {
+        const { block } = blockTracker;
+        this.setState({
+          blockTrackers: mutateBlockTrackers(this.state.blockTrackers, info.blockId, {
+            block: rotateClockWise90(block)
+          })
+        });
+      }
     }
-    const [blockId, blockX, blockY] = slotId.split("-").map((s: string) => parseInt(s));
-    const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-    const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, { zIndex: maxZ + 1, isPlaced: false });
-    this.setState({
-      panStartBlockId: blockId,
-      isPuzzleComplete: false,
-      dragInfo: { blockId, blockX, blockY },
-      blockTrackers
-    });
+  }
+
+  handlePanStart(ev: any) {
+    const info = blockInfo(ev.target);
+    if (info) {
+      const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
+      const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, info.blockId, {
+        zIndex: maxZ + 1,
+        isPlaced: false
+      });
+      this.setState({
+        panStartBlockId: info.blockId,
+        isPuzzleComplete: false,
+        dragInfo: { ...info },
+        blockTrackers
+      });
+    }
   }
 
   handlePan(ev: any) {
@@ -227,8 +235,8 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 })
               ),
               blockTrackers
-            },
-            () => console.log(this.state.blockTrackers)
+            }
+            //,() => console.log(this.state.blockTrackers)
           );
         }
       }
