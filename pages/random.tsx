@@ -1,5 +1,6 @@
 import { randomPuzzle } from "../src/puzzle";
 import { ColorGrid } from "../src/primitives";
+import colors from "../src/colors";
 
 function SlotComponent(props: { key: number | string; value: number }) {
   const className = `slot slot-${props.value}`;
@@ -8,7 +9,7 @@ function SlotComponent(props: { key: number | string; value: number }) {
       key={props.key}
       className={className}
       style={{
-        background: props.value
+        background: colors[props.value]
       }}
     >
       <style jsx>{`
