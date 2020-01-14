@@ -1,21 +1,17 @@
 import React from "react";
 import Hammer from "react-hammerjs";
 import { isComplete } from "../puzzle";
-import { PositionedBlock, Block, Size } from "../primitives";
+import { PositionedBlock, Block, Size, XY } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90 } from "../block";
 import { canFit } from "../grid";
+import { elementWidth } from "src/dom";
 
 type DragInfo = {
   blockId: number;
   blockX: number;
   blockY: number;
-};
-
-type GridInfo = {
-  x: number;
-  y: number;
 };
 
 export type BlockTracker = {
@@ -32,11 +28,11 @@ export type BlockTracker = {
 type PuzzleState = {
   panStartBlockId: null | number;
   blockSize: null | number;
-  draggedBlockInfo: null | DragInfo;
-  hoveredGridInfo: null | GridInfo;
+  dragInfo: null | DragInfo;
+  hoverXY: null | XY;
   gridSize: Size;
   positionedBlocks: PositionedBlock[];
-  highlightedPosition: PositionedBlock | null;
+  proposedBlock: PositionedBlock | null;
   blockTrackers: BlockTracker[];
   isPuzzleComplete: boolean;
 };
@@ -66,15 +62,15 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       panStartBlockId: null,
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
-      draggedBlockInfo: null,
-      hoveredGridInfo: null,
-      highlightedPosition: null,
+      dragInfo: null,
+      hoverXY: null,
+      proposedBlock: null,
       positionedBlocks: [],
       blockSize: null,
       blockTrackers: props.blocks.map((block, index) => {
         return {
-          screenX: 30 * index,
-          screenY: 5 * index,
+          screenX: 120 * index,
+          screenY: 20 * index,
           zIndex: index + 2,
           block,
           blockId: index,
@@ -94,12 +90,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   componentDidMount() {
-    const square = document.querySelector(".square");
-    if (!square) {
-      console.log("no square found");
-      return;
-    }
-    const { width: blockSize = 0 } = square.getBoundingClientRect();
+    const blockSize = elementWidth(".square");
     this.setState({ blockSize });
   }
 
@@ -154,16 +145,16 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.setState({
       panStartBlockId: blockId,
       isPuzzleComplete: false,
-      draggedBlockInfo: { blockId, blockX, blockY },
+      dragInfo: { blockId, blockX, blockY },
       blockTrackers
     });
   }
 
   handlePan(ev: any) {
-    if (!this.state.draggedBlockInfo || !this.state.blockSize) {
+    if (!this.state.dragInfo || !this.state.blockSize) {
       return;
     }
-    const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
+    const { blockId, blockX, blockY } = this.state.dragInfo;
     this.setState({
       blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
         screenX: ev.center.x - this.state.blockSize * blockX,
@@ -173,22 +164,22 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     if (window && window.document) {
       const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
       if (!el) {
-        this.setState({ highlightedPosition: null });
+        this.setState({ proposedBlock: null });
         return;
       }
       const xy = el.getAttribute("data-square-id");
       if (!xy) {
-        this.setState({ highlightedPosition: null });
+        this.setState({ proposedBlock: null });
         return;
       }
       const [x, y] = xy.split("-").map(s => parseInt(s));
-      this.setState({ hoveredGridInfo: { x, y } });
-      const { blockX, blockY } = this.state.draggedBlockInfo;
+      this.setState({ hoverXY: { x, y } });
+      const { blockX, blockY } = this.state.dragInfo;
       const fitX = x - blockX;
       const fitY = y - blockY;
       const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId);
       if (!tracker) {
-        this.setState({ highlightedPosition: null });
+        this.setState({ proposedBlock: null });
         return;
       }
       const proposedBlock = { x: fitX, y: fitY, block: tracker.block };
@@ -198,17 +189,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
         });
       if (canFit(this.state.gridSize, positionedBlocks as PositionedBlock[], proposedBlock)) {
-        this.setState({ highlightedPosition: proposedBlock });
+        this.setState({ proposedBlock: proposedBlock });
       } else {
-        this.setState({ highlightedPosition: null });
+        this.setState({ proposedBlock: null });
       }
     }
   }
 
   handlePanEnd(ev: any) {
-    if (this.state.draggedBlockInfo && this.state.highlightedPosition) {
+    if (this.state.dragInfo && this.state.proposedBlock) {
       if (window && window.document) {
-        const { blockId, blockX, blockY } = this.state.draggedBlockInfo;
+        const { blockId, blockX, blockY } = this.state.dragInfo;
         const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
         const xy = el && el.getAttribute("data-square-id");
         if (xy) {
@@ -242,9 +233,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       }
     }
     this.setState({
-      draggedBlockInfo: null,
-      hoveredGridInfo: null,
-      highlightedPosition: null
+      dragInfo: null,
+      hoverXY: null,
+      proposedBlock: null
     });
   }
 
@@ -263,12 +254,12 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         <div className="puzzle" style={{ position: "relative" }}>
           <label className="is-complete">Complete:{this.state.isPuzzleComplete ? "yes" : "no"}</label>
           {this.state.blockTrackers.map((tracker, index) => {
-            return <BlockView tracker={tracker} canSelect={!this.state.draggedBlockInfo} key={index} color={index} />;
+            return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}
           <GridView
             width={this.state.gridSize.w}
             height={this.state.gridSize.h}
-            highlight={this.state.highlightedPosition || undefined}
+            highlight={this.state.proposedBlock || undefined}
           />
           <style jsx global>
             {`
@@ -278,11 +269,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 position: fixed;
                 overflow: hidden;
                 touch-action: manipulation;
+                width: 100%;
+                height: 100%;
+              }
+              #__next {
+                width: 100%;
+                height: 100%;
               }
               .puzzle {
                 background: #efe;
-                width: 480px;
-                height: 480px;
+                width: 100%;
+                height: 100%;
                 touch-action: manipulation;
               }
               .puzzle .is-complete {

@@ -32,8 +32,8 @@ export function GridView(props: { width: number; height: number; highlight?: Pos
           background-color: #eee;
           z-index: 1;
           user-select: none;
-          top: 25%;
-          left: 25%;
+          top: calc(50% - 120px);
+          left: calc(50% - 120px);
           border: 1px solid black;
         }
         .grid-row {
