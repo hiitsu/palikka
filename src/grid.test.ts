@@ -98,28 +98,32 @@ describe("Grid", () => {
   });
 
   describe("colorGrid", () => {
-    it("respects given colors", () => {
-      expect(colorGrid({ w: 2, h: 1 }, [{ x: 0, y: 0, block: [[1, 1]] }], [123])).toStrictEqual([[123, 123]]);
+    it("fills simple grid with ones", () => {
+      expect(colorGrid({ w: 2, h: 1 }, [{ x: 0, y: 0, block: [[1, 1]] }])).toStrictEqual([[1, 1]]);
+    });
+    it("increases number according to block index", () => {
+      expect(
+        colorGrid({ w: 2, h: 1 }, [
+          { x: 0, y: 0, block: [[1]] },
+          { x: 1, y: 0, block: [[1]] }
+        ])
+      ).toStrictEqual([[1, 2]]);
     });
     it("leaves empty spots 'transparent'", () => {
       expect(
-        colorGrid(
-          { w: 2, h: 2 },
-          [
-            {
-              x: 0,
-              y: 0,
-              block: [
-                [1, 0],
-                [1, 1]
-              ]
-            }
-          ],
-          ["#cdcdcd"]
-        )
+        colorGrid({ w: 2, h: 2 }, [
+          {
+            x: 0,
+            y: 0,
+            block: [
+              [1, 0],
+              [1, 1]
+            ]
+          }
+        ])
       ).toStrictEqual([
-        ["#cdcdcd", 0],
-        ["#cdcdcd", "#cdcdcd"]
+        [1, 0],
+        [1, 1]
       ]);
     });
   });

@@ -1,4 +1,6 @@
 import { isComplete, randomPuzzle } from "./puzzle";
+import { Size } from "./primitives";
+import { sizeOf } from "./block";
 
 describe("Puzzle", () => {
   describe("isComplete", () => {
@@ -33,9 +35,15 @@ describe("Puzzle", () => {
   });
 
   describe("randomPuzzle", () => {
-    it("creates completeable", () => {
-      const ingredients = randomPuzzle({ w: 2, h: 2 }, 10);
-      expect(ingredients.blocks.length).toBeGreaterThan(0);
+    it("creates completeable puzzle every time x100", () => {
+      expect.assertions(100);
+      for (let i = 0; i < 100; i++) {
+        const puzzleSize: Size = { w: 2, h: 2 };
+        const maxBlockSize = 10;
+        const ingredients = randomPuzzle(puzzleSize, maxBlockSize);
+        const totalBlockSum = ingredients.blocks.reduce((memo, block) => memo + sizeOf(block), 0);
+        expect(totalBlockSum).toBe(puzzleSize.w * puzzleSize.h);
+      }
     });
   });
 });

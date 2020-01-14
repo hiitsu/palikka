@@ -21,7 +21,7 @@ describe("api", () => {
     expect(response.statusCode).toBe(200);
   });
 
-  it("sets default security headers", async () => {
+  it("sets helmet-library provided security headers", async () => {
     const response = await fastify.inject({
       method: "GET",
       url: "/"

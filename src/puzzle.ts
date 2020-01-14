@@ -2,7 +2,6 @@ import { Block, Slot, PositionedBlock, Size } from "./primitives";
 import { sizeOf, allBlockVariations } from "./block";
 import { arrayShuffle, arrayOfPoints } from "./util";
 import { canFit, colorGrid, allocationGrid } from "./grid";
-import { colors } from "./colors";
 
 export const blocks: Block[] = [
   [[1]],
@@ -175,11 +174,11 @@ export const blocks: Block[] = [
   ]
 ];
 
-export function randomPuzzle(size: Size, maxBlockSize = 10) {
+export function randomPuzzle(puzzleSize: Size, maxBlockSize = 10) {
   const blocksWithMatchingSize = allBlockVariations(blocks.filter(block => sizeOf(block) <= maxBlockSize));
   const positionedBlocks: Array<PositionedBlock> = [];
 
-  const points = arrayShuffle(arrayOfPoints(size.w, size.h));
+  const points = arrayShuffle(arrayOfPoints(puzzleSize.w, puzzleSize.h));
 
   const blockGroups = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(size => {
     return blocksWithMatchingSize
@@ -195,7 +194,7 @@ export function randomPuzzle(size: Size, maxBlockSize = 10) {
     biggerBlockGroups.forEach(blockGroup => {
       const shuffledBlockGroup = arrayShuffle(blockGroup);
       shuffledBlockGroup.forEach(block => {
-        if (canFit(size, positionedBlocks, { block, x, y })) {
+        if (canFit(puzzleSize, positionedBlocks, { block, x, y })) {
           positionedBlocks.push({ block, x, y });
         }
       });
@@ -205,7 +204,7 @@ export function randomPuzzle(size: Size, maxBlockSize = 10) {
   smallerBlockGroups.forEach(blockGroup => {
     blockGroup.forEach(block => {
       points.forEach(({ x, y }) => {
-        if (canFit(size, positionedBlocks, { block, x, y })) {
+        if (canFit(puzzleSize, positionedBlocks, { block, x, y })) {
           positionedBlocks.push({ block, x, y });
         }
       });
@@ -215,18 +214,21 @@ export function randomPuzzle(size: Size, maxBlockSize = 10) {
   tinyBlockGroups.forEach(blockGroup => {
     blockGroup.forEach(block => {
       points.forEach(({ x, y }) => {
-        if (canFit(size, positionedBlocks, { block, x, y })) {
-          positionedBlocks.push({ block, x, y });
-        }
+        const offsets = arrayOfPoints(block[0].length, block.length, true);
+        offsets.forEach(offset => {
+          if (canFit(puzzleSize, positionedBlocks, { block, x: x + offset.x, y: y + offset.y })) {
+            positionedBlocks.push({ block, x: x + offset.x, y: y + offset.y });
+          }
+        });
       });
     });
   });
-  //console.log("isComplete", isComplete(size, positionedBlocks));
+
   const p = {
     positionedBlocks,
-    size,
+    size: puzzleSize,
     blocks: positionedBlocks.map(p => p.block),
-    colorGrid: colorGrid(size, positionedBlocks, colors)
+    colorGrid: colorGrid(puzzleSize, positionedBlocks)
   };
 
   return p;

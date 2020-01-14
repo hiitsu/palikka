@@ -37,7 +37,7 @@ export function canFit(size: Size, positionedBlocks: PositionedBlock[], proposed
   return true;
 }
 
-export function colorGrid(size: Size, positionedBlocks: PositionedBlock[], colors: Color[]): ColorGrid {
+export function colorGrid(size: Size, positionedBlocks: PositionedBlock[]): ColorGrid {
   const grid: ColorGrid = array2D<Color>(size.w, size.h, () => 0);
   positionedBlocks.forEach(({ x, y, block }, blockIndex) => {
     const blockWidth = block[0].length;
@@ -49,7 +49,7 @@ export function colorGrid(size: Size, positionedBlocks: PositionedBlock[], color
         const isInside = isVerticallyInside && isHorizontallyInside;
         const isBlockPieceThere = block[j][i] === Slot.Taken;
         if (isInside && isBlockPieceThere) {
-          grid[y + j][x + i] = colors[blockIndex];
+          grid[y + j][x + i] = blockIndex + 1;
         }
       }
     }

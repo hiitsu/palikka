@@ -14,11 +14,16 @@ export const arrayShuffle = (list: Array<any>) => {
   return list.slice().sort(() => Math.random() - 0.5);
 };
 
-export const arrayOfPoints = (width: number, height: number) => {
+export const arrayOfPoints = (width: number, height: number, includeNegatives?: boolean) => {
   const points = [];
   for (let i = 0; i < width; i++) {
     for (let j = 0; j < height; j++) {
       points.push({ x: i, y: j });
+      if (includeNegatives) {
+        points.push({ x: -i, y: -j });
+        points.push({ x: i, y: -j });
+        points.push({ x: -i, y: j });
+      }
     }
   }
   return points;
