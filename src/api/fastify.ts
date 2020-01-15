@@ -30,11 +30,11 @@ export default function() {
       fastify.close(() => {
         destroy();
       });
+      const timeout = setTimeout(() => {
+        process.exit(1);
+      }, 5000);
+      if (timeout.unref) timeout.unref();
     });
-    const timeout = setTimeout(() => {
-      process.exit(1);
-    }, 5000);
-    if (timeout.unref) timeout.unref();
   });
 
   return fastify;
