@@ -2,6 +2,6 @@
     "watch": [
         "src"
     ],
-    "exec": "ts-node --project tsconfig.server.json src/api/api-entrypoint.ts",
+    "exec": "ts-node --project tsconfig.server.json src/api/fastify-entrypoint.ts",
     "ext": "ts"
 }

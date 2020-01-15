@@ -1,9 +1,9 @@
-import fastify from "fastify";
+import Fastify from "fastify";
 import http from "http";
-import buildFastify from "./api";
+import buildFastify from "./fastify";
 
 describe("api", () => {
-  let fastify: fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>;
+  let fastify: Fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>;
 
   beforeAll(() => {
     fastify = buildFastify();
@@ -13,12 +13,12 @@ describe("api", () => {
     fastify.close();
   });
 
-  it("loading root succesfully", async () => {
+  it("loading root succesfully with 404 (nothing there)", async () => {
     const response = await fastify.inject({
       method: "GET",
       url: "/"
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(404);
   });
 
   it("sets helmet-library provided security headers", async () => {
@@ -38,7 +38,7 @@ describe("api", () => {
     it("should give a token", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/signup"
+        url: "/user/signup"
       });
 
       expect(response.statusCode).toBe(200);
@@ -47,12 +47,23 @@ describe("api", () => {
   });
 
   describe("score", () => {
-    it("should give 401 is sending without token", async () => {
+    it("should give 401 when sending score without token", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/score"
+        url: "/score/new"
       });
       expect(response.statusCode).toBe(401);
+    });
+  });
+
+  describe("puzzle", () => {
+    it("should give new random puzzle from root", async () => {
+      const response = await fastify.inject({
+        method: "GET",
+        url: "/puzzle/new"
+      });
+      expect(response.statusCode).toBe(200);
+      expect(JSON.parse(response.payload).length).toBeGreaterThan(1);
     });
   });
 });
