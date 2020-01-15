@@ -21,6 +21,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "exclude": ["dist", ".next", "out", "next.config.js"],
+  "exclude": ["knexfile.ts", "dist", ".next", "out", "next.config.js"],
   "include": ["next-env.d.ts", "node_modules/react-hammerjs", "**/*.ts", "**/*.tsx"]
 }

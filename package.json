@@ -24,8 +24,10 @@
     "ts-jest": "^24.2.0"
   },
   "scripts": {
-    "dev": "nodemon",
-    "build": "next build && next export && tsc --project tsconfig.server.json"
+    "dev-api": "nodemon",
+    "dev-ui": "next",
+    "build-ui": "next build && next export",
+    "build-api": "tsc --project tsconfig.server.json"
   },
   "keywords": [],
   "author": "",
