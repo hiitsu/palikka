@@ -261,7 +261,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         onPress={() => console.log("PuzzleView:onPress")}
       >
         <div className="puzzle" style={{ position: "relative" }}>
-          <label className="is-complete">Complete:{this.state.isPuzzleComplete ? "yes" : "no"}</label>
+          <label className="is-complete">
+            Api:{process.env.API_BASE_URL}
+            Complete:{this.state.isPuzzleComplete ? "yes" : "no"}
+          </label>
           {this.state.blockTrackers.map((tracker, index) => {
             return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}
@@ -296,8 +299,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 top: 0;
                 right: 0;
                 z-index: 100000;
-                width: 150px;
+                width: 160px;
                 text-align: center;
+                word-wrap: break-word;
               }
             `}
           </style>
