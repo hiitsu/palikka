@@ -39,6 +39,7 @@ type PuzzleState = {
 
 type PuzzleProps = {
   blocks: Block[];
+  onCompleted: Function;
 };
 
 type Partial<T> = {
@@ -222,22 +223,23 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
             gridX: x - blockX,
             gridY: y - blockY
           });
+          const isPuzzleComplete = isComplete(
+            this.state.gridSize,
+            blockTrackers.map<PositionedBlock>(t => {
+              return {
+                x: t.gridX,
+                y: t.gridY,
+                block: t.block
+              } as PositionedBlock;
+            })
+          );
           this.setState(
-            {
-              isPuzzleComplete: isComplete(
-                this.state.gridSize,
-                blockTrackers.map<PositionedBlock>(t => {
-                  return {
-                    x: t.gridX,
-                    y: t.gridY,
-                    block: t.block
-                  } as PositionedBlock;
-                })
-              ),
-              blockTrackers
-            }
+            { isPuzzleComplete, blockTrackers }
             //,() => console.log(this.state.blockTrackers)
           );
+          if (isPuzzleComplete) {
+            this.props.onCompleted();
+          }
         }
       }
     }

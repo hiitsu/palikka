@@ -1,5 +1,5 @@
 import axios from "axios";
-import { PositionedBlock } from "src/primitives";
+import { PositionedBlock, Size } from "src/primitives";
 
 const api = axios.create({
   baseURL: process.env.API_BASE_URL || "http://localhost:3001",
@@ -10,9 +10,14 @@ const api = axios.create({
 });
 
 export default {
+  puzzle: {
+    new(size: Size) {
+      return api.post("puzzle", {});
+    }
+  },
   score: {
     save(puzzleId: number, blocks: PositionedBlock[]) {
-      api.post("/score/save");
+      api.post("/score", { puzzleId, blocks });
     }
   }
 };
