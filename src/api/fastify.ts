@@ -10,9 +10,12 @@ import { destroy } from "./knex";
 
 export default function() {
   const fastify = Fastify({
-    logger: {
-      level: "info"
-    }
+    logger:
+      process.env.NODE_ENV === "test"
+        ? false
+        : {
+            level: "info"
+          }
   });
 
   fastify.register(helmet);
@@ -20,9 +23,9 @@ export default function() {
     secret: "supersecret"
   });
 
-  fastify.register(routesPuzzle, { prefix: "/puzzle" });
-  fastify.register(routesScore, { prefix: "/score" });
-  fastify.register(routesUser, { prefix: "/user" });
+  fastify.register(routesPuzzle);
+  fastify.register(routesScore);
+  fastify.register(routesUser);
 
   const termSignals: NodeJS.Signals[] = ["SIGTERM", "SIGINT"];
   termSignals.forEach(signal => {

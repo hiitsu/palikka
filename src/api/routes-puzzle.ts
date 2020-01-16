@@ -7,8 +7,8 @@ export default function(
   _opts: any,
   done: Function
 ) {
-  fastify.get(
-    "/new",
+  fastify.post(
+    "/puzzle",
     (_req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       reply.header("Content-Type", "application/json").code(200);
       reply.send(randomPuzzle({ w: 6, h: 6 }, 10).blocks);

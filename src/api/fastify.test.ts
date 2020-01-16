@@ -38,7 +38,7 @@ describe("api", () => {
     it("should give a token", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/user/signup"
+        url: "/signup"
       });
 
       expect(response.statusCode).toBe(200);
@@ -47,20 +47,49 @@ describe("api", () => {
   });
 
   describe("score", () => {
-    it("should give 401 when sending score without token", async () => {
+    it("should give 200 when sending score with valid", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/score/new"
+        url: "/score",
+        payload: { puzzleId: 1, blocks: [[[1]]] }
       });
-      expect(response.statusCode).toBe(401);
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("should give 400 when sending score with invalid puzzleId", async () => {
+      const response = await fastify.inject({
+        method: "POST",
+        url: "/score",
+        payload: { puzzleId: "a", blocks: [[[1]]] }
+      });
+      expect(response.statusCode).toBe(400);
+    });
+
+    it("should give 400 when sending score with invalid block type", async () => {
+      const response = await fastify.inject({
+        method: "POST",
+        url: "/score",
+        payload: { puzzleId: "a", blocks: 123 }
+      });
+      expect(response.statusCode).toBe(400);
+    });
+
+    it("should give 400 when sending score with invalid block values", async () => {
+      const response = await fastify.inject({
+        method: "POST",
+        url: "/score",
+        payload: { puzzleId: "a", blocks: [[[3]]] }
+      });
+      expect(response.statusCode).toBe(400);
     });
   });
 
   describe("puzzle", () => {
     it("should give new random puzzle from root", async () => {
       const response = await fastify.inject({
-        method: "GET",
-        url: "/puzzle/new"
+        method: "POST",
+        url: "/puzzle"
       });
       expect(response.statusCode).toBe(200);
       expect(JSON.parse(response.payload).length).toBeGreaterThan(1);
