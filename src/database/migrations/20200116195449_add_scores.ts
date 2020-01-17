@@ -1,6 +1,10 @@
 import * as Knex from "knex";
 
-module.exports.up = (knex: Knex): any => {
+module.exports.up = async (knex: Knex): Promise<any> => {
+  await knex.schema.createTable("users", function(table) {
+    table.increments("id").notNullable();
+    table.timestamp("created_at").defaultTo(knex.fn.now());
+  });
   return knex.schema.createTable("scores", function(table) {
     table.increments("id").notNullable();
     table
@@ -9,15 +13,11 @@ module.exports.up = (knex: Knex): any => {
       .references("id")
       .inTable("puzzles");
     table.jsonb("blocks").notNullable();
-    table
-      .integer("user_id")
-      .notNullable()
-      .references("id")
-      .inTable("users");
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 };
 
-module.exports.down = (knex: Knex): any => {
-  return knex.schema.dropTable("scores");
+module.exports.down = async (knex: Knex): Promise<any> => {
+  await knex.schema.dropTable("scores");
+  await knex.schema.dropTable("users");
 };

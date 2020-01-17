@@ -1,5 +1,6 @@
 import http from "http";
 import fastify from "fastify";
+import knex from "./knex";
 import { randomPuzzle } from "../puzzle";
 
 export default function(
@@ -9,9 +10,13 @@ export default function(
 ) {
   fastify.post(
     "/puzzle",
-    (_req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
-      reply.header("Content-Type", "application/json").code(200);
-      reply.send(randomPuzzle({ w: 6, h: 6 }, 10).blocks);
+    async (_req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
+      const blocks = randomPuzzle({ w: 6, h: 6 }, 10).blocks;
+      const [id] = await knex("puzzles")
+        .insert({ blocks: JSON.stringify(blocks) })
+        .returning("id");
+      reply.header("Content-Type", "application/json").code(201);
+      reply.send({ id, blocks });
     }
   );
 
