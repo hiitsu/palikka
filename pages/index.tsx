@@ -2,15 +2,16 @@ import React from "react";
 import PuzzleView from "../src/ui/PuzzleView";
 import { randomPuzzle } from "../src/puzzle";
 import { Block } from "../src/primitives";
+import { Spinner } from "../src/ui/Spinner";
 
 type Props = { blocks: Block[] };
 type State = { completed: boolean; blocks: Block[] };
 
 export default class HomePage extends React.Component<Props, State> {
-  static getInitialProps = async () => {
+  /*static getInitialProps = async () => {
     const blocks = randomPuzzle({ w: 6, h: 6 }).blocks;
     return { blocks };
-  };
+  };*/
 
   constructor(props: Props) {
     super(props);
@@ -30,6 +31,9 @@ export default class HomePage extends React.Component<Props, State> {
     this.setState({ completed: true });
   }
   render() {
+    if (!this.state.blocks) {
+      return <Spinner width={100} height={100} />;
+    }
     return <PuzzleView onCompleted={this.handleCompleted} blocks={this.state.blocks} />;
   }
 }
