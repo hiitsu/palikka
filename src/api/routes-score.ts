@@ -3,6 +3,7 @@ import fastify from "fastify";
 import snakeCaseKeys from "snakecase-keys";
 import { onRequestVerifyJWT } from "./fastify-hooks";
 import knex from "./knex";
+import fastifyErrorHandler from "./fastify-error-handler";
 
 export default function(
   fastify: fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>,
@@ -37,11 +38,13 @@ export default function(
     { schema /*onRequest: onRequestVerifyJWT*/ },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const { blocks, puzzle_id } = snakeCaseKeys(req.body);
-      const id = await knex("scores")
+      const response = await knex("scores")
         .insert({ puzzle_id, blocks: JSON.stringify(blocks) })
-        .returning("id");
+        .returning("id")
+        .then(id => ({ id }))
+        .catch(fastifyErrorHandler(reply));
       reply.header("Content-Type", "application/json").code(200);
-      reply.send({ id });
+      reply.send(response);
     }
   );
 

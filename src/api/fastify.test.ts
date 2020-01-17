@@ -1,16 +1,22 @@
 import Fastify from "fastify";
 import http from "http";
 import buildFastify from "./fastify";
+import knex, { destroy } from "./knex";
 
 describe("api", () => {
   let fastify: Fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    await knex("puzzles").del();
+    await knex("scores").del();
     fastify = buildFastify();
   });
 
-  afterAll(() => {
-    fastify.close();
+  afterAll(async () => {
+    await knex("puzzles").del();
+    await knex("scores").del();
+    await fastify.close();
+    await destroy();
   });
 
   it("loading root succesfully with 404 (nothing there)", async () => {
@@ -47,14 +53,13 @@ describe("api", () => {
   });
 
   describe("score", () => {
-    it("should give 200 when sending score with valid", async () => {
+    it("should give 400 when sending score with valid but the puzzle does not exist", async () => {
       const response = await fastify.inject({
         method: "POST",
         url: "/score",
-        payload: { puzzleId: 1, blocks: [[[1]]] }
+        payload: { puzzleId: 1234567890, blocks: [[[1]]] }
       });
-
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(400);
     });
 
     it("should give 400 when sending score with invalid puzzleId", async () => {

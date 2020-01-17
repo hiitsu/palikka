@@ -18,5 +18,5 @@ grant all privileges on database palikka to palikka_user;
 Running migrations
 
 ```
-npx knex migrate:latest --knexfile src/database/knexfile.ts
+npx knex migrate:latest --env development --knexfile src/database/knexfile.ts
 ```

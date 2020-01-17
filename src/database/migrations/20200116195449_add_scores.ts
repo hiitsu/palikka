@@ -9,6 +9,11 @@ module.exports.up = (knex: Knex): any => {
       .references("id")
       .inTable("puzzles");
     table.jsonb("blocks").notNullable();
+    table
+      .integer("user_id")
+      .notNullable()
+      .references("id")
+      .inTable("users");
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 };

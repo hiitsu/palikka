@@ -14,6 +14,7 @@ export default function() {
       process.env.NODE_ENV === "test"
         ? false
         : {
+            prettyPrint: true,
             level: "info"
           }
   });
