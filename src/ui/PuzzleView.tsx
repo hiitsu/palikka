@@ -1,7 +1,7 @@
 import React from "react";
 import Hammer from "react-hammerjs";
 import { isComplete } from "../puzzle";
-import { PositionedBlock, Block, Size, XY } from "../primitives";
+import { PositionedBlock, Block, Size } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90 } from "../block";
@@ -29,7 +29,6 @@ type PuzzleState = {
   panStartBlockId: null | number;
   blockSize: null | number;
   dragInfo: null | BlockInfo;
-  hoverXY: null | XY;
   gridSize: Size;
   positionedBlocks: PositionedBlock[];
   proposedBlock: PositionedBlock | null;
@@ -79,7 +78,6 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
       dragInfo: null,
-      hoverXY: null,
       proposedBlock: null,
       positionedBlocks: [],
       blockSize: null,
@@ -113,7 +111,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   handleSwipe(ev: any) {
     console.log("handleSwipe", ev);
-    if (ev.deltaTime > 50) {
+    if (ev.deltaTime > 200) {
       return;
     }
     const blockId = this.state.panStartBlockId;
@@ -163,7 +161,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handlePan(ev: any) {
-    if (!this.state.dragInfo || !this.state.blockSize) {
+    if (!window || !window.document || !this.state.dragInfo || !this.state.blockSize) {
       return;
     }
     const { blockId, blockX, blockY } = this.state.dragInfo;
@@ -171,81 +169,78 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       screenX: ev.center.x - this.state.blockSize * blockX,
       screenY: ev.center.y - this.state.blockSize * blockY
     });
-    if (window && window.document) {
-      const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-      if (!el) {
-        this.setState({ proposedBlock: null });
-        return;
-      }
-      const xy = el.getAttribute("data-square-id");
-      if (!xy) {
-        this.setState({ proposedBlock: null });
-        return;
-      }
-      const [x, y] = xy.split("-").map(s => parseInt(s));
-      this.setState({ hoverXY: { x, y } });
-      const { blockX, blockY } = this.state.dragInfo;
-      const fitX = x - blockX;
-      const fitY = y - blockY;
-      const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId);
-      if (!tracker) {
-        this.setState({ proposedBlock: null });
-        return;
-      }
-      const proposedBlock = { x: fitX, y: fitY, block: tracker.block };
-      const positionedBlocks = this.state.blockTrackers
-        .filter(tracker => tracker.blockId != blockId && tracker.isPlaced)
-        .map(tracker => {
-          return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
-        });
-      if (canFit(this.state.gridSize, positionedBlocks as PositionedBlock[], proposedBlock)) {
-        this.setState({ proposedBlock: proposedBlock });
-      } else {
-        this.setState({ proposedBlock: null });
-      }
+    const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+    if (!el) {
+      this.setState({ proposedBlock: null });
+      return;
+    }
+    const xy = el.getAttribute("data-square-id");
+    if (!xy) {
+      this.setState({ proposedBlock: null });
+      return;
+    }
+    const [x, y] = xy.split("-").map(s => parseInt(s));
+    const fitX = x - blockX;
+    const fitY = y - blockY;
+    const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId);
+    if (!tracker) {
+      this.setState({ proposedBlock: null });
+      return;
+    }
+    const proposedBlock = { x: fitX, y: fitY, block: tracker.block };
+    const positionedBlocks = this.state.blockTrackers
+      .filter(tracker => tracker.blockId != blockId && tracker.isPlaced)
+      .map(tracker => {
+        return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
+      });
+
+    if (canFit(this.state.gridSize, positionedBlocks as PositionedBlock[], proposedBlock)) {
+      this.setState({ proposedBlock });
+    } else {
+      this.setState({ proposedBlock: null });
     }
   }
 
   handlePanEnd(ev: any) {
-    if (this.state.dragInfo && this.state.proposedBlock) {
-      if (window && window.document) {
-        const { blockId, blockX, blockY } = this.state.dragInfo;
-        const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-        const xy = el && el.getAttribute("data-square-id");
-        if (xy) {
-          const [x, y] = xy.split("-").map(s => parseInt(s));
-          const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
-          const rect = (squareTopLeft as Element).getBoundingClientRect();
-          const blockTrackers = mutateBlockTrackers(this, blockId, {
-            screenX: rect.left,
-            screenY: rect.top,
-            isPlaced: true,
-            gridX: x - blockX,
-            gridY: y - blockY
-          });
-          const isPuzzleComplete = isComplete(
-            this.state.gridSize,
-            blockTrackers.map<PositionedBlock>(t => {
-              return {
-                x: t.gridX,
-                y: t.gridY,
-                block: t.block
-              } as PositionedBlock;
-            })
-          );
-          this.setState(
-            { isPuzzleComplete, blockTrackers }
-            //,() => console.log(this.state.blockTrackers)
-          );
-          if (isPuzzleComplete) {
-            this.props.onCompleted();
-          }
-        }
+    if (!this.state.dragInfo || !this.state.proposedBlock || !window || !window.document) {
+      return;
+    }
+
+    const { blockId, blockX, blockY } = this.state.dragInfo;
+    const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+    const xy = el && el.getAttribute("data-square-id");
+    if (xy) {
+      const [x, y] = xy.split("-").map(s => parseInt(s));
+      const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
+      const rect = (squareTopLeft as Element).getBoundingClientRect();
+      const blockTrackers = mutateBlockTrackers(this, blockId, {
+        screenX: rect.left,
+        screenY: rect.top,
+        isPlaced: true,
+        gridX: x - blockX,
+        gridY: y - blockY
+      });
+      const isPuzzleComplete = isComplete(
+        this.state.gridSize,
+        blockTrackers.map<PositionedBlock>(t => {
+          return {
+            x: t.gridX,
+            y: t.gridY,
+            block: t.block
+          } as PositionedBlock;
+        })
+      );
+      this.setState(
+        { isPuzzleComplete, blockTrackers }
+        //,() => console.log(this.state.blockTrackers)
+      );
+      if (isPuzzleComplete) {
+        this.props.onCompleted();
       }
     }
+
     this.setState({
       dragInfo: null,
-      hoverXY: null,
       proposedBlock: null
     });
   }
