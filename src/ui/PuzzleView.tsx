@@ -46,13 +46,19 @@ type Partial<T> = {
   [P in keyof T]?: T[P];
 };
 
-function mutateBlockTrackers(trackers: BlockTracker[], blockId: number, update: Partial<BlockTracker>): BlockTracker[] {
-  return trackers.slice().map(tracker => {
+function mutateBlockTrackers(
+  component: React.Component<PuzzleProps, PuzzleState>,
+  blockId: number,
+  update: Partial<BlockTracker>
+): BlockTracker[] {
+  const blockTrackers: BlockTracker[] = component.state.blockTrackers.slice().map(tracker => {
     if (tracker.blockId == blockId) {
       return { ...tracker, ...update };
     }
     return tracker;
   });
+  component.setState({ blockTrackers });
+  return blockTrackers;
 }
 
 function blockInfo(el: Element): BlockInfo | null {
@@ -107,14 +113,15 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   handleSwipe(ev: any) {
     console.log("handleSwipe", ev);
+    if (ev.deltaTime > 50) {
+      return;
+    }
     const blockId = this.state.panStartBlockId;
     const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId);
     if (blockTracker) {
       const { block } = blockTracker;
       const flippedBlock = ev.direction == 2 || ev.direction == 4 ? flipX(block) : flipY(block);
-      this.setState({
-        blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId as number, { block: flippedBlock })
-      });
+      mutateBlockTrackers(this, blockId as number, { block: flippedBlock });
     }
   }
 
@@ -122,9 +129,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const info = blockInfo(ev.target);
     if (info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-      this.setState({
-        blockTrackers: mutateBlockTrackers(this.state.blockTrackers, info.blockId, { zIndex: maxZ + 1 })
-      });
+      mutateBlockTrackers(this, info.blockId, { zIndex: maxZ + 1 });
     }
   }
 
@@ -134,10 +139,8 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       const blockTracker = this.state.blockTrackers.find(t => t.blockId == info.blockId);
       if (blockTracker) {
         const { block } = blockTracker;
-        this.setState({
-          blockTrackers: mutateBlockTrackers(this.state.blockTrackers, info.blockId, {
-            block: rotateClockWise90(block)
-          })
+        mutateBlockTrackers(this, info.blockId, {
+          block: rotateClockWise90(block)
         });
       }
     }
@@ -147,15 +150,14 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const info = blockInfo(ev.target);
     if (info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-      const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, info.blockId, {
+      mutateBlockTrackers(this, info.blockId, {
         zIndex: maxZ + 1,
         isPlaced: false
       });
       this.setState({
         panStartBlockId: info.blockId,
         isPuzzleComplete: false,
-        dragInfo: { ...info },
-        blockTrackers
+        dragInfo: { ...info }
       });
     }
   }
@@ -165,11 +167,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       return;
     }
     const { blockId, blockX, blockY } = this.state.dragInfo;
-    this.setState({
-      blockTrackers: mutateBlockTrackers(this.state.blockTrackers, blockId, {
-        screenX: ev.center.x - this.state.blockSize * blockX,
-        screenY: ev.center.y - this.state.blockSize * blockY
-      })
+    mutateBlockTrackers(this, blockId, {
+      screenX: ev.center.x - this.state.blockSize * blockX,
+      screenY: ev.center.y - this.state.blockSize * blockY
     });
     if (window && window.document) {
       const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
@@ -216,7 +216,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           const [x, y] = xy.split("-").map(s => parseInt(s));
           const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
           const rect = (squareTopLeft as Element).getBoundingClientRect();
-          const blockTrackers = mutateBlockTrackers(this.state.blockTrackers, blockId, {
+          const blockTrackers = mutateBlockTrackers(this, blockId, {
             screenX: rect.left,
             screenY: rect.top,
             isPlaced: true,
