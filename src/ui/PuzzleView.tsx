@@ -170,31 +170,23 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       screenY: ev.center.y - this.state.blockSize * blockY
     });
     const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-    if (!el) {
-      this.setState({ proposedBlock: null });
-      return;
-    }
-    const xy = el.getAttribute("data-square-id");
+    const xy = el && el.getAttribute("data-square-id");
     if (!xy) {
       this.setState({ proposedBlock: null });
       return;
     }
-    const [x, y] = xy.split("-").map(s => parseInt(s));
-    const fitX = x - blockX;
-    const fitY = y - blockY;
-    const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId);
-    if (!tracker) {
-      this.setState({ proposedBlock: null });
-      return;
-    }
-    const proposedBlock = { x: fitX, y: fitY, block: tracker.block };
-    const positionedBlocks = this.state.blockTrackers
+    const [panX, panY] = xy.split("-").map(s => parseInt(s));
+    const x = panX - blockX;
+    const y = panY - blockY;
+    const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId) as BlockTracker;
+    const proposedBlock = { x, y, block: tracker.block };
+    const alreadyPositionedBlocks = this.state.blockTrackers
       .filter(tracker => tracker.blockId != blockId && tracker.isPlaced)
       .map(tracker => {
         return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
       });
 
-    if (canFit(this.state.gridSize, positionedBlocks as PositionedBlock[], proposedBlock)) {
+    if (canFit(this.state.gridSize, alreadyPositionedBlocks as PositionedBlock[], proposedBlock)) {
       this.setState({ proposedBlock });
     } else {
       this.setState({ proposedBlock: null });
