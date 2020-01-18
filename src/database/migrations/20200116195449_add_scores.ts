@@ -12,6 +12,11 @@ module.exports.up = async (knex: Knex): Promise<any> => {
       .notNullable()
       .references("id")
       .inTable("puzzles");
+    table
+      .integer("user_id")
+      .notNullable()
+      .references("id")
+      .inTable("users");
     table.jsonb("blocks").notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });

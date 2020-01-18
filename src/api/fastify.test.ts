@@ -74,7 +74,7 @@ describe("api", () => {
           url: "/verify",
           payload: { token: auth.token }
         });
-        console.log("verify", response.payload);
+        //console.log("verify", response.payload);
         const verified: Auth = JSON.parse(response.payload);
         expect(response.statusCode).toBe(200);
         expect(auth.user.id).toBe(verified.user.id);
@@ -88,14 +88,14 @@ describe("api", () => {
       user = await signUp(fastify);
     });
 
-    it("should give 400 when sending score with valid but the puzzle does not exist", async () => {
+    it("should give 400 when sending valid score with non-existing puzzle id", async () => {
       const response = await fastify.inject({
         method: "POST",
         url: "/score",
         headers: {
           Authorization: `Bearer ${user.token}`
         },
-        payload: { puzzleId: 1234567890, blocks: [[[1]]] }
+        payload: { puzzleId: 1234567890, blocks: [[[1]]], seconds: 12 }
       });
       expect(response.statusCode).toBe(400);
     });
@@ -107,7 +107,7 @@ describe("api", () => {
         headers: {
           Authorization: `Bearer ${user.token}`
         },
-        payload: { puzzleId: "a", blocks: [[[1]]] }
+        payload: { puzzleId: "a", blocks: [[[1]]], seconds: 12 }
       });
       expect(response.statusCode).toBe(400);
     });
@@ -119,7 +119,7 @@ describe("api", () => {
         headers: {
           Authorization: `Bearer ${user.token}`
         },
-        payload: { puzzleId: "a", blocks: 123 }
+        payload: { puzzleId: "a", blocks: 123, seconds: 12 }
       });
       expect(response.statusCode).toBe(400);
     });
@@ -131,12 +131,12 @@ describe("api", () => {
         headers: {
           Authorization: `Bearer ${user.token}`
         },
-        payload: { puzzleId: "a", blocks: [[[3]]] }
+        payload: { puzzleId: "a", blocks: [[[3]]], seconds: 12 }
       });
       expect(response.statusCode).toBe(400);
     });
 
-    it("happy path returns new score id", async () => {
+    it("saving a new score returns id", async () => {
       const puzzle = await fastify
         .inject({
           method: "POST",
@@ -150,10 +150,23 @@ describe("api", () => {
         headers: {
           Authorization: `Bearer ${user.token}`
         },
-        payload: { puzzleId: puzzle.id, blocks: [[[1]]] }
+        payload: { puzzleId: puzzle.id, blocks: [[[1]]], seconds: 23 }
       });
       expect(response.statusCode).toBe(201);
       expect(JSON.parse(response.payload).id).toBeGreaterThanOrEqual(0);
+    });
+
+    it("retrieving scores", async () => {
+      const response = await fastify.inject({
+        method: "GET",
+        url: "/score",
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
+      });
+      console.log(response.payload);
+      expect(response.statusCode).toBe(200);
+      expect(JSON.parse(response.payload).scores).toHaveLength(1);
     });
   });
 
