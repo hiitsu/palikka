@@ -1,4 +1,4 @@
-import { flipX, flipY, rotateClockWise90, blockVariations, clone, sizeOf } from "./block";
+import { flipX, flipY, rotateClockWise90, blockVariations, clone, sizeOf, isEqual } from "./block";
 import { Block } from "./primitives";
 
 describe("Block", () => {
@@ -75,5 +75,18 @@ describe("Block", () => {
       [0, 1]
     ];
     expect(blockVariations(block)).toHaveLength(4);
+  });
+
+  it("isEqual", () => {
+    const block1 = [
+      [0, 1, 0],
+      [1, 1, 1]
+    ];
+    const block2 = [
+      [0, 1],
+      [1, 1],
+      [0, 1]
+    ];
+    expect(isEqual(block1, block2)).toBe(true);
   });
 });

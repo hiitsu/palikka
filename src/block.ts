@@ -10,6 +10,11 @@ export const sizeOf = (block: Block): number => {
   }, 0);
 };
 
+export const isEqual = (block: Block, another: Block): boolean => {
+  const stringified = JSON.stringify(another);
+  return [...blockVariations(block)].map(block => JSON.stringify(block)).findIndex(s => s == stringified) > -1;
+};
+
 export const flipX = (block: Block): Block => {
   return block.map(row => row.slice().reverse());
 };
@@ -51,12 +56,7 @@ export const rotateClockWise90 = (block: Block): Block => {
 };
 
 export const blockVariations = (block: Block): Block[] => {
-  const flips: Block[] = [
-    block,
-    flipX(block),
-    flipY(block),
-    flipX(flipY(block))
-  ];
+  const flips: Block[] = [block, flipX(block), flipY(block), flipX(flipY(block))];
   const stringifiedBlocks = flips
     .reduce((memo, flip) => {
       memo.push(flip);
