@@ -58,7 +58,7 @@ export default function(
       const user_id = (req.user as any).sub;
       const scores = await knex
         .from("scores")
-        .select("seconds", "puzzle_id")
+        .select("seconds", "puzzle_id", "blocks")
         .where("user_id", user_id);
       reply.header("Content-Type", "application/json").code(200);
       reply.send({ scores });

@@ -19,3 +19,11 @@ export type PositionedBlock = {
   y: number;
   block: Block;
 };
+
+export type Score = {
+  id: number;
+  userId: number;
+  seconds: number;
+  puzzleId: number;
+  positionedBlocks: PositionedBlock[];
+};

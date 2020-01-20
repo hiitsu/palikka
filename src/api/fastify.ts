@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import helmet from "fastify-helmet";
 import jwt from "fastify-jwt";
+import cors from "fastify-cors";
 
 import routesPuzzle from "./routes-puzzle";
 import routesScore from "./routes-score";
@@ -19,6 +20,7 @@ export default function() {
           }
   });
 
+  fastify.register(cors, { origin: true });
   fastify.register(helmet);
   fastify.register(jwt, {
     secret: "supersecret"

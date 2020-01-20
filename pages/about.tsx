@@ -1,20 +1,23 @@
 import React, { Fragment } from "react";
-import GameControllerView from "../src/ui/GameControllerView";
 import Head from "next/head";
-import { AuthProvider } from "../src/ui/AuthContext";
 
 export default (props: any) => {
   return (
-    <AuthProvider>
+    <Fragment>
       <Head>
-        <title>index</title>
+        <title>About Palikka</title>
         <meta
           name="viewport"
           content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"
           key="viewport"
         />
       </Head>
-      <GameControllerView />
-    </AuthProvider>
+      <h1></h1>
+      <p>diipa daapa</p>
+      <h2></h2>
+      <p>diipa daapa</p>
+      <h2></h2>
+      <p>diipa daapa</p>
+    </Fragment>
   );
 };

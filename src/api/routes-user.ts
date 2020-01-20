@@ -16,7 +16,10 @@ export default function(
       const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
       const payload = { iss: "palikka-api", aud: "palikka-services", exp, sub: id };
       const token = (fastify.jwt as JWT).sign(payload);
-      reply.code(201).send({ token, user: { id } });
+      reply
+        .header("Content-Type", "application/json")
+        .code(201)
+        .send({ token, user: { id } });
     }
   );
 
@@ -24,7 +27,10 @@ export default function(
     "/verify",
     async (request: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const payload: any = (fastify.jwt as JWT).decode(request.body.token);
-      reply.send({ token: request.body.token, user: { id: payload ? payload.sub : null } });
+      reply
+        .header("Content-Type", "application/json")
+        .code(201)
+        .send({ token: request.body.token, user: { id: payload ? payload.sub : null } });
     }
   );
 

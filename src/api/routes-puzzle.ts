@@ -15,8 +15,10 @@ export default function(
       const [id] = await knex("puzzles")
         .insert({ blocks: JSON.stringify(blocks) })
         .returning("id");
-      reply.header("Content-Type", "application/json").code(201);
-      reply.send({ id, blocks });
+      reply
+        .header("Content-Type", "application/json")
+        .code(201)
+        .send({ id, blocks });
     }
   );
 
