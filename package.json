@@ -27,6 +27,7 @@
     "ts-jest": "^24.2.0"
   },
   "scripts": {
+    "test": "npx jest",
     "dev-api": "nodemon",
     "dev-ui": "next",
     "build-ui": "next build && next export",
