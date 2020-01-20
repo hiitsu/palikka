@@ -1,7 +1,21 @@
 import React from "react";
 
-export const Spinner = (svg: any) => (
-  <svg width={svg.width} height={svg.height} viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke={svg.color}>
+export const Spinner = (svg: { width: number; height: number; color?: string }) => (
+  <svg
+    style={{
+      left: 0,
+      right: 0,
+      position: "absolute",
+      marginLeft: "auto",
+      marginRight: "auto",
+      top: "20%"
+    }}
+    width={svg.width}
+    height={svg.height}
+    viewBox="0 0 38 38"
+    xmlns="http://www.w3.org/2000/svg"
+    stroke={svg.color || "red"}
+  >
     <g fill="none" fillRule="evenodd">
       <g transform="translate(1 1)" strokeWidth="2">
         <circle strokeOpacity=".5" cx="18" cy="18" r="18" />
