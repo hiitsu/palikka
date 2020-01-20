@@ -1,9 +1,9 @@
-import { PositionedBlock, Slot } from "../primitives";
+import { PositionedBlock, Slot, Size } from "../primitives";
 import { SquareView } from "./SquareView";
 import { array2D } from "../util";
 
-export function GridView(props: { width: number; height: number; highlight?: PositionedBlock }) {
-  const grid = array2D(props.width, props.height, () => 0);
+export function GridView(props: { size: Size; highlight?: PositionedBlock }) {
+  const grid = array2D(props.size.w, props.size.h, () => 0);
   return (
     <div className="grid" draggable={false}>
       {grid.map((row, y) => {

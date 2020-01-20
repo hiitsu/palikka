@@ -125,6 +125,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   handleTap(ev: any) {
     const info = blockInfo(ev.target);
+    console.log("handleTap", info, ev.target);
     if (info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
       mutateBlockTrackers(this, info.blockId, { zIndex: maxZ + 1 });
@@ -146,6 +147,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   handlePanStart(ev: any) {
     const info = blockInfo(ev.target);
+    console.log("handlePanStart", info, ev.target);
     if (info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
       mutateBlockTrackers(this, info.blockId, {
@@ -165,7 +167,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       return;
     }
     const { blockId, blockX, blockY } = this.state.dragInfo;
-    mutateBlockTrackers(this, blockId, {
+    const blockTrackers = mutateBlockTrackers(this, blockId, {
       screenX: ev.center.x - this.state.blockSize * blockX,
       screenY: ev.center.y - this.state.blockSize * blockY
     });
@@ -178,9 +180,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const [panX, panY] = xy.split("-").map(s => parseInt(s));
     const x = panX - blockX;
     const y = panY - blockY;
-    const tracker = this.state.blockTrackers.find(tracker => tracker.blockId == blockId) as BlockTracker;
+    const tracker = blockTrackers.find(tracker => tracker.blockId == blockId) as BlockTracker;
     const proposedBlock = { x, y, block: tracker.block };
-    const alreadyPositionedBlocks = this.state.blockTrackers
+    const alreadyPositionedBlocks = blockTrackers
       .filter(tracker => tracker.blockId != blockId && tracker.isPlaced)
       .map(tracker => {
         return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
@@ -194,40 +196,39 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handlePanEnd(ev: any) {
-    if (!this.state.dragInfo || !this.state.proposedBlock || !window || !window.document) {
+    if (!this.state.dragInfo || !window || !window.document) {
       return;
     }
 
-    const { blockId, blockX, blockY } = this.state.dragInfo;
-    const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-    const xy = el && el.getAttribute("data-square-id");
-    if (xy) {
-      const [x, y] = xy.split("-").map(s => parseInt(s));
-      const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
-      const rect = (squareTopLeft as Element).getBoundingClientRect();
-      const blockTrackers = mutateBlockTrackers(this, blockId, {
-        screenX: rect.left,
-        screenY: rect.top,
-        isPlaced: true,
-        gridX: x - blockX,
-        gridY: y - blockY
-      });
-      const isPuzzleComplete = isComplete(
-        this.state.gridSize,
-        blockTrackers.map<PositionedBlock>(t => {
-          return {
-            x: t.gridX,
-            y: t.gridY,
-            block: t.block
-          } as PositionedBlock;
-        })
-      );
-      this.setState(
-        { isPuzzleComplete, blockTrackers }
-        //,() => console.log(this.state.blockTrackers)
-      );
-      if (isPuzzleComplete) {
-        this.props.onCompleted();
+    if (this.state.proposedBlock) {
+      const { blockId, blockX, blockY } = this.state.dragInfo;
+      const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+      const xy = el && el.getAttribute("data-square-id");
+      if (xy) {
+        const [x, y] = xy.split("-").map(s => parseInt(s));
+        const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
+        const rect = (squareTopLeft as Element).getBoundingClientRect();
+        const blockTrackers = mutateBlockTrackers(this, blockId, {
+          screenX: rect.left,
+          screenY: rect.top,
+          isPlaced: true,
+          gridX: x - blockX,
+          gridY: y - blockY
+        });
+        const isPuzzleComplete = isComplete(
+          this.state.gridSize,
+          blockTrackers.map<PositionedBlock>(t => {
+            return {
+              x: t.gridX,
+              y: t.gridY,
+              block: t.block
+            } as PositionedBlock;
+          })
+        );
+        this.setState({ isPuzzleComplete, blockTrackers }, () => console.log(this.state.blockTrackers));
+        if (isPuzzleComplete) {
+          this.props.onCompleted();
+        }
       }
     }
 
@@ -250,18 +251,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         onPress={() => console.log("PuzzleView:onPress")}
       >
         <div className="puzzle" style={{ position: "relative" }}>
-          <label className="is-complete">
-            Api:{process.env.API_BASE_URL}
-            Complete:{this.state.isPuzzleComplete ? "yes" : "no"}
-          </label>
           {this.state.blockTrackers.map((tracker, index) => {
             return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}
-          <GridView
-            width={this.state.gridSize.w}
-            height={this.state.gridSize.h}
-            highlight={this.state.proposedBlock || undefined}
-          />
+          <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
           <style jsx global>
             {`
               body {
@@ -278,19 +271,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 height: 100%;
               }
               .puzzle {
-                background: #efe;
                 width: 100%;
                 height: 100%;
                 touch-action: manipulation;
-              }
-              .puzzle .is-complete {
-                position: absolute;
-                top: 0;
-                right: 0;
-                z-index: 100000;
-                width: 160px;
-                text-align: center;
-                word-wrap: break-word;
               }
             `}
           </style>
