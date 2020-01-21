@@ -69,6 +69,14 @@ function blockInfo(el: Element): BlockInfo | null {
   return { blockId, blockX, blockY };
 }
 
+function screenPosition(index: number): { screenX: number; screenY: number } {
+  const offsetY = Math.floor((120.0 * index) / 320.0);
+  return {
+    screenX: (120 * index) % 320,
+    screenY: 10 + 120 * offsetY
+  };
+}
+
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
   constructor(props: PuzzleProps) {
     super(props);
@@ -82,10 +90,8 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       positionedBlocks: [],
       blockSize: null,
       blockTrackers: props.blocks.map((block, index) => {
-        const offsetY = Math.floor((120.0 * index) / 320.0);
         return {
-          screenX: (120 * index) % 320,
-          screenY: 10 + 120 * offsetY,
+          ...screenPosition(index),
           zIndex: index + 2,
           block,
           blockId: index,
@@ -117,13 +123,15 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handleResize() {
-    this.state.blockTrackers.forEach(blockTracker => {
+    const blockTrackers = this.state.blockTrackers.map((blockTracker, index) => {
+      const naturalPosition = screenPosition(index);
       if (!blockTracker.isPlaced) {
-        return;
+        return { ...blockTracker, ...naturalPosition };
       }
       const { top, left } = squareTopLeft(blockTracker.gridX as number, blockTracker.gridY as number) as DOMRect;
-      mutateBlockTrackers(this, blockTracker.blockId, { screenX: left, screenY: top });
+      return { ...blockTracker, screenX: left, screenY: top };
     });
+    this.setState({ blockTrackers });
   }
 
   handleSwipe(ev: any) {
