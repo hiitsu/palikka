@@ -10,7 +10,7 @@ export default (props: any) => {
         <title>index</title>
         <meta
           name="viewport"
-          content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"
+          content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, user-scalable=0"
           key="viewport"
         />
       </Head>
