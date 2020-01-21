@@ -10,10 +10,10 @@ const api = axios.create({
 });
 
 export default {
+  axiosInstance: api,
   user: {
     async signup(): Promise<string> {
       const res = await api.post("signup");
-      console.log("signup", res.data);
       const token = res.data.token;
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       return token;
