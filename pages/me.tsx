@@ -1,13 +1,13 @@
 import React, { Fragment, useState, useEffect } from "react";
 import Head from "next/head";
 import { AuthProvider, AuthConsumer } from "../src/ui/AuthContext";
-import ScoreList from "../src/ui/ScoreList";
+import ScoreList from "../src/ui/SolutionList";
 
 export default (props: any) => {
   return (
     <AuthProvider>
       <Head>
-        <title>My Puzzles</title>
+        <title>me</title>
         <meta
           name="viewport"
           content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"

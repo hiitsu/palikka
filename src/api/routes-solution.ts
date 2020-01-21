@@ -36,12 +36,12 @@ export default function(
   };
 
   fastify.post(
-    "/score",
+    "/solution",
     { schema, onRequest: onRequestVerifyJWT },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const { blocks, puzzle_id, seconds } = snakeCaseKeys(req.body);
       const user_id = (req.user as any).sub;
-      const id = await knex("scores")
+      const id = await knex("solutions")
         .insert({ puzzle_id, blocks: JSON.stringify(blocks), user_id, seconds })
         .returning("id")
         .then(ids => ids[0])
@@ -52,12 +52,12 @@ export default function(
   );
 
   fastify.get(
-    "/score",
+    "/solution",
     { onRequest: onRequestVerifyJWT },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const user_id = (req.user as any).sub;
       const scores = await knex
-        .from("scores")
+        .from("solutions")
         .select("seconds", "puzzle_id", "blocks")
         .where("user_id", user_id);
       reply.header("Content-Type", "application/json").code(200);

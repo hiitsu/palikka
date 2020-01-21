@@ -19,13 +19,13 @@ describe("api", () => {
   }
 
   beforeAll(async () => {
-    await knex("scores").del();
+    await knex("solutions").del();
     await knex("puzzles").del();
     fastify = buildFastify();
   });
 
   afterAll(async () => {
-    await knex("scores").del();
+    await knex("solutions").del();
     await knex("puzzles").del();
     await fastify.close();
     await destroy();
@@ -82,16 +82,16 @@ describe("api", () => {
     });
   });
 
-  describe("score", () => {
+  describe("solution", () => {
     let user: Auth;
     beforeAll(async () => {
       user = await signUp(fastify);
     });
 
-    it("should give 400 when sending valid score with non-existing puzzle id", async () => {
+    it("should give 400 when sending valid solution with non-existing puzzle id", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/score",
+        url: "/solution",
         headers: {
           Authorization: `Bearer ${user.token}`
         },
@@ -100,10 +100,10 @@ describe("api", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("should give 400 when sending score with invalid puzzleId", async () => {
+    it("should give 400 when sending solution with invalid puzzleId", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/score",
+        url: "/solution",
         headers: {
           Authorization: `Bearer ${user.token}`
         },
@@ -112,10 +112,10 @@ describe("api", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("should give 400 when sending score with invalid block type", async () => {
+    it("should give 400 when sending solution with invalid block type", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/score",
+        url: "/solution",
         headers: {
           Authorization: `Bearer ${user.token}`
         },
@@ -124,10 +124,10 @@ describe("api", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("should give 400 when sending score with invalid block values", async () => {
+    it("should give 400 when sending solution with invalid block values", async () => {
       const response = await fastify.inject({
         method: "POST",
-        url: "/score",
+        url: "/solution",
         headers: {
           Authorization: `Bearer ${user.token}`
         },
@@ -136,7 +136,7 @@ describe("api", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("saving a new score returns id", async () => {
+    it("saving a new solution returns id", async () => {
       const puzzle = await fastify
         .inject({
           method: "POST",
@@ -146,7 +146,7 @@ describe("api", () => {
 
       const response = await fastify.inject({
         method: "POST",
-        url: "/score",
+        url: "/solution",
         headers: {
           Authorization: `Bearer ${user.token}`
         },
@@ -156,17 +156,17 @@ describe("api", () => {
       expect(JSON.parse(response.payload).id).toBeGreaterThanOrEqual(0);
     });
 
-    it("retrieving scores", async () => {
+    it("retrieving solutions", async () => {
       const response = await fastify.inject({
         method: "GET",
-        url: "/score",
+        url: "/solution",
         headers: {
           Authorization: `Bearer ${user.token}`
         }
       });
       console.log(response.payload);
       expect(response.statusCode).toBe(200);
-      expect(JSON.parse(response.payload).scores).toHaveLength(1);
+      expect(JSON.parse(response.payload).solutions).toHaveLength(1);
     });
   });
 

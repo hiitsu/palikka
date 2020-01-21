@@ -4,7 +4,7 @@ import jwt from "fastify-jwt";
 import cors from "fastify-cors";
 
 import routesPuzzle from "./routes-puzzle";
-import routesScore from "./routes-score";
+import routesSolution from "./routes-solution";
 import routesUser from "./routes-user";
 
 import { destroy } from "./knex";
@@ -27,7 +27,7 @@ export default function() {
   });
 
   fastify.register(routesPuzzle);
-  fastify.register(routesScore);
+  fastify.register(routesSolution);
   fastify.register(routesUser);
 
   const termSignals: NodeJS.Signals[] = ["SIGTERM", "SIGINT"];
