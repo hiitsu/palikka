@@ -1,5 +1,5 @@
 import { randomPuzzle } from "../src/puzzle";
-import PuzzleVisualizedView from "src/ui/PuzzleVisualizedView";
+import PuzzleVisualizedView from "../src/ui/PuzzleVisualizedView";
 
 function RandomPuzzles() {
   return (
