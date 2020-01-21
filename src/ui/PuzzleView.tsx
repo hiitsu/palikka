@@ -6,7 +6,7 @@ import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90 } from "../block";
 import { canFit } from "../grid";
-import { elementWidth } from "../dom";
+import { elementWidth, elementTopLeft, squareTopLeft } from "../dom";
 
 type BlockInfo = {
   blockId: number;
@@ -102,11 +102,28 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handleTap = this.handleTap.bind(this);
     this.handleDoubleTap = this.handleDoubleTap.bind(this);
     this.handleSwipe = this.handleSwipe.bind(this);
+
+    this.handleResize = this.handleResize.bind(this);
   }
 
   componentDidMount() {
     const blockSize = elementWidth(".square");
     this.setState({ blockSize });
+    window && window.addEventListener("resize", this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window && window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize() {
+    this.state.blockTrackers.forEach(blockTracker => {
+      if (!blockTracker.isPlaced) {
+        return;
+      }
+      const { top, left } = squareTopLeft(blockTracker.gridX as number, blockTracker.gridY as number) as DOMRect;
+      mutateBlockTrackers(this, blockTracker.blockId, { screenX: left, screenY: top });
+    });
   }
 
   handleSwipe(ev: any) {
@@ -206,8 +223,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       const xy = el && el.getAttribute("data-square-id");
       if (xy) {
         const [x, y] = xy.split("-").map(s => parseInt(s));
-        const squareTopLeft = document.querySelector(`[data-square-id="${x - blockX}-${y - blockY}"]`);
-        const rect = (squareTopLeft as Element).getBoundingClientRect();
+        const rect = squareTopLeft(x - blockX, y - blockY) as DOMRect;
         const blockTrackers = mutateBlockTrackers(this, blockId, {
           screenX: rect.left,
           screenY: rect.top,
