@@ -31,7 +31,6 @@ export function GridView(props: { size: Size; highlight?: PositionedBlock }) {
           padding: 0;
           background-color: #eee;
           z-index: 1;
-          user-select: none;
           top: calc(50% - 120px);
           left: calc(50% - 120px);
           border: 1px solid black;
@@ -39,7 +38,6 @@ export function GridView(props: { size: Size; highlight?: PositionedBlock }) {
         .grid-row {
           box-sizing: border-box;
           height: 1cm;
-          user-select: none;
         }
       `}</style>
     </div>

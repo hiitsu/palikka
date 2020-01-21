@@ -26,7 +26,6 @@ export function SlotView(props: {
           display: inline-block;
           box-sizing: border-box;
           z-index: 10;
-          user-select: none;
           pointer-events: all;
         }
         .slot-0 {

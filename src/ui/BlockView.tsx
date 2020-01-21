@@ -37,14 +37,12 @@ export function BlockView(props: { tracker: BlockTracker; color: number; canSele
           position: absolute;
           display: inline-block;
           z-index: 10;
-          user-select: none;
           pointer-events: none;
         }
         .block-row {
           box-sizing: border-box;
           height: 1cm;
           z-index: 10;
-          user-select: none;
           pointer-events: none;
         }
       `}</style>

@@ -14,7 +14,6 @@ export function SquareView(props: { highlight?: boolean; squareId: string }) {
           box-sizing: border-box;
           z-index: 1;
           border: 1px solid black;
-          user-select: none;
         }
       `}</style>
     </div>

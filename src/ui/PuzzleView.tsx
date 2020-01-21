@@ -281,23 +281,27 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
           <style jsx global>
             {`
+              html,
               body {
                 margin: 0;
                 padding: 0;
                 position: fixed;
                 overflow: hidden;
-                touch-action: manipulation;
                 width: 100%;
                 height: 100%;
+                user-zoom: fixed;
               }
               #__next {
                 width: 100%;
                 height: 100%;
               }
+              * {
+                user-select: none;
+                touch-action: manipulation;
+              }
               .puzzle {
                 width: 100%;
                 height: 100%;
-                touch-action: manipulation;
               }
             `}
           </style>
