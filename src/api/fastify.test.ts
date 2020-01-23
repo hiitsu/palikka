@@ -21,13 +21,20 @@ describe("api", () => {
   beforeAll(async () => {
     await knex("solutions").del();
     await knex("puzzles").del();
+    await knex("users").del();
+    await knex.schema.dropTableIfExists("solutions");
+    await knex.schema.dropTableIfExists("puzzles");
+    await knex.schema.dropTableIfExists("users");
     fastify = buildFastify();
   });
 
   afterAll(async () => {
     await knex("solutions").del();
     await knex("puzzles").del();
-    await fastify.close();
+    await knex("users").del();
+    await knex.schema.dropTableIfExists("solutions");
+    await knex.schema.dropTableIfExists("puzzles");
+    await knex.schema.dropTableIfExists("users");
     await destroy();
   });
 

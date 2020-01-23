@@ -1,7 +1,7 @@
 import * as Knex from "knex";
 
 module.exports.up = async (knex: Knex): Promise<any> => {
-  await knex.schema.createTable("solutions", function(table) {
+  await knex.schema.createTable("users", function(table) {
     table.increments("id").notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
@@ -14,10 +14,11 @@ module.exports.up = async (knex: Knex): Promise<any> => {
       .inTable("puzzles");
     table
       .integer("user_id")
-      .notNullable()
+      .nullable()
       .references("id")
       .inTable("users");
     table.jsonb("blocks").notNullable();
+    table.decimal("seconds").notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 };

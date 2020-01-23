@@ -19,7 +19,6 @@ describe("Api", () => {
         try {
           await Api.user.signup();
         } catch (error) {
-          console.log(error);
           expect(error).toBeDefined();
         }
 

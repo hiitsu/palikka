@@ -4,6 +4,8 @@ module.exports.up = (knex: Knex): any => {
   return knex.schema.createTable("puzzles", function(table) {
     table.increments("id").notNullable();
     table.jsonb("blocks").notNullable();
+    table.integer("width").notNullable();
+    table.integer("height").notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 };
