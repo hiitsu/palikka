@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import Api from "./Api";
 import nock from "nock";
 
