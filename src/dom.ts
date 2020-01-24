@@ -51,3 +51,55 @@ export function areCornersInside(container: HTMLElement, topLeft: XY, topRight: 
     isPointInside(container, bottomRight)
   );
 }
+
+export function getViewportHeight(element: HTMLElement) {
+  if (element === document.body) {
+    return window.innerHeight || document.documentElement.clientHeight;
+  } else {
+    return element.clientHeight;
+  }
+}
+
+export function getContentHeight(element: HTMLElement) {
+  if (element === document.body) {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight,
+      document.documentElement.clientHeight
+    );
+  } else {
+    return element.scrollHeight;
+  }
+}
+
+export function scrollTop(element: HTMLElement) {
+  if (element === document.body) {
+    return (
+      window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop
+    );
+  } else {
+    return element.scrollTop;
+  }
+}
+
+export function scrollLeft(element: HTMLElement) {
+  if (element === document.body) {
+    return (
+      window.pageXOffset ||
+      (document.documentElement && document.documentElement.scrollLeft) ||
+      document.body.scrollLeft
+    );
+  } else {
+    return element.scrollLeft;
+  }
+}
+
+export function elementOffset(el: HTMLElement) {
+  let rect = el.getBoundingClientRect();
+  return {
+    top: rect.top + scrollTop(document.body),
+    left: rect.left + scrollLeft(document.body)
+  };
+}
