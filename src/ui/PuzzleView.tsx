@@ -1,17 +1,16 @@
 import React, { DOMElement } from "react";
 import Hammer from "react-hammerjs";
 import { isComplete } from "../puzzle";
-import { PositionedBlock, Block, Size } from "../primitives";
+import { PositionedBlock, Block, Size, XY } from "../primitives";
 import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
-import { flipX, flipY, rotateClockWise90 } from "../block";
+import { flipX, flipY, rotateClockWise90, corners } from "../block";
 import { canFit } from "../grid";
-import { elementWidth, elementTopLeft, squareTopLeft, isPointInside } from "../dom";
+import { elementWidth, elementTopLeft, squareTopLeft, isPointInside, elementOffset } from "../dom";
 
 type BlockInfo = {
   blockId: number;
-  blockX: number;
-  blockY: number;
+  xy: XY;
 };
 
 export type BlockTracker = {
@@ -65,8 +64,8 @@ function blockInfo(el: Element): BlockInfo | null {
   if (!slotId) {
     return null;
   }
-  const [blockId, blockX, blockY] = slotId.split("-").map((s: string) => parseInt(s));
-  return { blockId, blockX, blockY };
+  const [blockId, x, y] = slotId.split("-").map((s: string) => parseInt(s));
+  return { blockId, xy: { x, y } };
 }
 
 function screenPosition(index: number): { screenX: number; screenY: number } {
@@ -76,6 +75,19 @@ function screenPosition(index: number): { screenX: number; screenY: number } {
     screenY: 10 + 120 * offsetY
   };
 }
+
+/*
+function isOutside(component: PuzzleComponent, screenXY: XY): boolean {
+  const dragInfo = component.state.dragInfo as BlockInfo;
+  const tracker = component.state.blockTrackers.find(tracker => tracker.blockId == dragInfo.blockId) as BlockTracker;
+  const screenPixelCorners = corners(tracker.block, dragInfo.xy).map(xy => {});
+  const el = window.document.elementFromPoint(screenXY.x, screenXY.y);
+  //console.log("elementOffset", elementOffset(el as HTMLElement));
+  //console.log("element x", ev.center.x - elementOffset(el as HTMLElement).left);
+  //console.log("element y", ev.center.y - elementOffset(el as HTMLElement).top);
+  return false;
+}
+*/
 
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
   el: HTMLDivElement | null;
@@ -108,7 +120,8 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handlePanEnd = this.handlePanEnd.bind(this);
     this.handleTap = this.handleTap.bind(this);
     this.handleDoubleTap = this.handleDoubleTap.bind(this);
-    this.handleSwipe = this.handleSwipe.bind(this);
+
+    this.handleKeyDown = this.handleKeyDown.bind(this);
 
     this.handleResize = this.handleResize.bind(this);
     this.handleSetElement = this.handleSetElement.bind(this);
@@ -122,6 +135,31 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   componentWillUnmount() {
     window && window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleKeyDown(ev: any) {
+    const blockId = this.state.panStartBlockId;
+    if (!blockId) return;
+    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId) as BlockTracker;
+    const { block } = blockTracker;
+    let flippedBlock;
+    switch (ev.keyCode) {
+      case 65:
+      case 68:
+      case 39:
+      case 37:
+        flippedBlock = flipX(block);
+        break;
+      case 87:
+      case 83:
+      case 38:
+      case 40:
+        flippedBlock = flipY(block);
+        break;
+      default:
+        break;
+    }
+    mutateBlockTrackers(this, blockId as number, { block: flippedBlock });
   }
 
   handleSetElement(el: HTMLDivElement) {
@@ -138,20 +176,6 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       return { ...blockTracker, screenX: left, screenY: top };
     });
     this.setState({ blockTrackers });
-  }
-
-  handleSwipe(ev: any) {
-    console.log("handleSwipe", ev);
-    if (ev.deltaTime > 200) {
-      return;
-    }
-    const blockId = this.state.panStartBlockId;
-    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId);
-    if (blockTracker) {
-      const { block } = blockTracker;
-      const flippedBlock = ev.direction == 2 || ev.direction == 4 ? flipX(block) : flipY(block);
-      mutateBlockTrackers(this, blockId as number, { block: flippedBlock });
-    }
   }
 
   handleTap(ev: any) {
@@ -178,7 +202,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   handlePanStart(ev: any) {
     const info = blockInfo(ev.target);
-    console.log("handlePanStart", info, ev.target);
+    console.log("handlePanStart", ev, info);
     if (info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
       mutateBlockTrackers(this, info.blockId, {
@@ -197,24 +221,27 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     if (!window || !window.document || !this.state.dragInfo || !this.state.blockSize) {
       return;
     }
-    const { blockId, blockX, blockY } = this.state.dragInfo;
-    const blockTrackers = mutateBlockTrackers(this, blockId, {
-      screenX: ev.center.x - this.state.blockSize * blockX,
-      screenY: ev.center.y - this.state.blockSize * blockY
+    const dragInfo = this.state.dragInfo;
+    const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
+      screenX: ev.center.x - this.state.blockSize * dragInfo.xy.x,
+      screenY: ev.center.y - this.state.blockSize * dragInfo.xy.y
     });
     const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+    //console.log("elementOffset", elementOffset(el as HTMLElement));
+    //console.log("element x", ev.center.x - elementOffset(el as HTMLElement).left);
+    //console.log("element y", ev.center.y - elementOffset(el as HTMLElement).top);
     const xy = el && el.getAttribute("data-square-id");
     if (!xy) {
       this.setState({ proposedBlock: null });
       return;
     }
     const [panX, panY] = xy.split("-").map(s => parseInt(s));
-    const x = panX - blockX;
-    const y = panY - blockY;
-    const tracker = blockTrackers.find(tracker => tracker.blockId == blockId) as BlockTracker;
+    const x = panX - dragInfo.xy.x;
+    const y = panY - dragInfo.xy.y;
+    const tracker = blockTrackers.find(tracker => tracker.blockId == dragInfo.blockId) as BlockTracker;
     const proposedBlock = { x, y, block: tracker.block };
     const alreadyPositionedBlocks = blockTrackers
-      .filter(tracker => tracker.blockId != blockId && tracker.isPlaced)
+      .filter(tracker => tracker.blockId != dragInfo.blockId && tracker.isPlaced)
       .map(tracker => {
         return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
       });
@@ -232,18 +259,18 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     }
 
     if (this.state.proposedBlock) {
-      const { blockId, blockX, blockY } = this.state.dragInfo;
+      const dragInfo = this.state.dragInfo;
       const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
       const xy = el && el.getAttribute("data-square-id");
       if (xy) {
         const [x, y] = xy.split("-").map(s => parseInt(s));
-        const rect = squareTopLeft(x - blockX, y - blockY) as DOMRect;
-        const blockTrackers = mutateBlockTrackers(this, blockId, {
+        const rect = squareTopLeft(x - dragInfo.xy.x, y - dragInfo.xy.y) as DOMRect;
+        const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
           screenX: rect.left,
           screenY: rect.top,
           isPlaced: true,
-          gridX: x - blockX,
-          gridY: y - blockY
+          gridX: x - dragInfo.xy.x,
+          gridY: y - dragInfo.xy.y
         });
         const isPuzzleComplete = isComplete(
           this.state.gridSize,
@@ -276,11 +303,16 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         onPanEnd={this.handlePanEnd}
         onPan={this.handlePan}
         onDoubleTap={this.handleDoubleTap}
-        onSwipe={this.handleSwipe}
         onTap={this.handleTap}
         onPress={() => console.log("PuzzleView:onPress")}
       >
-        <div ref={this.handleSetElement} className="puzzle" style={{ position: "relative" }}>
+        <div
+          tabIndex={0}
+          onKeyDown={this.handleKeyDown}
+          ref={this.handleSetElement}
+          className="puzzle"
+          style={{ position: "relative" }}
+        >
           {this.state.blockTrackers.map((tracker, index) => {
             return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}
