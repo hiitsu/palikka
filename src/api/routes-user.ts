@@ -10,7 +10,7 @@ export default function(
   fastify.post(
     "/signup",
     async (request: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
-      if (request?.headers?.authorization) {
+      if (request.headers && request.headers.authorization) {
         reply
           .header("Content-Type", "application/json")
           .code(403)
@@ -36,7 +36,7 @@ export default function(
       const payload: any = (fastify.jwt as JWT).decode(request.body.token);
       reply
         .header("Content-Type", "application/json")
-        .code(201)
+        .code(200)
         .send({ token: request.body.token, user: { id: payload ? payload.sub : null } });
     }
   );
