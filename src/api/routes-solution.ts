@@ -17,17 +17,7 @@ export default function(
       properties: {
         blocks: {
           type: "array",
-          maxItems: 20,
-          items: {
-            type: "array",
-            maxItems: 5,
-            minItems: 1,
-            items: {
-              type: "array",
-              maxItems: 5,
-              items: { type: "integer", minimum: 0, maximum: 1 }
-            }
-          }
+          maxItems: 20
         },
         seconds: { type: "number", minimum: 1, maximum: 60 * 60 },
         puzzleId: { type: "integer" }
