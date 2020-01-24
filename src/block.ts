@@ -15,15 +15,15 @@ export const isEqual = (block: Block, another: Block): boolean => {
   return [...blockVariations(block)].map(block => JSON.stringify(block)).findIndex(s => s == stringified) > -1;
 };
 
-export const corners = (block: Block): { topLeft: XY; topRight: XY; bottomLeft: XY; bottomRight: XY } => {
+export const corners = (block: Block, relativeTo: XY = { x: 0, y: 0 }): [XY, XY, XY, XY] => {
   const w = block[0].length - 1;
   const h = block.length - 1;
-  return {
-    topLeft: { x: 0, y: 0 },
-    topRight: { x: w, y: 0 },
-    bottomLeft: { x: w, y: h },
-    bottomRight: { x: 0, y: h }
-  };
+  return [
+    { x: 0 - relativeTo.x, y: 0 - relativeTo.y },
+    { x: w - relativeTo.x + 1, y: 0 - relativeTo.y },
+    { x: w - relativeTo.x, y: h - relativeTo.y + 1 },
+    { x: 0 - relativeTo.x + 1, y: h - relativeTo.y + 1 }
+  ];
 };
 
 export const flipX = (block: Block): Block => {
