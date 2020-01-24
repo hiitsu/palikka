@@ -44,6 +44,8 @@ export function BlockView(props: { tracker: BlockTracker; color: number; canSele
           height: 1cm;
           z-index: 10;
           pointer-events: none;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
       `}</style>
     </div>
