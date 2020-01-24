@@ -1,4 +1,4 @@
-import React from "react";
+import React, { DOMElement } from "react";
 import Hammer from "react-hammerjs";
 import { isComplete } from "../puzzle";
 import { PositionedBlock, Block, Size } from "../primitives";
@@ -6,7 +6,7 @@ import { BlockView } from "./BlockView";
 import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90 } from "../block";
 import { canFit } from "../grid";
-import { elementWidth, elementTopLeft, squareTopLeft } from "../dom";
+import { elementWidth, elementTopLeft, squareTopLeft, isPointInside } from "../dom";
 
 type BlockInfo = {
   blockId: number;
@@ -78,9 +78,10 @@ function screenPosition(index: number): { screenX: number; screenY: number } {
 }
 
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
+  el: HTMLDivElement | null;
   constructor(props: PuzzleProps) {
     super(props);
-
+    this.el = null;
     this.state = {
       panStartBlockId: null,
       isPuzzleComplete: false,
@@ -110,6 +111,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handleSwipe = this.handleSwipe.bind(this);
 
     this.handleResize = this.handleResize.bind(this);
+    this.handleSetElement = this.handleSetElement.bind(this);
   }
 
   componentDidMount() {
@@ -120,6 +122,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   componentWillUnmount() {
     window && window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleSetElement(el: HTMLDivElement) {
+    this.el = el;
   }
 
   handleResize() {
@@ -274,7 +280,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         onTap={this.handleTap}
         onPress={() => console.log("PuzzleView:onPress")}
       >
-        <div className="puzzle" style={{ position: "relative" }}>
+        <div ref={this.handleSetElement} className="puzzle" style={{ position: "relative" }}>
           {this.state.blockTrackers.map((tracker, index) => {
             return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}

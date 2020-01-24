@@ -1,4 +1,4 @@
-import { Block } from "./primitives";
+import { Block, XY } from "./primitives";
 
 export const clone = (block: Block): Block => {
   return JSON.parse(JSON.stringify(block)) as Block;
@@ -13,6 +13,17 @@ export const sizeOf = (block: Block): number => {
 export const isEqual = (block: Block, another: Block): boolean => {
   const stringified = JSON.stringify(another);
   return [...blockVariations(block)].map(block => JSON.stringify(block)).findIndex(s => s == stringified) > -1;
+};
+
+export const corners = (block: Block): { topLeft: XY; topRight: XY; bottomLeft: XY; bottomRight: XY } => {
+  const w = block[0].length - 1;
+  const h = block.length - 1;
+  return {
+    topLeft: { x: 0, y: 0 },
+    topRight: { x: w, y: 0 },
+    bottomLeft: { x: w, y: h },
+    bottomRight: { x: 0, y: h }
+  };
 };
 
 export const flipX = (block: Block): Block => {

@@ -37,3 +37,17 @@ export function elementTopLeft(selector: string): DOMRect | null {
 export function squareTopLeft(x: number, y: number): DOMRect | null {
   return elementTopLeft(`[data-square-id="${x}-${y}"]`);
 }
+
+export function isPointInside(container: HTMLElement, point: XY) {
+  const el = window.document.elementFromPoint(point.x, point.y);
+  return container.contains(el);
+}
+
+export function areCornersInside(container: HTMLElement, topLeft: XY, topRight: XY, bottomLeft: XY, bottomRight: XY) {
+  return (
+    isPointInside(container, topLeft) &&
+    isPointInside(container, topRight) &&
+    isPointInside(container, bottomLeft) &&
+    isPointInside(container, bottomRight)
+  );
+}
