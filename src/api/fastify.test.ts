@@ -11,13 +11,8 @@ describe("api", () => {
   let fastify: FastifyInstance;
 
   async function signUp(fastify: FastifyInstance): Promise<Auth> {
-    const response = await fastify.inject({
-      method: "POST",
-      url: "/signup"
-    });
-    //console.log(response.payload);
-    const payload: any = JSON.parse(response.payload);
-    return payload;
+    const response = await supertest(fastify.server).post("/signup");
+    return response.body;
   }
 
   beforeAll(async () => {
