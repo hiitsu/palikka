@@ -36,8 +36,10 @@ export default function(
         .returning("id")
         .then(ids => ids[0])
         .catch(fastifyErrorHandler(reply));
-      reply.header("Content-Type", "application/json").code(201);
-      reply.send({ id });
+      reply
+        .header("Content-Type", "application/json")
+        .code(201)
+        .send({ id });
     }
   );
 
@@ -49,7 +51,8 @@ export default function(
       const scores = await knex
         .from("solutions")
         .select("seconds", "puzzle_id", "blocks")
-        .where("user_id", user_id);
+        .where("user_id", user_id)
+        .catch(fastifyErrorHandler(reply));
       reply.header("Content-Type", "application/json").code(200);
       reply.send({ scores });
     }

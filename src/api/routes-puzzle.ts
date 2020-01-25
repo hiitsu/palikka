@@ -2,7 +2,6 @@ import http from "http";
 import fastify from "fastify";
 import knex from "./knex";
 import { randomPuzzle } from "../puzzle";
-import PuzzleComponent from "src/ui/PuzzleView";
 
 export default function(
   fastify: fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>,

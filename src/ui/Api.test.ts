@@ -4,6 +4,7 @@
 
 import Api from "./Api";
 import nock from "nock";
+import { Auth } from "../primitives";
 
 describe("Api", () => {
   const baseUrl = `http://localhost:8089`;
@@ -30,12 +31,13 @@ describe("Api", () => {
       });
 
       it("happy path should be 201", async () => {
+        const auth = { token: "abc", user: { id: 1 } };
         const scope = nock(baseUrl)
           .defaultReplyHeaders({ "access-control-allow-origin": "*" })
           .post("/signup")
-          .reply(201, { token: 1, user: { id: 1 } });
+          .reply(201, auth);
         const signup = await Api.user.signup();
-        expect(signup).toBe(1);
+        expect(signup).toEqual({ ...auth });
         scope.done();
         nock.cleanAll();
       });

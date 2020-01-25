@@ -27,3 +27,5 @@ export type Score = {
   puzzleId: number;
   positionedBlocks: PositionedBlock[];
 };
+
+export type Auth = { token: string; user: { id: number | string } };

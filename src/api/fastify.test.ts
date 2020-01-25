@@ -3,8 +3,8 @@ import http from "http";
 import buildFastify from "./fastify";
 import knex, { destroy } from "./knex";
 import supertest from "supertest";
+import { Auth } from "../primitives";
 
-type Auth = { token: string; user: { id: number | string } };
 type FastifyInstance = Fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>;
 
 describe("api", () => {

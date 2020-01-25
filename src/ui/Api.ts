@@ -1,5 +1,5 @@
 import axios from "axios";
-import { PositionedBlock, Size, Score } from "src/primitives";
+import { PositionedBlock, Size, Score, Auth } from "../primitives";
 
 const api = axios.create({
   baseURL: process.env.API_BASE_URL || "http://localhost:3001",
@@ -12,20 +12,18 @@ const api = axios.create({
 export default {
   axiosInstance: api,
   user: {
-    async signup(): Promise<string> {
-      let token;
-      if (localStorage && localStorage.getItem("token")) {
-        token = localStorage.getItem("token");
-        console.log("token revived from localStorage", token);
+    async signup(): Promise<Auth> {
+      let auth: Auth;
+      if (localStorage && localStorage.getItem("auth")) {
+        auth = JSON.parse(localStorage.getItem("auth") as string) as Auth;
       } else {
-        const res = await api.post("signup");
-        token = res.data.token;
-        console.log("token acquired from POST /signup", token);
+        auth = await api.post("signup").then(res => res.data as Auth);
+        console.log("Auth info acquired from POST /signup", auth);
         // TODO: handle QuotaExceededError
-        localStorage && localStorage.setItem("token", token);
+        localStorage && localStorage.setItem("auth", JSON.stringify(auth));
       }
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      return token;
+      api.defaults.headers.common["Authorization"] = `Bearer ${auth.token}`;
+      return auth;
     }
   },
   puzzle: {
