@@ -30,6 +30,18 @@ describe("database", () => {
     expect(typeof rows[0].blocks).toBe("object");
   });
 
+  it("create schema with json and write without calling JSON.stringify", async () => {
+    await knex.schema.createTable("jsontest2", function(table) {
+      table.increments("id").notNullable();
+      table.json("something");
+    });
+    await knex("jsontest2").insert({ something: { a: 1, b: [1, 2, 3] } });
+    const rows = await knex("jsontest2").select("something");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].something.a).toBe(1);
+    expect(rows[0].something.b.length).toBe(3);
+  });
+
   it("create schema with int[][] and write and read it", async () => {
     await knex.schema.createTable("arraytest", function(table) {
       table.increments("id").notNullable();
