@@ -122,6 +122,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handleDoubleTap = this.handleDoubleTap.bind(this);
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleWheel = this.handleWheel.bind(this);
 
     this.handleResize = this.handleResize.bind(this);
     this.handleSetElement = this.handleSetElement.bind(this);
@@ -135,6 +136,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   componentWillUnmount() {
     window && window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleWheel(ev: any) {
+    console.log("handleWheel", ev.deltaX, ev.deltaY);
+    const blockId = this.state.panStartBlockId;
+    if (!blockId) return;
+    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId) as BlockTracker;
+    const { block } = blockTracker;
+
+    if (Math.abs(ev.deltaX) > 15) mutateBlockTrackers(this, blockId as number, { block: flipX(block) });
+    if (Math.abs(ev.deltaY) > 15) mutateBlockTrackers(this, blockId as number, { block: flipY(block) });
   }
 
   handleKeyDown(ev: any) {
@@ -308,6 +320,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       >
         <div
           tabIndex={0}
+          onWheel={this.handleWheel}
           onKeyDown={this.handleKeyDown}
           ref={this.handleSetElement}
           className="puzzle"

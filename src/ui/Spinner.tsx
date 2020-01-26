@@ -1,6 +1,6 @@
 import React from "react";
 
-export const Spinner = (svg: { width: number; height: number; color?: string }) => (
+export const Spinner = (props: { width: number; height: number; color?: string }) => (
   <svg
     style={{
       left: 0,
@@ -10,11 +10,11 @@ export const Spinner = (svg: { width: number; height: number; color?: string }) 
       marginRight: "auto",
       top: "20%"
     }}
-    width={svg.width}
-    height={svg.height}
+    width={props.width}
+    height={props.height}
     viewBox="0 0 38 38"
     xmlns="http://www.w3.org/2000/svg"
-    stroke={svg.color || "red"}
+    stroke={props.color || "red"}
   >
     <g fill="none" fillRule="evenodd">
       <g transform="translate(1 1)" strokeWidth="2">
