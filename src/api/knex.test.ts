@@ -14,6 +14,7 @@ describe("database", () => {
     await del("jsontest3");
     await del("arraytest1");
     await del("arraytest2");
+    await del("casingtest1");
   }
   beforeAll(cleanup);
 
@@ -100,7 +101,19 @@ describe("database", () => {
     });
     const rows = await knex("arraytest2").select("*");
     expect(rows).toHaveLength(1);
-    console.log("blocks", rows[0].blocks);
     expect(rows[0].blocks).toStrictEqual(blocks);
+  });
+
+  it("casing test: camelCase", async () => {
+    await knex.schema.createTable("casingtest1", function(table) {
+      table.increments("id").notNullable();
+      table.integer("puzzleId").notNullable();
+    });
+    await knex("casingtest1").insert({
+      puzzleId: 123
+    });
+    const rows = await knex("casingtest1").select("*");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].puzzleId).toStrictEqual(123);
   });
 });
