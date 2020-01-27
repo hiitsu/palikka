@@ -1,17 +1,5 @@
-const list = [
-  "a6cee3",
-  "1f78b4",
-  "b2df8a",
-  "33a02c",
-  "fb9a99",
-  "e31a1c",
-  "fdbf6f",
-  "ff7f00",
-  "cab2d6",
-  "6a3d9a",
-  "ffff99",
-  "b15928"
-];
+const list = ["fa1e1e", "f1fa1e", "d838cb", "f5821f", "42c6f0", "4bd838", "fa1e1e"];
+
 const colors = list
   .concat(
     list.map(color =>

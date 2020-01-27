@@ -94,7 +94,23 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   constructor(props: PuzzleProps) {
     super(props);
     this.el = null;
-    this.state = {
+    this.state = this.resetWith(props);
+
+    this.handlePanStart = this.handlePanStart.bind(this);
+    this.handlePan = this.handlePan.bind(this);
+    this.handlePanEnd = this.handlePanEnd.bind(this);
+    this.handleTap = this.handleTap.bind(this);
+    this.handleDoubleTap = this.handleDoubleTap.bind(this);
+
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleWheel = this.handleWheel.bind(this);
+
+    this.handleResize = this.handleResize.bind(this);
+    this.handleSetElement = this.handleSetElement.bind(this);
+  }
+
+  resetWith(props: PuzzleProps): PuzzleState {
+    return {
       panStartBlockId: null,
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
@@ -114,24 +130,18 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         };
       })
     };
-
-    this.handlePanStart = this.handlePanStart.bind(this);
-    this.handlePan = this.handlePan.bind(this);
-    this.handlePanEnd = this.handlePanEnd.bind(this);
-    this.handleTap = this.handleTap.bind(this);
-    this.handleDoubleTap = this.handleDoubleTap.bind(this);
-
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleWheel = this.handleWheel.bind(this);
-
-    this.handleResize = this.handleResize.bind(this);
-    this.handleSetElement = this.handleSetElement.bind(this);
   }
 
   componentDidMount() {
     const blockSize = elementWidth(".square");
     this.setState({ blockSize });
     window && window.addEventListener("resize", this.handleResize);
+  }
+
+  componentDidUpdate(prevProps: PuzzleProps, prevState: PuzzleState) {
+    if (prevProps.blocks !== this.props.blocks) {
+      this.setState(this.resetWith(this.props));
+    }
   }
 
   componentWillUnmount() {
