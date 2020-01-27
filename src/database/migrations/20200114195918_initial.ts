@@ -6,7 +6,7 @@ module.exports.up = (knex: Knex): any => {
     table.jsonb("blocks").notNullable();
     table.integer("width").notNullable();
     table.integer("height").notNullable();
-    table.timestamp("created_at").defaultTo(knex.fn.now());
+    table.timestamp("createdAt").defaultTo(knex.fn.now());
   });
 };
 

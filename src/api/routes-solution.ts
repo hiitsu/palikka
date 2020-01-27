@@ -1,6 +1,5 @@
 import http from "http";
 import fastify from "fastify";
-import snakeCaseKeys from "snakecase-keys";
 import { onRequestVerifyJWT } from "./fastify-hooks";
 import knex from "./knex";
 import fastifyErrorHandler from "./fastify-error-handler";
@@ -29,10 +28,10 @@ export default function(
     "/solution",
     { schema, onRequest: onRequestVerifyJWT },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
-      const { blocks, puzzle_id, seconds } = snakeCaseKeys(req.body);
-      const user_id = (req.user as any).sub;
+      const userId = (req.user as any).sub;
+      const solution = { ...req.body, blocks: JSON.stringify(req.body.blocks), userId };
       const id = await knex("solutions")
-        .insert({ puzzle_id, blocks: JSON.stringify(blocks), user_id, seconds })
+        .insert(solution)
         .returning("id")
         .then(ids => ids[0])
         .catch(fastifyErrorHandler(reply));
@@ -47,11 +46,11 @@ export default function(
     "/solution",
     { onRequest: onRequestVerifyJWT },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
-      const user_id = (req.user as any).sub;
+      const userId = (req.user as any).sub;
       const scores = await knex
         .from("solutions")
-        .select("seconds", "puzzle_id", "blocks")
-        .where("user_id", user_id)
+        .select("seconds", "puzzleId", "blocks")
+        .where("userId", userId)
         .catch(fastifyErrorHandler(reply));
       reply.header("Content-Type", "application/json").code(200);
       reply.send({ scores });
