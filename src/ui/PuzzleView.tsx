@@ -29,10 +29,12 @@ type PuzzleState = {
   blockSize: null | number;
   dragInfo: null | BlockInfo;
   gridSize: Size;
+  pressedBlockId: null | number;
   positionedBlocks: PositionedBlock[];
   proposedBlock: PositionedBlock | null;
   blockTrackers: BlockTracker[];
   isPuzzleComplete: boolean;
+  debug?: any;
 };
 
 type PuzzleProps = {
@@ -101,6 +103,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handlePanEnd = this.handlePanEnd.bind(this);
     this.handleTap = this.handleTap.bind(this);
     this.handleDoubleTap = this.handleDoubleTap.bind(this);
+    this.handlePress = this.handlePress.bind(this);
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleWheel = this.handleWheel.bind(this);
@@ -111,6 +114,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   resetWith(props: PuzzleProps): PuzzleState {
     return {
+      pressedBlockId: null,
       panStartBlockId: null,
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
@@ -200,6 +204,14 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.setState({ blockTrackers });
   }
 
+  handlePress(ev: any) {
+    const info = blockInfo(ev.target);
+    console.log("handlePress", info, ev.target);
+    if (info) {
+      this.setState({ pressedBlockId: info.blockId });
+    }
+  }
+
   handleTap(ev: any) {
     const info = blockInfo(ev.target);
     console.log("handleTap", info, ev.target);
@@ -225,7 +237,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   handlePanStart(ev: any) {
     const info = blockInfo(ev.target);
     console.log("handlePanStart", ev, info);
-    if (info) {
+    if (ev.pointers.length == 1 && info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
       mutateBlockTrackers(this, info.blockId, {
         zIndex: maxZ + 1,
@@ -240,7 +252,14 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handlePan(ev: any) {
-    if (!window || !window.document || !this.state.dragInfo || !this.state.blockSize) {
+    this.setState({
+      debug: {
+        velocityX: Math.floor((ev.velocityX as number) * 1000),
+        velocityY: Math.floor((ev.velocityY as number) * 1000),
+        devicePixelRatio: window.devicePixelRatio
+      }
+    });
+    if (ev.pointers.length > 1 || !window || !window.document || !this.state.dragInfo || !this.state.blockSize) {
       return;
     }
     const dragInfo = this.state.dragInfo;
@@ -320,13 +339,13 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   render() {
     return (
       <Hammer
-        direction={"DIRECTION_ALL"}
+        //direction={"DIRECTION_ALL"}
         onPanStart={this.handlePanStart}
         onPanEnd={this.handlePanEnd}
         onPan={this.handlePan}
         onDoubleTap={this.handleDoubleTap}
         onTap={this.handleTap}
-        onPress={() => console.log("PuzzleView:onPress")}
+        onPress={this.handlePress}
       >
         <div
           tabIndex={0}
@@ -340,6 +359,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
             return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}
           <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
+          <div className="debug">{JSON.stringify(this.state.debug || null)}</div>
           <style jsx global>
             {`
               html,
@@ -359,6 +379,11 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
               * {
                 user-select: none;
                 touch-action: manipulation;
+              }
+              .debug {
+                position:absolute;
+                top:4px;
+                left4px;
               }
               .puzzle {
                 width: 100%;

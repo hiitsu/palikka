@@ -13,6 +13,7 @@ export default (props: any) => {
           content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, user-scalable=no"
           key="viewport"
         />
+        <meta key="msapplication-tap-highlight" name="msapplication-tap-highlight" content="no" />
       </Head>
       <GameControllerView />
     </AuthProvider>
