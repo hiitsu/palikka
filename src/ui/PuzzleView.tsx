@@ -33,6 +33,7 @@ type PuzzleState = {
   proposedBlock: PositionedBlock | null;
   blockTrackers: BlockTracker[];
   isPuzzleComplete: boolean;
+  pointerCount: number;
 };
 
 type PuzzleProps = {
@@ -118,6 +119,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       proposedBlock: null,
       positionedBlocks: [],
       blockSize: null,
+      pointerCount: 0,
       blockTrackers: props.blocks.map((block, index) => {
         return {
           ...screenPosition(index),
@@ -154,7 +156,6 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     if (!blockId) return;
     const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId) as BlockTracker;
     const { block } = blockTracker;
-
     if (Math.abs(ev.deltaX) > 15) mutateBlockTrackers(this, blockId as number, { block: flipX(block) });
     if (Math.abs(ev.deltaY) > 15) mutateBlockTrackers(this, blockId as number, { block: flipY(block) });
   }
@@ -225,6 +226,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   handlePanStart(ev: any) {
     const info = blockInfo(ev.target);
     console.log("handlePanStart", ev, info);
+    this.setState({ pointerCount: ev.pointers.length });
     if (info) {
       const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
       mutateBlockTrackers(this, info.blockId, {
@@ -240,7 +242,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handlePan(ev: any) {
+    this.setState({ pointerCount: ev.pointers.length });
     if (!window || !window.document || !this.state.dragInfo || !this.state.blockSize) {
+      return;
+    }
+    if (ev.pointers.length > 1) {
+      const blockId = this.state.panStartBlockId;
+      if (!blockId) return;
+      const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId) as BlockTracker;
+      const { block } = blockTracker;
+      if (Math.abs(ev.deltaX) > 15) mutateBlockTrackers(this, blockId as number, { block: flipX(block) });
+      if (Math.abs(ev.deltaY) > 15) mutateBlockTrackers(this, blockId as number, { block: flipY(block) });
       return;
     }
     const dragInfo = this.state.dragInfo;
@@ -276,6 +288,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   }
 
   handlePanEnd(ev: any) {
+    this.setState({ pointerCount: this.state.pointerCount - 1 });
     if (!this.state.dragInfo || !window || !window.document) {
       return;
     }
@@ -340,6 +353,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
             return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
           })}
           <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
+          <div className="debug">Pointer count:{this.state.pointerCount}</div>
           <style jsx global>
             {`
               html,
@@ -359,6 +373,12 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
               * {
                 user-select: none;
                 touch-action: manipulation;
+              }
+              .debug {
+                position:absolute;
+                top:5px;
+                left5px;
+                color:black;
               }
               .puzzle {
                 width: 100%;
