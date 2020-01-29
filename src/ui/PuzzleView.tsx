@@ -25,15 +25,14 @@ export type BlockTracker = {
 };
 
 type PuzzleState = {
-  panStartBlockId: null | number;
+  selectedBlockInfo: null | BlockInfo;
   blockSize: null | number;
-  dragInfo: null | BlockInfo;
   gridSize: Size;
-  pressedBlockId: null | number;
   positionedBlocks: PositionedBlock[];
   proposedBlock: PositionedBlock | null;
   blockTrackers: BlockTracker[];
   isPuzzleComplete: boolean;
+  state: StateMachineState;
   debug?: any;
 };
 
@@ -49,7 +48,8 @@ type Partial<T> = {
 function mutateBlockTrackers(
   component: React.Component<PuzzleProps, PuzzleState>,
   blockId: number,
-  update: Partial<BlockTracker>
+  update: Partial<BlockTracker>,
+  extraState: Partial<PuzzleState> = {}
 ): BlockTracker[] {
   const blockTrackers: BlockTracker[] = component.state.blockTrackers.slice().map(tracker => {
     if (tracker.blockId == blockId) {
@@ -57,7 +57,7 @@ function mutateBlockTrackers(
     }
     return tracker;
   });
-  component.setState({ blockTrackers });
+  component.setState({ ...(extraState as any), blockTrackers });
   return blockTrackers;
 }
 
@@ -78,32 +78,240 @@ function screenPosition(index: number): { screenX: number; screenY: number } {
   };
 }
 
-/*
-function isOutside(component: PuzzleComponent, screenXY: XY): boolean {
-  const dragInfo = component.state.dragInfo as BlockInfo;
-  const tracker = component.state.blockTrackers.find(tracker => tracker.blockId == dragInfo.blockId) as BlockTracker;
-  const screenPixelCorners = corners(tracker.block, dragInfo.xy).map(xy => {});
-  const el = window.document.elementFromPoint(screenXY.x, screenXY.y);
-  //console.log("elementOffset", elementOffset(el as HTMLElement));
-  //console.log("element x", ev.center.x - elementOffset(el as HTMLElement).left);
-  //console.log("element y", ev.center.y - elementOffset(el as HTMLElement).top);
-  return false;
-}
-*/
+type StateMachineState = "noSelection" | "singleSelected" | "flipping";
+type HammerEventType =
+  | "handlePanStart"
+  | "handlePan"
+  | "handlePanEnd"
+  | "handleTap"
+  | "handleDoubleTap"
+  | "handlePress";
+
+type HammerEventHandler = (this: PuzzleComponent, ev: any) => void;
+type States = {
+  [key in StateMachineState]?: {
+    [key in HammerEventType]?: HammerEventHandler;
+  };
+};
+
+const PuzzleStates: States = {
+  flipping: {
+    handlePanEnd(ev: any) {
+      const selectedBlockInfo = this.state.selectedBlockInfo!;
+      const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId) as BlockTracker;
+      const { block } = blockTracker;
+      if (Math.abs(ev.deltaX) > 15)
+        mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipX(block) }, { state: "singleSelected" });
+      if (Math.abs(ev.deltaY) > 15)
+        mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipY(block) }, { state: "singleSelected" });
+    }
+  },
+  noSelection: {
+    handleTap(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
+        mutateBlockTrackers(
+          this,
+          selectedBlockInfo.blockId,
+          { zIndex: maxZ + 1 },
+          { selectedBlockInfo, state: "singleSelected" }
+        );
+      }
+    },
+    handlePanStart(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
+        mutateBlockTrackers(
+          this,
+          selectedBlockInfo.blockId,
+          {
+            zIndex: maxZ + 1,
+            isPlaced: false
+          },
+          {
+            selectedBlockInfo,
+            isPuzzleComplete: false,
+            state: "singleSelected"
+          }
+        );
+      }
+    },
+    handlePress(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        this.setState({ selectedBlockInfo, state: "flipping" });
+      }
+    },
+    handleDoubleTap(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId);
+        if (blockTracker) {
+          const { block } = blockTracker;
+          mutateBlockTrackers(this, selectedBlockInfo.blockId, {
+            block: rotateClockWise90(block)
+          });
+        }
+      }
+    }
+  },
+  singleSelected: {
+    handlePress(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        this.setState({ selectedBlockInfo, state: "flipping" });
+      }
+    },
+
+    handleTap(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
+        mutateBlockTrackers(this, selectedBlockInfo.blockId, { zIndex: maxZ + 1 }, { selectedBlockInfo });
+      } else {
+        this.setState({ state: "noSelection" });
+      }
+    },
+
+    handleDoubleTap(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (selectedBlockInfo) {
+        const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId);
+        if (blockTracker) {
+          const { block } = blockTracker;
+          mutateBlockTrackers(this, selectedBlockInfo.blockId, {
+            block: rotateClockWise90(block)
+          });
+        }
+      }
+    },
+
+    handlePanStart(ev: any) {
+      const selectedBlockInfo = blockInfo(ev.target);
+      if (ev.pointers.length == 1 && selectedBlockInfo) {
+        const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
+        mutateBlockTrackers(
+          this,
+          selectedBlockInfo.blockId,
+          {
+            zIndex: maxZ + 1,
+            isPlaced: false
+          },
+          {
+            selectedBlockInfo,
+            isPuzzleComplete: false,
+            state: "singleSelected"
+          }
+        );
+      }
+    },
+
+    handlePan(ev: any) {
+      if (
+        ev.pointers.length > 1 ||
+        !window ||
+        !window.document ||
+        !this.state.selectedBlockInfo ||
+        !this.state.blockSize
+      ) {
+        return;
+      }
+      const selectedBlockInfo = this.state.selectedBlockInfo;
+      const blockTrackers = mutateBlockTrackers(this, selectedBlockInfo.blockId, {
+        screenX: ev.center.x - this.state.blockSize * selectedBlockInfo.xy.x,
+        screenY: ev.center.y - this.state.blockSize * selectedBlockInfo.xy.y
+      });
+      const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+      const xy = el && el.getAttribute("data-square-id");
+      if (!xy) {
+        this.setState({ proposedBlock: null });
+        return;
+      }
+      const [panX, panY] = xy.split("-").map(s => parseInt(s));
+      const x = panX - selectedBlockInfo.xy.x;
+      const y = panY - selectedBlockInfo.xy.y;
+      const tracker = blockTrackers.find(tracker => tracker.blockId == selectedBlockInfo.blockId) as BlockTracker;
+      const proposedBlock = { x, y, block: tracker.block };
+      const alreadyPositionedBlocks = blockTrackers
+        .filter(tracker => tracker.blockId != selectedBlockInfo.blockId && tracker.isPlaced)
+        .map(tracker => {
+          return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
+        });
+
+      if (canFit(this.state.gridSize, alreadyPositionedBlocks as PositionedBlock[], proposedBlock)) {
+        this.setState({ proposedBlock });
+      } else {
+        this.setState({ proposedBlock: null });
+      }
+    },
+
+    handlePanEnd(ev: any) {
+      if (!this.state.selectedBlockInfo || !window || !window.document) {
+        return;
+      }
+
+      if (this.state.proposedBlock) {
+        const dragInfo = this.state.selectedBlockInfo;
+        const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
+        const xy = el && el.getAttribute("data-square-id");
+        if (xy) {
+          const [x, y] = xy.split("-").map(s => parseInt(s));
+          const rect = squareTopLeft(x - dragInfo.xy.x, y - dragInfo.xy.y) as DOMRect;
+          const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
+            screenX: rect.left,
+            screenY: rect.top,
+            isPlaced: true,
+            gridX: x - dragInfo.xy.x,
+            gridY: y - dragInfo.xy.y
+          });
+          const isPuzzleComplete = isComplete(
+            this.state.gridSize,
+            blockTrackers.map<PositionedBlock>(t => {
+              return {
+                x: t.gridX,
+                y: t.gridY,
+                block: t.block
+              } as PositionedBlock;
+            })
+          );
+          this.setState({ isPuzzleComplete, blockTrackers }, () => console.log(this.state.blockTrackers));
+          if (isPuzzleComplete) {
+            this.props.onCompleted();
+          }
+        }
+      }
+
+      this.setState({
+        selectedBlockInfo: null,
+        proposedBlock: null
+      });
+    }
+  }
+};
 
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
   el: HTMLDivElement | null;
+  handlePanStart: (ev: any) => void;
+  handlePan: (ev: any) => void;
+  handlePanEnd: (ev: any) => void;
+  handleTap: (ev: any) => void;
+  handleDoubleTap: (ev: any) => void;
+  handlePress: (ev: any) => void;
   constructor(props: PuzzleProps) {
     super(props);
     this.el = null;
     this.state = this.resetWith(props);
 
-    this.handlePanStart = this.handlePanStart.bind(this);
-    this.handlePan = this.handlePan.bind(this);
-    this.handlePanEnd = this.handlePanEnd.bind(this);
-    this.handleTap = this.handleTap.bind(this);
-    this.handleDoubleTap = this.handleDoubleTap.bind(this);
-    this.handlePress = this.handlePress.bind(this);
+    this.handleHammerEvent = this.handleHammerEvent.bind(this);
+
+    this.handlePanStart = this.handleHammerEvent.bind(this, "handlePanStart");
+    this.handlePan = this.handleHammerEvent.bind(this, "handlePan");
+    this.handlePanEnd = this.handleHammerEvent.bind(this, "handlePanEnd");
+    this.handleTap = this.handleHammerEvent.bind(this, "handleTap");
+    this.handleDoubleTap = this.handleHammerEvent.bind(this, "handleDoubleTap");
+    this.handlePress = this.handleHammerEvent.bind(this, "handlePress");
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleWheel = this.handleWheel.bind(this);
@@ -114,18 +322,17 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   resetWith(props: PuzzleProps): PuzzleState {
     return {
-      pressedBlockId: null,
-      panStartBlockId: null,
+      state: "noSelection",
+      selectedBlockInfo: null,
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
-      dragInfo: null,
       proposedBlock: null,
       positionedBlocks: [],
       blockSize: null,
       blockTrackers: props.blocks.map((block, index) => {
         return {
           ...screenPosition(index),
-          zIndex: index + 2,
+          zIndex: 10 + index + 2,
           block,
           blockId: index,
           isPlaced: false,
@@ -154,19 +361,19 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
 
   handleWheel(ev: any) {
     console.log("handleWheel", ev.deltaX, ev.deltaY);
-    const blockId = this.state.panStartBlockId;
-    if (!blockId) return;
-    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId) as BlockTracker;
+    const selectedBlockInfo = this.state.selectedBlockInfo;
+    if (!selectedBlockInfo) return;
+    const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId) as BlockTracker;
     const { block } = blockTracker;
 
-    if (Math.abs(ev.deltaX) > 15) mutateBlockTrackers(this, blockId as number, { block: flipX(block) });
-    if (Math.abs(ev.deltaY) > 15) mutateBlockTrackers(this, blockId as number, { block: flipY(block) });
+    if (Math.abs(ev.deltaX) > 15) mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipX(block) });
+    if (Math.abs(ev.deltaY) > 15) mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipY(block) });
   }
 
   handleKeyDown(ev: any) {
-    const blockId = this.state.panStartBlockId;
-    if (!blockId) return;
-    const blockTracker = this.state.blockTrackers.find(t => t.blockId == blockId) as BlockTracker;
+    const selectedBlockInfo = this.state.selectedBlockInfo;
+    if (!selectedBlockInfo) return;
+    const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId) as BlockTracker;
     const { block } = blockTracker;
     let flippedBlock;
     switch (ev.keyCode) {
@@ -185,7 +392,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       default:
         break;
     }
-    mutateBlockTrackers(this, blockId as number, { block: flippedBlock });
+    mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flippedBlock });
   }
 
   handleSetElement(el: HTMLDivElement) {
@@ -204,142 +411,18 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.setState({ blockTrackers });
   }
 
-  handlePress(ev: any) {
-    const info = blockInfo(ev.target);
-    console.log("handlePress", info, ev.target);
-    if (info) {
-      this.setState({ pressedBlockId: info.blockId });
+  handleHammerEvent(eventType: HammerEventType, ev: any) {
+    const state = PuzzleStates[this.state.state];
+    const handler = state && state[eventType];
+    console.log("handleHammerEvent", this.state.state, eventType, handler ? "handler:yes" : "handler:no");
+    if (handler) {
+      handler.call(this, ev);
     }
-  }
-
-  handleTap(ev: any) {
-    const info = blockInfo(ev.target);
-    console.log("handleTap", info, ev.target);
-    if (info) {
-      const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-      mutateBlockTrackers(this, info.blockId, { zIndex: maxZ + 1 });
-    }
-  }
-
-  handleDoubleTap(ev: any) {
-    const info = blockInfo(ev.target);
-    if (info) {
-      const blockTracker = this.state.blockTrackers.find(t => t.blockId == info.blockId);
-      if (blockTracker) {
-        const { block } = blockTracker;
-        mutateBlockTrackers(this, info.blockId, {
-          block: rotateClockWise90(block)
-        });
-      }
-    }
-  }
-
-  handlePanStart(ev: any) {
-    const info = blockInfo(ev.target);
-    console.log("handlePanStart", ev, info);
-    if (ev.pointers.length == 1 && info) {
-      const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-      mutateBlockTrackers(this, info.blockId, {
-        zIndex: maxZ + 1,
-        isPlaced: false
-      });
-      this.setState({
-        panStartBlockId: info.blockId,
-        isPuzzleComplete: false,
-        dragInfo: { ...info }
-      });
-    }
-  }
-
-  handlePan(ev: any) {
-    this.setState({
-      debug: {
-        velocityX: Math.floor((ev.velocityX as number) * 1000),
-        velocityY: Math.floor((ev.velocityY as number) * 1000),
-        devicePixelRatio: window.devicePixelRatio
-      }
-    });
-    if (ev.pointers.length > 1 || !window || !window.document || !this.state.dragInfo || !this.state.blockSize) {
-      return;
-    }
-    const dragInfo = this.state.dragInfo;
-    const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
-      screenX: ev.center.x - this.state.blockSize * dragInfo.xy.x,
-      screenY: ev.center.y - this.state.blockSize * dragInfo.xy.y
-    });
-    const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-    //console.log("elementOffset", elementOffset(el as HTMLElement));
-    //console.log("element x", ev.center.x - elementOffset(el as HTMLElement).left);
-    //console.log("element y", ev.center.y - elementOffset(el as HTMLElement).top);
-    const xy = el && el.getAttribute("data-square-id");
-    if (!xy) {
-      this.setState({ proposedBlock: null });
-      return;
-    }
-    const [panX, panY] = xy.split("-").map(s => parseInt(s));
-    const x = panX - dragInfo.xy.x;
-    const y = panY - dragInfo.xy.y;
-    const tracker = blockTrackers.find(tracker => tracker.blockId == dragInfo.blockId) as BlockTracker;
-    const proposedBlock = { x, y, block: tracker.block };
-    const alreadyPositionedBlocks = blockTrackers
-      .filter(tracker => tracker.blockId != dragInfo.blockId && tracker.isPlaced)
-      .map(tracker => {
-        return { x: tracker.gridX, y: tracker.gridY, block: tracker.block };
-      });
-
-    if (canFit(this.state.gridSize, alreadyPositionedBlocks as PositionedBlock[], proposedBlock)) {
-      this.setState({ proposedBlock });
-    } else {
-      this.setState({ proposedBlock: null });
-    }
-  }
-
-  handlePanEnd(ev: any) {
-    if (!this.state.dragInfo || !window || !window.document) {
-      return;
-    }
-
-    if (this.state.proposedBlock) {
-      const dragInfo = this.state.dragInfo;
-      const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
-      const xy = el && el.getAttribute("data-square-id");
-      if (xy) {
-        const [x, y] = xy.split("-").map(s => parseInt(s));
-        const rect = squareTopLeft(x - dragInfo.xy.x, y - dragInfo.xy.y) as DOMRect;
-        const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
-          screenX: rect.left,
-          screenY: rect.top,
-          isPlaced: true,
-          gridX: x - dragInfo.xy.x,
-          gridY: y - dragInfo.xy.y
-        });
-        const isPuzzleComplete = isComplete(
-          this.state.gridSize,
-          blockTrackers.map<PositionedBlock>(t => {
-            return {
-              x: t.gridX,
-              y: t.gridY,
-              block: t.block
-            } as PositionedBlock;
-          })
-        );
-        this.setState({ isPuzzleComplete, blockTrackers }, () => console.log(this.state.blockTrackers));
-        if (isPuzzleComplete) {
-          this.props.onCompleted();
-        }
-      }
-    }
-
-    this.setState({
-      dragInfo: null,
-      proposedBlock: null
-    });
   }
 
   render() {
     return (
       <Hammer
-        //direction={"DIRECTION_ALL"}
         onPanStart={this.handlePanStart}
         onPanEnd={this.handlePanEnd}
         onPan={this.handlePan}
@@ -356,10 +439,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           style={{ position: "relative" }}
         >
           {this.state.blockTrackers.map((tracker, index) => {
-            return <BlockView tracker={tracker} canSelect={!this.state.dragInfo} key={index} color={index} />;
+            return <BlockView tracker={tracker} canSelect={true} key={index} color={index} />;
           })}
           <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
-          <div className="debug">{JSON.stringify(this.state.debug || null)}</div>
+          {process.env.NODE_ENV != "production" && <div className="debug">{this.state.state}</div>}
           <style jsx global>
             {`
               html,
