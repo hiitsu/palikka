@@ -33,6 +33,7 @@ type PuzzleState = {
   blockTrackers: BlockTracker[];
   isPuzzleComplete: boolean;
   state: StateMachineState;
+  dragging: boolean;
   debug?: any;
 };
 
@@ -133,7 +134,8 @@ const PuzzleStates: States = {
           {
             selectedBlockInfo,
             isPuzzleComplete: false,
-            state: "singleSelected"
+            state: "singleSelected",
+            dragging: true
           }
         );
       }
@@ -202,7 +204,8 @@ const PuzzleStates: States = {
           {
             selectedBlockInfo,
             isPuzzleComplete: false,
-            state: "singleSelected"
+            state: "singleSelected",
+            dragging: true
           }
         );
       }
@@ -226,6 +229,7 @@ const PuzzleStates: States = {
       const el = window.document.elementFromPoint(ev.center.x, ev.center.y);
       const xy = el && el.getAttribute("data-square-id");
       if (!xy) {
+        console.log("warning could not trace grid xy for ", ev.center);
         this.setState({ proposedBlock: null });
         return;
       }
@@ -259,6 +263,7 @@ const PuzzleStates: States = {
         if (xy) {
           const [x, y] = xy.split("-").map(s => parseInt(s));
           const rect = squareTopLeft(x - dragInfo.xy.x, y - dragInfo.xy.y) as DOMRect;
+
           const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
             screenX: rect.left,
             screenY: rect.top,
@@ -276,7 +281,7 @@ const PuzzleStates: States = {
               } as PositionedBlock;
             })
           );
-          this.setState({ isPuzzleComplete, blockTrackers }, () => console.log(this.state.blockTrackers));
+          this.setState({ isPuzzleComplete, blockTrackers });
           if (isPuzzleComplete) {
             this.props.onCompleted();
           }
@@ -285,7 +290,8 @@ const PuzzleStates: States = {
 
       this.setState({
         selectedBlockInfo: null,
-        proposedBlock: null
+        proposedBlock: null,
+        dragging: false
       });
     }
   }
@@ -323,6 +329,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
   resetWith(props: PuzzleProps): PuzzleState {
     return {
       state: "noSelection",
+      dragging: false,
       selectedBlockInfo: null,
       isPuzzleComplete: false,
       gridSize: { w: 6, h: 6 },
@@ -439,7 +446,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           style={{ position: "relative" }}
         >
           {this.state.blockTrackers.map((tracker, index) => {
-            return <BlockView tracker={tracker} canSelect={true} key={index} color={index} />;
+            return <BlockView tracker={tracker} canSelect={!this.state.dragging} key={index} color={index} />;
           })}
           <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
           {process.env.NODE_ENV != "production" && <div className="debug">{this.state.state}</div>}
