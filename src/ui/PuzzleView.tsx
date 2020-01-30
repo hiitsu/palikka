@@ -46,22 +46,6 @@ type Partial<T> = {
   [P in keyof T]?: T[P];
 };
 
-function mutateBlockTrackers(
-  component: React.Component<PuzzleProps, PuzzleState>,
-  blockId: number,
-  update: Partial<BlockTracker>,
-  extraState: Partial<PuzzleState> = {}
-): BlockTracker[] {
-  const blockTrackers: BlockTracker[] = component.state.blockTrackers.slice().map(tracker => {
-    if (tracker.blockId == blockId) {
-      return { ...tracker, ...update };
-    }
-    return tracker;
-  });
-  component.setState({ ...(extraState as any), blockTrackers });
-  return blockTrackers;
-}
-
 function blockInfo(el: Element): BlockInfo | null {
   const slotId = el.getAttribute("data-slot-id");
   if (!slotId) {
@@ -102,9 +86,9 @@ const PuzzleStates: States = {
       const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId) as BlockTracker;
       const { block } = blockTracker;
       if (Math.abs(ev.deltaX) > 15)
-        mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipX(block) }, { state: "singleSelected" });
+        this.mutateBlockTrackers(selectedBlockInfo.blockId, { block: flipX(block) }, { state: "singleSelected" });
       if (Math.abs(ev.deltaY) > 15)
-        mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipY(block) }, { state: "singleSelected" });
+        this.mutateBlockTrackers(selectedBlockInfo.blockId, { block: flipY(block) }, { state: "singleSelected" });
     }
   },
   noSelection: {
@@ -112,8 +96,7 @@ const PuzzleStates: States = {
       const selectedBlockInfo = blockInfo(ev.target);
       if (selectedBlockInfo) {
         const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-        mutateBlockTrackers(
-          this,
+        this.mutateBlockTrackers(
           selectedBlockInfo.blockId,
           { zIndex: maxZ + 1 },
           { selectedBlockInfo, state: "singleSelected" }
@@ -124,8 +107,7 @@ const PuzzleStates: States = {
       const selectedBlockInfo = blockInfo(ev.target);
       if (selectedBlockInfo) {
         const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-        mutateBlockTrackers(
-          this,
+        this.mutateBlockTrackers(
           selectedBlockInfo.blockId,
           {
             zIndex: maxZ + 1,
@@ -152,7 +134,7 @@ const PuzzleStates: States = {
         const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId);
         if (blockTracker) {
           const { block } = blockTracker;
-          mutateBlockTrackers(this, selectedBlockInfo.blockId, {
+          this.mutateBlockTrackers(selectedBlockInfo.blockId, {
             block: rotateClockWise90(block)
           });
         }
@@ -171,7 +153,7 @@ const PuzzleStates: States = {
       const selectedBlockInfo = blockInfo(ev.target);
       if (selectedBlockInfo) {
         const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-        mutateBlockTrackers(this, selectedBlockInfo.blockId, { zIndex: maxZ + 1 }, { selectedBlockInfo });
+        this.mutateBlockTrackers(selectedBlockInfo.blockId, { zIndex: maxZ + 1 }, { selectedBlockInfo });
       } else {
         this.setState({ state: "noSelection" });
       }
@@ -183,7 +165,7 @@ const PuzzleStates: States = {
         const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId);
         if (blockTracker) {
           const { block } = blockTracker;
-          mutateBlockTrackers(this, selectedBlockInfo.blockId, {
+          this.mutateBlockTrackers(selectedBlockInfo.blockId, {
             block: rotateClockWise90(block)
           });
         }
@@ -194,8 +176,7 @@ const PuzzleStates: States = {
       const selectedBlockInfo = blockInfo(ev.target);
       if (ev.pointers.length == 1 && selectedBlockInfo) {
         const maxZ = Math.max(...this.state.blockTrackers.map(t => t.zIndex));
-        mutateBlockTrackers(
-          this,
+        this.mutateBlockTrackers(
           selectedBlockInfo.blockId,
           {
             zIndex: maxZ + 1,
@@ -222,7 +203,7 @@ const PuzzleStates: States = {
         return;
       }
       const selectedBlockInfo = this.state.selectedBlockInfo;
-      const blockTrackers = mutateBlockTrackers(this, selectedBlockInfo.blockId, {
+      const blockTrackers = this.mutateBlockTrackers(selectedBlockInfo.blockId, {
         screenX: ev.center.x - this.state.blockSize * selectedBlockInfo.xy.x,
         screenY: ev.center.y - this.state.blockSize * selectedBlockInfo.xy.y
       });
@@ -264,7 +245,7 @@ const PuzzleStates: States = {
           const [x, y] = xy.split("-").map(s => parseInt(s));
           const rect = squareTopLeft(x - dragInfo.xy.x, y - dragInfo.xy.y) as DOMRect;
 
-          const blockTrackers = mutateBlockTrackers(this, dragInfo.blockId, {
+          const blockTrackers = this.mutateBlockTrackers(dragInfo.blockId, {
             screenX: rect.left,
             screenY: rect.top,
             isPlaced: true,
@@ -373,8 +354,8 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const blockTracker = this.state.blockTrackers.find(t => t.blockId == selectedBlockInfo.blockId) as BlockTracker;
     const { block } = blockTracker;
 
-    if (Math.abs(ev.deltaX) > 15) mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipX(block) });
-    if (Math.abs(ev.deltaY) > 15) mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flipY(block) });
+    if (Math.abs(ev.deltaX) > 15) this.mutateBlockTrackers(selectedBlockInfo.blockId, { block: flipX(block) });
+    if (Math.abs(ev.deltaY) > 15) this.mutateBlockTrackers(selectedBlockInfo.blockId, { block: flipY(block) });
   }
 
   handleKeyDown(ev: any) {
@@ -399,7 +380,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       default:
         break;
     }
-    mutateBlockTrackers(this, selectedBlockInfo.blockId, { block: flippedBlock });
+    this.mutateBlockTrackers(selectedBlockInfo.blockId, { block: flippedBlock });
   }
 
   handleSetElement(el: HTMLDivElement) {
@@ -484,5 +465,20 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
         </div>
       </Hammer>
     );
+  }
+
+  mutateBlockTrackers(
+    blockId: number,
+    update: Partial<BlockTracker>,
+    extraState: Partial<PuzzleState> = {}
+  ): BlockTracker[] {
+    const blockTrackers: BlockTracker[] = this.state.blockTrackers.slice().map(tracker => {
+      if (tracker.blockId == blockId) {
+        return { ...tracker, ...update };
+      }
+      return tracker;
+    });
+    this.setState({ ...(extraState as any), blockTrackers });
+    return blockTrackers;
   }
 }

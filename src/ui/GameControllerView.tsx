@@ -5,6 +5,7 @@ import PuzzleView from "./PuzzleView";
 import { Block } from "../primitives";
 
 import { randomPuzzle } from "../puzzle";
+import Button from "./Button";
 
 type Props = {};
 type State = { completed: boolean; blocks: Block[] | null; loading: boolean };
@@ -45,15 +46,9 @@ export default class GameControllerView extends React.Component<Props, State> {
   render() {
     return (
       <div className="game-controller-view">
-        <label className="status">
-          Api:{process.env.API_BASE_URL}
-          Complete:{this.state.completed ? "yes" : "no"}
-        </label>
         {this.state.completed && !this.state.loading && (
           <div className="menu">
-            <button className="play-again" onClick={this.handlePlayAgain}>
-              Play Again
-            </button>
+            <Button text={"Play Again"} onClick={this.handlePlayAgain} />
           </div>
         )}
         {this.renderPuzzle()}
@@ -74,27 +69,7 @@ export default class GameControllerView extends React.Component<Props, State> {
               z-index: 111111;
               text-align: center;
             }
-            .play-again {
-              width: 160px;
-              height: 1cm;
-              background-color: #fff;
-              font-weight: bolder;
-              color: black;
-              border-color: black;
-              border-radius: 5px;
-              outline: none;
-              box-shadow: 0 4px #ccc;
-              z-index: 1000000;
-            }
-            .play-again:active {
-              background-color: #cdcdcd;
-              box-shadow: 0 2px #888;
-              transform: translateY(2px);
-            }
-            .play-again:hover,
-            .play-again:focus {
-              background-color: #efefef;
-            }
+
             .status {
               position: absolute;
               top: 0;

@@ -24,6 +24,7 @@ function PuzzleVisualizedView(props: { grid: ColorGrid }) {
       })}
       <style jsx>{`
         .grid {
+          text-align: center;
           box-sizing: border-box;
           padding: 1em;
           background-color: #eee;
