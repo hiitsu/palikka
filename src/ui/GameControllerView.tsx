@@ -75,10 +75,25 @@ export default class GameControllerView extends React.Component<Props, State> {
               text-align: center;
             }
             .play-again {
-              width: 3cm;
+              width: 160px;
               height: 1cm;
-              background: green;
-              color: lightblue;
+              background-color: #fff;
+              font-weight: bolder;
+              color: black;
+              border-color: black;
+              border-radius: 5px;
+              outline: none;
+              box-shadow: 0 4px #ccc;
+              z-index: 1000000;
+            }
+            .play-again:active {
+              background-color: #cdcdcd;
+              box-shadow: 0 2px #888;
+              transform: translateY(2px);
+            }
+            .play-again:hover,
+            .play-again:focus {
+              background-color: #efefef;
             }
             .status {
               position: absolute;
