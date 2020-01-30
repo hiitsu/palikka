@@ -1,17 +1,10 @@
 import React, { Fragment } from "react";
-import Head from "next/head";
+import CommonHead from "../src/ui/CommonHead";
 
 export default (props: any) => {
   return (
     <Fragment>
-      <Head>
-        <title>about</title>
-        <meta
-          name="viewport"
-          content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"
-          key="viewport"
-        />
-      </Head>
+      <CommonHead title="about" />
       <h1>Palikka h1</h1>
       <p>diipa daapa</p>
       <h2>palikka h2</h2>

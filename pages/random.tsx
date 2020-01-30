@@ -1,9 +1,11 @@
 import { randomPuzzle } from "../src/puzzle";
 import PuzzleVisualizedView from "../src/ui/PuzzleVisualizedView";
+import CommonHead from "../src/ui/CommonHead";
 
 function RandomPuzzles() {
   return (
     <>
+      <CommonHead title="examples of randomized puzzles" />
       <h1>Puzzles</h1>
 
       <h2>Size 4x4</h2>
