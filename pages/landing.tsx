@@ -12,32 +12,54 @@ export default (props: any) => {
       <CommonHead title="landing" />
 
       <div className="container">
-        <h1>Palikka game - Puzzles for all spirits</h1>
+        <header className="row section-header">
+          <div className="col-12">
+            <h1>Palikka game</h1>
+            <p>Puzzles for all spirits</p>
+          </div>
+        </header>
         <div className="row">
           <section className="col-6 section-play-now">
             <StyledNextLink text={"Play Now"} href="/" />
           </section>
           <section className="col-6">
-            <h2></h2>
-
             <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 5 }, 7).colorGrid} />
           </section>
         </div>
 
-        <div className="row">
-          <div className="col-6">
+        <section className="row section-instructions">
+          <div className="col-4 hidden-sm">
+            <PuzzleVisualizedView grid={randomPuzzle({ w: 4, h: 7 }, 7).colorGrid} />
+          </div>
+          <div className="col-8">
             <h2>Instructions</h2>
             <p>
-              On desktop use <b>AWSD</b> or <b>UP,DOWN,LEFT,RIGHT</b> keys to flip blocks around their axis and{" "}
-              <b>Mouse</b> to move them around.
+              On desktop use <strong>AWSD</strong> or <strong>UP</strong>, <strong>DOWN</strong>, <strong>LEFT</strong>,{" "}
+              <strong>RIGHT</strong> keys to flip blocks around their axis and{" "}
+              <img src="/img/mouse.svg" style={{ marginBottom: -4 }} alt="image of mouse" /> <strong>mouse</strong> to
+              move them around.
             </p>
-            <p>On mobile you one finger to move blocks around. Press longer on block to flip it.</p>
+            <p>
+              On mobile you one <img src="/img/finger.svg" style={{ marginBottom: -4 }} alt="image of mouse" />{" "}
+              <strong>finger</strong> to move blocks around. Press longer on block to flip it.
+            </p>
           </div>
-          <div className="col-6">
-            <h2>Privacy</h2>
-            <p>There are no external analytic-service.</p>
+        </section>
+
+        <section className="row section-variations">
+          <div className="col-4">
+            <h2>Simple for kids</h2>
+            <p>Kids can play 5x5 or even 4x4.</p>
           </div>
-        </div>
+          <div className="col-4">
+            <h2>Complex for geniuses</h2>
+            <p>Tweak to you tasting play 5x5, 6x6, or even 7x7</p>
+          </div>
+          <div className="col-4">
+            <h2>Challange your friends</h2>
+            <p>See if your friends are actually dumb as you always thought they are.</p>
+          </div>
+        </section>
 
         <section className="row section-illustrations">
           <div className="col-3">
@@ -59,7 +81,12 @@ export default (props: any) => {
             <h2>Development Blog Post</h2>
             <p>There is a blog post about it</p>
           </section>
+          <div className="col-6">
+            <h2>Privacy</h2>
+            <p>There are no external analytic-service.</p>
+          </div>
         </div>
+
         <section className="row section-illustrations">
           <div className="col-4">
             <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 3 }, 4).colorGrid} />
@@ -73,8 +100,7 @@ export default (props: any) => {
         </section>
       </div>
 
-      <style jsx>{`
-        @import url(https://fonts.googleapis.com/css?family=Lato:400, 300, 300italic, 400italic, 700, 700italic);
+      <style global jsx>{`
         body,
         html {
           height: 100%;
@@ -91,7 +117,7 @@ export default (props: any) => {
           margin-right: auto;
         }
         * {
-          font-family: Lato, Helvetica, sans-serif;
+          font-family: "Inconsolata", monospace;
           color: #333447;
           line-height: 1.5;
         }
@@ -99,7 +125,7 @@ export default (props: any) => {
           font-size: 2.5rem;
         }
         h2 {
-          font-size: 2rem;
+          font-size: 1.5rem;
         }
         h3 {
           font-size: 1.375rem;
@@ -116,7 +142,7 @@ export default (props: any) => {
         p {
           font-size: 1.125rem;
           font-weight: 200;
-          line-height: 1.8;
+          line-height: 1.5rem;
         }
         .font-light {
           font-weight: 300;
@@ -267,14 +293,28 @@ export default (props: any) => {
           padding-bottom: 10em;
         }
         .section-play-now {
-          padding-top: 100px;
+          padding-top: 2rem;
+          padding-bottom: 2rem;
           text-align: center;
+        }
+        .section-instructions {
+          padding-top: 2em;
         }
         .section-illustrations {
           padding-top: 2em;
         }
         .section-blog {
-          padding: 2em 0;
+        }
+        .section-variations {
+        }
+        .section-header h1 {
+          display: inline-block;
+          line-height: 1rem;
+        }
+        .section-header p {
+          margin-left: 2em;
+          line-height: 1rem;
+          display: inline-block;
         }
       `}</style>
     </>
