@@ -18,7 +18,7 @@ export default function StyledNextLink(props: StyledNextLinkProps) {
             border: 1px solid #000;
             text-decoration: none;
             outline: none;
-            box-shadow: 0 4px #ccc;
+            box-shadow: 4px 4px #ccc;
             z-index: 1000000;
             display: inline-block;
             line-height: 3em;
@@ -26,12 +26,12 @@ export default function StyledNextLink(props: StyledNextLinkProps) {
           }
           .button:active {
             background-color: #cdcdcd;
-            box-shadow: 0 2px #888;
+            box-shadow: 2px 2px #888;
             transform: translateY(2px);
           }
           .button:hover,
           .button:focus {
-            background-color: #efefef;
+            background-color: #fafafa;
           }
         `}</style>
       </a>
