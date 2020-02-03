@@ -22,7 +22,7 @@ export default function(
       reply
         .header("Content-Type", "application/json")
         .code(201)
-        .send({ id: puzzleId, blocks: puzzle.blocks });
+        .send({ data: { id: puzzleId, blocks: puzzle.blocks } });
     }
   );
 

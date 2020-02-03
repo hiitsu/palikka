@@ -4,7 +4,6 @@
 
 import Api from "./Api";
 import nock from "nock";
-import { Auth } from "../primitives";
 
 describe("Api", () => {
   const baseUrl = `http://localhost:8089`;
@@ -37,7 +36,7 @@ describe("Api", () => {
           .post("/signup")
           .reply(201, auth);
         const signup = await Api.user.signup();
-        expect(signup).toEqual({ ...auth });
+        expect(signup).toEqual({ data: { ...auth } });
         scope.done();
         nock.cleanAll();
       });

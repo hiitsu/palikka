@@ -38,7 +38,7 @@ export default function(
       reply
         .header("Content-Type", "application/json")
         .code(201)
-        .send({ id });
+        .send({ data: { ...solution, id } });
     }
   );
 
@@ -53,7 +53,7 @@ export default function(
         .where("userId", userId)
         .catch(fastifyErrorHandler(reply));
       reply.header("Content-Type", "application/json").code(200);
-      reply.send({ scores });
+      reply.send({ data: scores });
     }
   );
 

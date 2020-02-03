@@ -28,7 +28,7 @@ export default function(
       reply
         .header("Content-Type", "application/json")
         .code(201)
-        .send(auth);
+        .send({ data: auth });
     }
   );
 
@@ -40,7 +40,7 @@ export default function(
       reply
         .header("Content-Type", "application/json")
         .code(200)
-        .send(auth);
+        .send({ data: auth });
     }
   );
 
