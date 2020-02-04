@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import CommonHead from "../src/ui/CommonHead";
 import Head from "next/head";
 import PuzzleVisualizedView from "../src/ui/PuzzleVisualizedView";
-import { randomPuzzle } from "../src/puzzle";
+import { randomPuzzle, renderColorGrid } from "../src/puzzle";
 import Button from "../src/ui/Button";
 import StyledNextLink from "../src/ui/StyledNextLink";
 
@@ -26,16 +26,16 @@ export default (props: any) => {
         <div className="container">
           <div className="row">
             <div className="col-2">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 7).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 6 }, 7))} />
             </div>
             <div className="col-2">
               <StyledNextLink text={"Play Now"} href="/" />
             </div>
             <div className="col-2 hidden-sm">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 7).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 6 }, 7))} />
             </div>
             <div className="col-2 hidden-sm">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 7).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 6 }, 7))} />
             </div>
           </div>
         </div>
@@ -45,7 +45,7 @@ export default (props: any) => {
         <div className="container">
           <div className="row">
             <div className="col-2 hidden-sm">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 8 }, 7).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 5, h: 8 }, 7))} />
             </div>
             <div className="col-6">
               <h2>Instructions</h2>
@@ -89,16 +89,16 @@ export default (props: any) => {
         <div className="container">
           <div className="row">
             <div className="col-2">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 3 }, 4).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 3 }, 4))} />
             </div>
             <div className="col-2">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 5).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 6 }, 5))} />
             </div>
             <div className="col-2">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 9 }, 6).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 9 }, 6))} />
             </div>
             <div className="col-2">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 7 }, 6).colorGrid} />
+              <PuzzleVisualizedView grid={renderColorGrid(randomPuzzle({ w: 6, h: 7 }, 6))} />
             </div>
           </div>
         </div>

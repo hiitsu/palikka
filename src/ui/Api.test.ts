@@ -36,7 +36,7 @@ describe("Api", () => {
           .post("/signup")
           .reply(201, auth);
         const signup = await Api.user.signup();
-        expect(signup).toEqual({ data: { ...auth } });
+        expect(signup).toEqual({ ...auth });
         scope.done();
         nock.cleanAll();
       });

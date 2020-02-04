@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React from "react";
 import { AuthProvider, AuthConsumer } from "../src/ui/AuthContext";
 import ScoreList from "../src/ui/SolutionList";
 import CommonHead from "../src/ui/CommonHead";

@@ -26,7 +26,7 @@ export default class GameControllerView extends React.Component<Props, State> {
 
   componentDidMount() {
     setTimeout(() => {
-      const blocks = randomPuzzle({ w: 6, h: 6 }).blocks;
+      const blocks = randomPuzzle({ w: 6, h: 6 }).positionedBlocks.map(positionedBlock => positionedBlock.block);
       this.setState({ blocks, loading: false, completed: false });
     }, 500);
   }
@@ -38,7 +38,7 @@ export default class GameControllerView extends React.Component<Props, State> {
   handlePlayAgain() {
     this.setState({ loading: true, completed: false });
     setTimeout(() => {
-      const blocks = randomPuzzle({ w: 6, h: 6 }).blocks;
+      const blocks = randomPuzzle({ w: 6, h: 6 }).positionedBlocks.map(positionedBlock => positionedBlock.block);
       this.setState({ blocks, loading: false });
     }, 500);
   }

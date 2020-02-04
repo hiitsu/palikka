@@ -1,7 +1,7 @@
-import { Block, Slot, PositionedBlock, Size } from "./primitives";
+import { Block, Slot, PositionedBlock, Size, Puzzle, ColorGrid } from "./primitives";
 import { sizeOf, allBlockVariations } from "./block";
 import { arrayShuffle, arrayOfPoints } from "./util";
-import { canFit, colorGrid, allocationGrid } from "./grid";
+import { canFit, allocationGrid, colorGrid } from "./grid";
 
 export const blocks: Block[] = [
   [[1]],
@@ -179,7 +179,7 @@ export const blocks: Block[] = [
   ]
 ];
 
-export function randomPuzzle(puzzleSize: Size, maxBlockSize = 10) {
+export function randomPuzzle(puzzleSize: Size, maxBlockSize = 10): Puzzle {
   const blocksWithMatchingSize = allBlockVariations(blocks.filter(block => sizeOf(block) <= maxBlockSize));
   const positionedBlocks: Array<PositionedBlock> = [];
 
@@ -226,14 +226,13 @@ export function randomPuzzle(puzzleSize: Size, maxBlockSize = 10) {
     });
   });
 
-  const p = {
+  const puzzle = {
     positionedBlocks,
-    size: puzzleSize,
-    blocks: positionedBlocks.map(p => p.block),
-    colorGrid: colorGrid(puzzleSize, positionedBlocks)
+    width: puzzleSize.w,
+    height: puzzleSize.h
   };
 
-  return p;
+  return puzzle;
 }
 
 export function isComplete(size: Size, positionedBlocks: PositionedBlock[]): boolean {
@@ -243,4 +242,8 @@ export function isComplete(size: Size, positionedBlocks: PositionedBlock[]): boo
     .concat(...grid)
     .reduce((memo, slot) => (slot == Slot.Taken ? memo + 1 : memo));
   return allocatedCount === totalCount;
+}
+
+export function renderColorGrid(puzzle: Puzzle): ColorGrid {
+  return colorGrid({ w: puzzle.width, h: puzzle.height }, puzzle.positionedBlocks);
 }

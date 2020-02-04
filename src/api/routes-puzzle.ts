@@ -11,18 +11,17 @@ export default function(
   fastify.post(
     "/puzzle",
     async (request: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
-      const size = 6;
-      const puzzle = randomPuzzle({ w: size, h: size }, 10);
-      const [puzzleId] = await knex("puzzles")
-        .insert({ blocks: JSON.stringify(puzzle.blocks), width: size, height: size })
-        .returning("id");
-      const [solutionId] = await knex("solutions")
-        .insert({ blocks: JSON.stringify(puzzle.positionedBlocks), userId: null, seconds: 0, puzzleId })
+      const puzzle = randomPuzzle({ w: 6, h: 6 }, 10);
+      const [id] = await knex("puzzles")
+        .insert({
+          ...puzzle,
+          positionedBlocks: JSON.stringify(puzzle.positionedBlocks)
+        })
         .returning("id");
       reply
         .header("Content-Type", "application/json")
         .code(201)
-        .send({ data: { id: puzzleId, blocks: puzzle.blocks } });
+        .send({ data: { id, positionedBlocks: puzzle.positionedBlocks } });
     }
   );
 

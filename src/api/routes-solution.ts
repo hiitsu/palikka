@@ -12,13 +12,15 @@ export default function(
   const schema = {
     body: {
       type: "object",
-      required: ["puzzleId", "blocks"],
+      required: ["puzzleId", "positionedBlocks", "width", "height"],
       properties: {
         blocks: {
           type: "array",
           maxItems: 20
         },
         seconds: { type: "number", minimum: 1, maximum: 60 * 60 },
+        width: { type: "integer", minimum: 2, maximum: 16 },
+        height: { type: "integer", minimum: 2, maximum: 16 },
         puzzleId: { type: "integer" }
       }
     }
@@ -29,8 +31,8 @@ export default function(
     { schema, onRequest: onRequestVerifyJWT },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const userId = (req.user as any).sub;
-      const solution = { ...req.body, blocks: JSON.stringify(req.body.blocks), userId };
-      const id = await knex("solutions")
+      const solution = { ...req.body, positionedBlocks: JSON.stringify(req.body.positionedBlocks), userId };
+      const id = await knex("puzzles")
         .insert(solution)
         .returning("id")
         .then(ids => ids[0])
@@ -49,7 +51,8 @@ export default function(
       const userId = (req.user as any).sub;
       const scores = await knex
         .from("solutions")
-        .select("seconds", "puzzleId", "blocks")
+        .select("seconds", "puzzleId", "positionedBlocks", "createdAt")
+        .orderBy("createdAt", "asc")
         .where("userId", userId)
         .catch(fastifyErrorHandler(reply));
       reply.header("Content-Type", "application/json").code(200);

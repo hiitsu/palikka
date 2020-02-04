@@ -51,4 +51,19 @@ dropdb palikkatest
 dropuser palikkatest_user
 dropdb palikka
 dropuser palikka_user
+
+createdb palikkatest
+createuser palikkatest_user
+psql -e -c "alter user palikkatest_user with encrypted password 'palikka123';"
+psql -e -c "grant all privileges on database palikkatest to palikkatest_user;"
+
+createdb palikka
+createuser palikka_user
+psql -e -c "alter user palikka_user with encrypted password 'palikka123';"
+psql -e -c "grant all privileges on database palikka to palikka_user;"
+
+npx knex migrate:latest --env development --knexfile src/database/knexfile.ts
+npx knex migrate:latest --env test --knexfile src/database/knexfile.ts
+
+
 ```

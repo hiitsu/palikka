@@ -20,11 +20,14 @@ export type PositionedBlock = {
   block: Block;
 };
 
-export type Score = {
-  id: number;
-  userId: number;
-  seconds: number;
-  puzzleId: number;
+export type Puzzle = {
+  id?: number;
+  userId?: number;
+  seconds?: number;
+  puzzleId?: number;
+  createdAt?: Date;
+  width: number;
+  height: number;
   positionedBlocks: PositionedBlock[];
 };
 

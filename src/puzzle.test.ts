@@ -40,7 +40,10 @@ describe("Puzzle", () => {
         const puzzleSize: Size = { w: 6, h: 6 };
         const maxBlockSize = 10;
         const ingredients = randomPuzzle(puzzleSize, maxBlockSize);
-        const totalBlockSum = ingredients.blocks.reduce((memo, block) => memo + sizeOf(block), 0);
+        const totalBlockSum = ingredients.positionedBlocks.reduce(
+          (memo, positionedBlock) => memo + sizeOf(positionedBlock.block),
+          0
+        );
         //console.log("isComplete", isComplete(puzzleSize, ingredients.positionedBlocks));
         expect(totalBlockSum).toBe(puzzleSize.w * puzzleSize.h);
       }
@@ -50,7 +53,10 @@ describe("Puzzle", () => {
         const puzzleSize: Size = { w: 5, h: 5 };
         const maxBlockSize = 10;
         const ingredients = randomPuzzle(puzzleSize, maxBlockSize);
-        const totalBlockSum = ingredients.blocks.reduce((memo, block) => memo + sizeOf(block), 0);
+        const totalBlockSum = ingredients.positionedBlocks.reduce(
+          (memo, positionedBlock) => memo + sizeOf(positionedBlock.block),
+          0
+        );
         //console.log("isComplete", isComplete(puzzleSize, ingredients.positionedBlocks));
         expect(totalBlockSum).toBe(puzzleSize.w * puzzleSize.h);
       }
@@ -60,7 +66,10 @@ describe("Puzzle", () => {
         const puzzleSize: Size = { w: 8, h: 8 };
         const maxBlockSize = 10;
         const ingredients = randomPuzzle(puzzleSize, maxBlockSize);
-        const totalBlockSum = ingredients.blocks.reduce((memo, block) => memo + sizeOf(block), 0);
+        const totalBlockSum = ingredients.positionedBlocks.reduce(
+          (memo, positionedBlock) => memo + sizeOf(positionedBlock.block),
+          0
+        );
         //console.log("isComplete", isComplete(puzzleSize, ingredients.positionedBlocks));
         expect(totalBlockSum).toBe(puzzleSize.w * puzzleSize.h);
       }
