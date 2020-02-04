@@ -10,15 +10,20 @@ module.exports.up = async (knex: Knex): Promise<any> => {
     table
       .integer("puzzleId")
       .nullable()
+      .defaultTo(null)
       .references("id")
       .inTable("puzzles");
     table
       .integer("userId")
       .nullable()
+      .defaultTo(null)
       .references("id")
       .inTable("users");
     table.jsonb("positionedBlocks").notNullable();
-    table.decimal("seconds").nullable();
+    table
+      .decimal("seconds")
+      .nullable()
+      .defaultTo(null);
     table.integer("width").notNullable();
     table.integer("height").notNullable();
     table.timestamp("createdAt").defaultTo(knex.fn.now());

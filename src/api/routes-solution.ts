@@ -12,7 +12,7 @@ export default function(
   const schema = {
     body: {
       type: "object",
-      required: ["puzzleId", "positionedBlocks", "width", "height"],
+      required: ["puzzleId", "positionedBlocks", "width", "height", "seconds"],
       properties: {
         blocks: {
           type: "array",
@@ -50,7 +50,7 @@ export default function(
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const userId = (req.user as any).sub;
       const scores = await knex
-        .from("solutions")
+        .from("puzzles")
         .select("seconds", "puzzleId", "positionedBlocks", "createdAt")
         .orderBy("createdAt", "asc")
         .where("userId", userId)

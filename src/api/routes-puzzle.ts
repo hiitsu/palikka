@@ -21,7 +21,7 @@ export default function(
       reply
         .header("Content-Type", "application/json")
         .code(201)
-        .send({ data: { id, positionedBlocks: puzzle.positionedBlocks } });
+        .send({ data: { id, ...puzzle } });
     }
   );
 

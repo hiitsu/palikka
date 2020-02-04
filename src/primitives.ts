@@ -22,13 +22,13 @@ export type PositionedBlock = {
 
 export type Puzzle = {
   id?: number;
-  userId?: number;
-  seconds?: number;
-  puzzleId?: number;
   createdAt?: Date;
   width: number;
   height: number;
   positionedBlocks: PositionedBlock[];
+  userId?: number;
+  seconds?: number;
+  puzzleId?: number;
 };
 
 export type Auth = { token: string; user: { id: number | string } };

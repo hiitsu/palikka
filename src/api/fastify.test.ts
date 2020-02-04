@@ -21,17 +21,23 @@ describe("api", () => {
       .set("Authorization", `Bearer ${auth.token}`)
       .send({})
       .expect(201);
-    expect(res.body.data.id).toBeGreaterThanOrEqual(1);
-    expect(res.body.data.positionedBlocks.length).toBeGreaterThanOrEqual(2);
-    return res.body.data;
+
+    const puzzle: Puzzle = res.body.data;
+    expect(puzzle.id).toBeGreaterThanOrEqual(1);
+    expect(puzzle.positionedBlocks.length).toBeGreaterThanOrEqual(2);
+    expect(puzzle.width).toBeGreaterThanOrEqual(2);
+    expect(puzzle.height).toBeGreaterThanOrEqual(2);
+    return puzzle;
   }
 
-  async function saveSolution(auth: Auth, solution: any): Promise<Puzzle> {
+  async function saveSolution(auth: Auth, solution: Puzzle): Promise<Puzzle> {
+    delete solution.id;
     const res = await supertest(fastify.server)
       .post("/solution")
       .set("Authorization", `Bearer ${auth.token}`)
       .send(solution)
       .expect(201);
+
     return res.body.data;
   }
 
@@ -99,13 +105,13 @@ describe("api", () => {
     beforeAll(async () => {});
 
     beforeEach(async () => {
-      await knex("users").del();
       await knex("puzzles").del();
+      await knex("users").del();
     });
 
     afterEach(async () => {
-      await knex("users").del();
       await knex("puzzles").del();
+      await knex("users").del();
     });
 
     describe("saving a new solution ", () => {
@@ -148,7 +154,7 @@ describe("api", () => {
         });
       });
 
-      it.only("should return id when succesfully saving one", async () => {
+      it("should return id when succesfully saving one", async () => {
         const user = await signUp();
         const puzzle = await newPuzzle(user);
         const solution = { ...puzzle, puzzleId: puzzle.id, seconds: 12 };
@@ -182,11 +188,15 @@ describe("api", () => {
       it("should enlist a saved solution", async () => {
         const user = await signUp();
         const puzzle = await newPuzzle(user);
-        await saveSolution(user, { puzzleId: puzzle.id, positionedBlocks: puzzle.positionedBlocks, seconds: 12 });
+        await saveSolution(user, { ...puzzle, puzzleId: puzzle.id, seconds: 12 });
         const res = await supertest(fastify.server)
           .get("/solution")
           .set("Authorization", `Bearer ${user.token}`)
-          .expect(200);
+          .expect(200)
+          .catch(err => {
+            console.log(err);
+            return err;
+          });
         expect(res.body.data).toHaveLength(1);
         expect(res.body.data[0].puzzleId).toBe(puzzle.id);
       });
@@ -194,11 +204,11 @@ describe("api", () => {
       it("should enlist saved solutions in order", async () => {
         const user = await signUp();
         const first = await newPuzzle(user);
-        await saveSolution(user, { puzzleId: first.id, positionedBlocks: first.positionedBlocks, seconds: 12 });
+        await saveSolution(user, { ...first, puzzleId: first.id, seconds: 12 });
         const second = await newPuzzle(user);
-        await saveSolution(user, { puzzleId: second.id, positionedBlocks: second.positionedBlocks, seconds: 12 });
+        await saveSolution(user, { ...second, puzzleId: second.id, seconds: 12 });
         const third = await newPuzzle(user);
-        await saveSolution(user, { puzzleId: third.id, positionedBlocks: third.positionedBlocks, seconds: 12 });
+        await saveSolution(user, { ...third, puzzleId: third.id, seconds: 12 });
         const res = await supertest(fastify.server)
           .get("/solution")
           .set("Authorization", `Bearer ${user.token}`)
