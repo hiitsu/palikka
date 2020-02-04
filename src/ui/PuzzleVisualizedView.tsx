@@ -1,13 +1,13 @@
 import { ColorGrid } from "../primitives";
 import colors from "../colors";
-import ContainerDimensions from "react-container-dimensions";
+import ParentWith from "./ParentWidth";
 
 function PuzzleVisualizedView(props: { grid: ColorGrid }) {
-  const w = props.grid[0].length;
   return (
-    <ContainerDimensions>
-      {({ width }) => {
-        const size = width / w;
+    <ParentWith>
+      {(info: any) => {
+        const w = props.grid[0].length;
+        const size = (info.width as number) / w;
         return (
           <div className="grid">
             {props.grid.map((row, index) => {
@@ -30,24 +30,24 @@ function PuzzleVisualizedView(props: { grid: ColorGrid }) {
                 </div>
               );
             })}
+            <style jsx>{`
+              .grid {
+                text-align: left;
+                box-sizing: border-box;
+                padding: 0;
+              }
+              .grid-row {
+                box-sizing: border-box;
+              }
+              .slot {
+                display: inline-block;
+                box-sizing: border-box;
+              }
+            `}</style>
           </div>
         );
       }}
-      <style jsx>{`
-        .grid {
-          text-align: left;
-          box-sizing: border-box;
-          padding: 0;
-        }
-        .grid-row {
-          box-sizing: border-box;
-        }
-        .slot {
-          display: inline-block;
-          box-sizing: border-box;
-        }
-      `}</style>
-    </ContainerDimensions>
+    </ParentWith>
   );
 }
 
