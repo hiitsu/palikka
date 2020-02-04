@@ -19,6 +19,7 @@ export default function Button(props: ButtonProps) {
           z-index: 1000000;
           display: inline-block;
           user-select: none;
+          text-align: center;
         }
         .button:active {
           background-color: #cdcdcd;

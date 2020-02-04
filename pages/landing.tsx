@@ -11,94 +11,119 @@ export default (props: any) => {
     <>
       <CommonHead title="landing" />
 
-      <div className="container">
-        <header className="row section-header">
-          <div className="col-12">
-            <h1>Palikka game</h1>
-            <p>Puzzles for all spirits</p>
-          </div>
-        </header>
-        <div className="row">
-          <section className="col-6 section-play-now">
-            <StyledNextLink text={"Play Now"} href="/" />
-          </section>
-          <section className="col-6">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 5 }, 7).colorGrid} />
-          </section>
+      <header className="section-header">
+        <div className="container">
+          <h1>Palikka</h1>
+          <p>(Yet another dumbass puzzle game)</p>
         </div>
+      </header>
 
-        <section className="row section-instructions">
-          <div className="col-4 hidden-sm">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 4, h: 7 }, 7).colorGrid} />
-          </div>
-          <div className="col-8">
-            <h2>Instructions</h2>
-            <p>
-              On desktop use <strong>AWSD</strong> or <strong>UP</strong>, <strong>DOWN</strong>, <strong>LEFT</strong>,{" "}
-              <strong>RIGHT</strong> keys to flip blocks around their axis and{" "}
-              <img src="/img/mouse.svg" style={{ marginBottom: -4 }} alt="image of mouse" /> <strong>mouse</strong> to
-              move them around.
-            </p>
-            <p>
-              On mobile you one <img src="/img/finger.svg" style={{ marginBottom: -4 }} alt="image of mouse" />{" "}
-              <strong>finger</strong> to move blocks around. Press longer on block to flip it.
-            </p>
-          </div>
-        </section>
-
-        <section className="row section-variations">
-          <div className="col-4">
-            <h2>Simple for kids</h2>
-            <p>Kids can play 5x5 or even 4x4.</p>
-          </div>
-          <div className="col-4">
-            <h2>Complex for geniuses</h2>
-            <p>Tweak to you tasting play 5x5, 6x6, or even 7x7</p>
-          </div>
-          <div className="col-4">
-            <h2>Challange your friends</h2>
-            <p>See if your friends are actually dumb as you always thought they are.</p>
-          </div>
-        </section>
-
-        <section className="row section-illustrations">
-          <div className="col-3">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 3 }, 4).colorGrid} />
-          </div>
-          <div className="col-3">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 4 }, 5).colorGrid} />
-          </div>
-          <div className="col-3">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 5 }, 6).colorGrid} />
-          </div>
-          <div className="col-3">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 6 }, 7).colorGrid} />
-          </div>
-        </section>
-
-        <div className="row">
-          <section className="col-6 section-blog">
-            <h2>Development Blog Post</h2>
-            <p>There is a blog post about it</p>
-          </section>
-          <div className="col-6">
-            <h2>Privacy</h2>
-            <p>There are no external analytic-service.</p>
+      <section className="section-play-now">
+        <div className="container">
+          <div className="row">
+            <div className="col-6">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 10, h: 5 }, 7).colorGrid} />
+            </div>
+            <div className="col-2">
+              <StyledNextLink text={"Play Now"} href="/" />
+            </div>
           </div>
         </div>
+      </section>
 
-        <section className="row section-illustrations">
-          <div className="col-4">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 3 }, 4).colorGrid} />
+      <section className="section-instructions">
+        <div className="container">
+          <div className="row">
+            <div className="col-2 hidden-sm">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 8 }, 7).colorGrid} />
+            </div>
+            <div className="col-6">
+              <h2>Instructions</h2>
+              <p>
+                On desktop use <strong>AWSD</strong> or <strong>UP</strong>, <strong>DOWN</strong>,{" "}
+                <strong>LEFT</strong>, <strong>RIGHT</strong> keys to flip blocks around their axis and{" "}
+                <img src="/img/mouse.svg" style={{ marginBottom: -4 }} alt="image of mouse" /> <strong>mouse</strong> to
+                move them around.
+              </p>
+              <p>
+                On mobile you one <img src="/img/finger.svg" style={{ marginBottom: -4 }} alt="image of mouse" />{" "}
+                <strong>finger</strong> to move blocks around. Press longer on block to flip it.
+              </p>
+            </div>
           </div>
-          <div className="col-4">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 6 }, 5).colorGrid} />
+        </div>
+      </section>
+
+      <section className="section-variations">
+        <div className="container">
+          <div className="row">
+            <div className="col-4">
+              <h2>Simple for kids</h2>
+              <p>Kids get easily bored, and they play way too much, so let them play.</p>
+            </div>
+            <div className="col-4">
+              <h2>Wanna be genius?</h2>
+              <p>Let's face it, this game will not make you smart, but you can always try.</p>
+            </div>
+            <div className="row">
+              <div className="col-4">
+                <h2>Challenge your friends</h2>
+                <p>See if your friends are actually dumb as you always thought they were.</p>
+              </div>
+            </div>
           </div>
-          <div className="col-4">
-            <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 9 }, 6).colorGrid} />
+        </div>
+      </section>
+
+      <section className="section-illustrations">
+        <div className="container">
+          <div className="row">
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 3 }, 4).colorGrid} />
+            </div>
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 4 }, 5).colorGrid} />
+            </div>
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 5 }, 6).colorGrid} />
+            </div>
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 6 }, 7).colorGrid} />
+            </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      <section className="section-boring">
+        <div className="container">
+          <div className="row">
+            <section className="col-4">
+              <h2>Development Blog Post</h2>
+              <p>There is a blog post about it</p>
+            </section>
+            <div className="col-4">
+              <h2>Privacy</h2>
+              <p>There are no external analytic-service.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="row section-illustrations">
+        <div className="container">
+          <div className="row">
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 3 }, 4).colorGrid} />
+            </div>
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 6 }, 5).colorGrid} />
+            </div>
+            <div className="col-4">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 9 }, 6).colorGrid} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <style global jsx>{`
         body,
@@ -111,20 +136,20 @@ export default (props: any) => {
           top: 0;
           font-size: 100%;
         }
-        .center,
         .container {
           margin-left: auto;
           margin-right: auto;
         }
         * {
           font-family: "Inconsolata", monospace;
-          color: #333447;
           line-height: 1.5;
         }
         h1 {
           font-size: 2.5rem;
         }
         h2 {
+          margin-top: 0;
+          padding-top: 0;
           font-size: 1.5rem;
         }
         h3 {
@@ -144,27 +169,6 @@ export default (props: any) => {
           font-weight: 200;
           line-height: 1.5rem;
         }
-        .font-light {
-          font-weight: 300;
-        }
-        .font-regular {
-          font-weight: 400;
-        }
-        .font-heavy {
-          font-weight: 700;
-        }
-        .left {
-          text-align: left;
-        }
-        .right {
-          text-align: right;
-        }
-        .center {
-          text-align: center;
-        }
-        .justify {
-          text-align: justify;
-        }
         .container {
           width: 90%;
         }
@@ -174,58 +178,16 @@ export default (props: any) => {
         }
         .row [class*="col-"] {
           float: left;
-          margin: 0.5rem 2%;
+          margin: 0;
           min-height: 0.125rem;
+          /*box-sizing: border-box;
+          border: 1px solid #ccc;*/
         }
-        .col-1,
-        .col-10,
-        .col-11,
-        .col-12,
         .col-2,
-        .col-3,
         .col-4,
-        .col-5,
         .col-6,
-        .col-7,
-        .col-8,
-        .col-9 {
-          width: 96%;
-        }
-        .col-1-sm {
-          width: 4.33%;
-        }
-        .col-2-sm {
-          width: 12.66%;
-        }
-        .col-3-sm {
-          width: 21%;
-        }
-        .col-4-sm {
-          width: 29.33%;
-        }
-        .col-5-sm {
-          width: 37.66%;
-        }
-        .col-6-sm {
-          width: 46%;
-        }
-        .col-7-sm {
-          width: 54.33%;
-        }
-        .col-8-sm {
-          width: 62.66%;
-        }
-        .col-9-sm {
-          width: 71%;
-        }
-        .col-10-sm {
-          width: 79.33%;
-        }
-        .col-11-sm {
-          width: 87.66%;
-        }
-        .col-12-sm {
-          width: 96%;
+        .col-8 {
+          width: 100%;
         }
         .row::after {
           content: "";
@@ -241,41 +203,17 @@ export default (props: any) => {
           }
         }
         @media only screen and (min-width: 45em) {
-          .col-1 {
-            width: 4.33%;
-          }
           .col-2 {
-            width: 12.66%;
-          }
-          .col-3 {
-            width: 21%;
+            width: 25%;
           }
           .col-4 {
-            width: 29.33%;
-          }
-          .col-5 {
-            width: 37.66%;
+            width: 50%;
           }
           .col-6 {
-            width: 46%;
-          }
-          .col-7 {
-            width: 54.33%;
+            width: 75%;
           }
           .col-8 {
-            width: 62.66%;
-          }
-          .col-9 {
-            width: 71%;
-          }
-          .col-10 {
-            width: 79.33%;
-          }
-          .col-11 {
-            width: 87.66%;
-          }
-          .col-12 {
-            width: 96%;
+            width: 100%;
           }
           .hidden-sm {
             display: block;
@@ -287,34 +225,35 @@ export default (props: any) => {
             max-width: 60rem;
           }
         }
-        .container {
-          padding-top: 4em;
-          max-width: 50rem;
-          padding-bottom: 10em;
+
+        [class*="section-"] {
+          padding: 2em 0;
+          color: #333447;
         }
+
         .section-play-now {
-          padding-top: 2rem;
-          padding-bottom: 2rem;
-          text-align: center;
+          background: #ededed;
         }
         .section-instructions {
-          padding-top: 2em;
         }
         .section-illustrations {
-          padding-top: 2em;
         }
-        .section-blog {
+        .section-boring {
+          background-color: #e1e1b0;
+          color: #333;
         }
         .section-variations {
+          background-color: #e1e1b0;
+          color: #333;
         }
         .section-header h1 {
-          display: inline-block;
           line-height: 1rem;
+          margin-bottom: 0.4em;
         }
         .section-header p {
-          margin-left: 2em;
+          margin-left: 0;
+          margin-top: 0;
           line-height: 1rem;
-          display: inline-block;
         }
       `}</style>
     </>
