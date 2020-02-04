@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { debounce } from "../util";
 
 type ParentWithProps = { children: any };
 type ParentWithState = { width: number };
@@ -15,7 +16,7 @@ export default class ParentWith extends Component<ParentWithProps, ParentWithSta
     };
 
     this.handlSetRef = this.handlSetRef.bind(this);
-    this.handleResize = this.handleResize.bind(this);
+    this.handleResize = debounce(this.handleResize.bind(this), 50);
   }
 
   componentDidMount() {

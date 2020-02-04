@@ -36,3 +36,14 @@ export default function snapToGrid(x: number, y: number, gridSize: number = 32) 
   const snappedY = Math.round(y / gridSize) * gridSize;
   return [snappedX, snappedY];
 }
+
+export const debounce = <F extends (...args: any) => any>(func: F, waitFor: number) => {
+  let timeout: number = 0;
+
+  const debounced = (...args: any) => {
+    clearTimeout(timeout);
+    setTimeout(() => func(...args));
+  };
+
+  return debounced as (...args: Parameters<F>) => ReturnType<F>;
+};

@@ -38,6 +38,7 @@ function PuzzleVisualizedView(props: { grid: ColorGrid }) {
               }
               .grid-row {
                 box-sizing: border-box;
+                white-space: nowrap;
               }
               .slot {
                 display: inline-block;

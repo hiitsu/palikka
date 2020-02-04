@@ -13,19 +13,29 @@ export default (props: any) => {
 
       <header className="section-header">
         <div className="container">
-          <h1>Palikka</h1>
-          <p>(Yet another dumbass puzzle game)</p>
+          <div className="row">
+            <div className="col-8">
+              <h1>Palikka</h1>
+              <p>(Yet another dumbass puzzle game)</p>
+            </div>
+          </div>
         </div>
       </header>
 
       <section className="section-play-now">
         <div className="container">
           <div className="row">
-            <div className="col-6">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 10, h: 5 }, 7).colorGrid} />
+            <div className="col-2">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 7).colorGrid} />
             </div>
             <div className="col-2">
               <StyledNextLink text={"Play Now"} href="/" />
+            </div>
+            <div className="col-2 hidden-sm">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 7).colorGrid} />
+            </div>
+            <div className="col-2 hidden-sm">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 7).colorGrid} />
             </div>
           </div>
         </div>
@@ -65,11 +75,11 @@ export default (props: any) => {
               <h2>Wanna be genius?</h2>
               <p>Let's face it, this game will not make you smart, but you can always try.</p>
             </div>
-            <div className="row">
-              <div className="col-4">
-                <h2>Challenge your friends</h2>
-                <p>See if your friends are actually dumb as you always thought they were.</p>
-              </div>
+          </div>
+          <div className="row">
+            <div className="col-4">
+              <h2>Challenge your friends</h2>
+              <p>See if your friends are actually dumb as you always thought they were.</p>
             </div>
           </div>
         </div>
@@ -78,17 +88,17 @@ export default (props: any) => {
       <section className="section-illustrations">
         <div className="container">
           <div className="row">
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 3 }, 4).colorGrid} />
+            <div className="col-2">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 3 }, 4).colorGrid} />
             </div>
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 4 }, 5).colorGrid} />
+            <div className="col-2">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 6 }, 5).colorGrid} />
             </div>
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 5 }, 6).colorGrid} />
+            <div className="col-2">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 9 }, 6).colorGrid} />
             </div>
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 3, h: 6 }, 7).colorGrid} />
+            <div className="col-2">
+              <PuzzleVisualizedView grid={randomPuzzle({ w: 6, h: 7 }, 6).colorGrid} />
             </div>
           </div>
         </div>
@@ -104,22 +114,6 @@ export default (props: any) => {
             <div className="col-4">
               <h2>Privacy</h2>
               <p>There are no external analytic-service.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="row section-illustrations">
-        <div className="container">
-          <div className="row">
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 3 }, 4).colorGrid} />
-            </div>
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 6 }, 5).colorGrid} />
-            </div>
-            <div className="col-4">
-              <PuzzleVisualizedView grid={randomPuzzle({ w: 5, h: 9 }, 6).colorGrid} />
             </div>
           </div>
         </div>
@@ -170,7 +164,8 @@ export default (props: any) => {
           line-height: 1.5rem;
         }
         .container {
-          width: 90%;
+          width: 100%;
+          max-width: 1023px;
         }
         .row {
           position: relative;
@@ -179,8 +174,10 @@ export default (props: any) => {
         .row [class*="col-"] {
           float: left;
           margin: 0;
+          padding: 0 0.5rem;
           min-height: 0.125rem;
-          /*box-sizing: border-box;
+          box-sizing: border-box;
+          /*
           border: 1px solid #ccc;*/
         }
         .col-2,
@@ -235,8 +232,6 @@ export default (props: any) => {
           background: #ededed;
         }
         .section-instructions {
-        }
-        .section-illustrations {
         }
         .section-boring {
           background-color: #e1e1b0;
