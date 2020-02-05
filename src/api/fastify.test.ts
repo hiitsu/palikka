@@ -4,6 +4,7 @@ import buildFastify from "./fastify";
 import knex, { destroy } from "./knex";
 import supertest from "supertest";
 import { Auth, Puzzle } from "../primitives";
+import { isComplete } from "../puzzle";
 
 type FastifyInstance = Fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>;
 
@@ -247,6 +248,10 @@ describe("api", () => {
 
       it("should have positionedBlocks more than 2", async () => {
         expect(puzzle.positionedBlocks.length).toBeGreaterThan(2);
+      });
+
+      it("should not send completed puzzle", async () => {
+        expect(isComplete(puzzle)).toBe(false);
       });
 
       it("should have mirror the request width and height", async () => {

@@ -1,9 +1,9 @@
 import React, { Fragment, useState, useEffect } from "react";
 import Api from "./Api";
-import { Score } from "src/primitives";
+import { Puzzle } from "src/primitives";
 
 export default (props: { signedUp: boolean }) => {
-  const [solutions, setSolutions] = useState<Score[]>([]);
+  const [solutions, setSolutions] = useState<Puzzle[]>([]);
 
   useEffect(() => {
     if (!props.signedUp) Api.solution.list().then((res: any) => setSolutions(res.data.solutions));

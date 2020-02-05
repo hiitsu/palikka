@@ -252,16 +252,17 @@ const PuzzleStates: States = {
             gridX: x - dragInfo.xy.x,
             gridY: y - dragInfo.xy.y
           });
-          const isPuzzleComplete = isComplete(
-            this.state.gridSize,
-            blockTrackers.map<PositionedBlock>(t => {
+          const isPuzzleComplete = isComplete({
+            width: this.state.gridSize.w,
+            height: this.state.gridSize.h,
+            positionedBlocks: blockTrackers.map<PositionedBlock>(t => {
               return {
                 x: t.gridX,
                 y: t.gridY,
                 block: t.block
               } as PositionedBlock;
             })
-          );
+          });
           this.setState({ isPuzzleComplete, blockTrackers });
           if (isPuzzleComplete) {
             this.props.onCompleted();

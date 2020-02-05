@@ -1,4 +1,5 @@
 import { Block, XY } from "./primitives";
+import { randomInt } from "./util";
 
 export const clone = (block: Block): Block => {
   return JSON.parse(JSON.stringify(block)) as Block;
@@ -89,4 +90,10 @@ export const allBlockVariations = (blocks: Block[]): Block[] => {
     .map(block => JSON.stringify(block));
 
   return [...new Set(stringifiedBlocks)].map(s => JSON.parse(s));
+};
+
+export const randomVariationOf = (block: Block): Block => {
+  const variations = blockVariations(block);
+  const num = randomInt(0, variations.length - 1);
+  return variations[num];
 };
