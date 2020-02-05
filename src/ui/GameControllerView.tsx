@@ -4,9 +4,18 @@ import PuzzleView from "./PuzzleView";
 import { Block, PositionedBlock, Puzzle } from "../primitives";
 import Button from "./Button";
 import Api from "./Api";
+import { millisToMinutesAndSeconds } from "../util";
 
 type Props = {};
-type State = { completed: boolean; blocks: Block[] | null; loading: boolean; puzzle?: Puzzle };
+type State = {
+  completed: boolean;
+  blocks: Block[] | null;
+  loading: boolean;
+  puzzle?: Puzzle;
+  started?: number | null;
+  intervalId?: NodeJS.Timeout;
+  seconds?: number;
+};
 
 export default class GameControllerView extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -20,27 +29,40 @@ export default class GameControllerView extends React.Component<Props, State> {
 
     this.handleCompleted = this.handleCompleted.bind(this);
     this.handlePlayAgain = this.handlePlayAgain.bind(this);
+    this.handleUpdateTime = this.handleUpdateTime.bind(this);
   }
 
   async componentDidMount() {
     const puzzle = await Api.puzzle.newPuzzle();
     const blocks = puzzle.positionedBlocks.map(positionedBlock => positionedBlock.block);
-    this.setState({ blocks, loading: false, completed: false, puzzle });
+    const intervalId = setInterval(this.handleUpdateTime, 500);
+    this.setState({ blocks, loading: false, completed: false, puzzle, intervalId, seconds: 0, started: Date.now() });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.intervalId as NodeJS.Timeout);
   }
 
   async handleCompleted(positionedBlocks: PositionedBlock[]) {
     const puzzle = this.state.puzzle as Puzzle;
-    const solution = { ...puzzle, positionedBlocks, seconds: 10, puzzleId: puzzle.id };
+    const seconds = this.state.seconds as number;
+    const solution = { ...puzzle, positionedBlocks, seconds, puzzleId: puzzle.id };
     delete solution.id;
     await Api.solution.save(solution);
-    this.setState({ completed: true, loading: false });
+    this.setState({ completed: true, loading: false, started: null });
   }
 
   async handlePlayAgain() {
     this.setState({ loading: true, completed: false });
     const puzzle = await Api.puzzle.newPuzzle();
     const blocks = puzzle.positionedBlocks.map(positionedBlock => positionedBlock.block);
-    this.setState({ blocks, loading: false, completed: false, puzzle });
+    this.setState({ blocks, loading: false, completed: false, puzzle, started: Date.now() });
+  }
+
+  handleUpdateTime() {
+    if (!this.state.started) return;
+    const seconds = (Date.now() - (this.state.started as number)) / 1000;
+    this.setState({ seconds });
   }
 
   render() {
@@ -51,6 +73,7 @@ export default class GameControllerView extends React.Component<Props, State> {
             <Button text={"Play Again"} onClick={this.handlePlayAgain} />
           </div>
         )}
+        {this.state.seconds && <div className="seconds">{millisToMinutesAndSeconds(this.state.seconds * 1000)}</div>}
         {this.renderPuzzle()}
         <style jsx global>
           {`
@@ -78,6 +101,15 @@ export default class GameControllerView extends React.Component<Props, State> {
               width: 160px;
               text-align: center;
               word-wrap: break-word;
+            }
+            .seconds {
+              font-family: Inconsolata;
+              font-size: 2em;
+              user-select: none;
+              touch-action: none;
+              position: absolute;
+              right: 0.2em;
+              top: 0.2em;
             }
           `}
         </style>

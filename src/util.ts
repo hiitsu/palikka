@@ -47,3 +47,12 @@ export const debounce = <F extends (...args: any) => any>(func: F, waitFor: numb
 
   return debounced as (...args: Parameters<F>) => ReturnType<F>;
 };
+
+export const millisToMinutesAndSeconds = (millis: number): string => {
+  let seconds = Math.floor(millis / 1000);
+
+  const minutes = Math.floor(seconds / 60);
+  seconds = seconds % 60;
+
+  return [minutes, seconds].map(n => String(n).padStart(2, "0")).join(":");
+};
