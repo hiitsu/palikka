@@ -39,13 +39,8 @@ export default class ParentWith extends Component<ParentWithProps, ParentWithSta
 
   render() {
     return (
-      <div ref={this.handlSetRef} className="full-width">
+      <div ref={this.handlSetRef} style={{ width: "100%" }}>
         {this.props.children(this.state)}
-        <style jsx>{`
-          .full-width {
-            width: 100%;
-          }
-        `}</style>
       </div>
     );
   }
