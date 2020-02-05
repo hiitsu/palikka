@@ -6,14 +6,18 @@ export default (props: { signedUp: boolean }) => {
   const [solutions, setSolutions] = useState<Puzzle[]>([]);
 
   useEffect(() => {
-    if (!props.signedUp) Api.solution.list().then((res: any) => setSolutions(res.data.solutions));
+    if (!props.signedUp) return;
+    (async function anyNameFunction() {
+      const list = await Api.solution.list();
+      setSolutions(list);
+    })();
   });
 
   console.log("solutions", solutions);
   return (
     <div>
-      {(solutions || []).map(solution => {
-        return <p>{solution}</p>;
+      {(solutions || []).map((solution, index) => {
+        return <p key={index}>{JSON.stringify(solution)}</p>;
       })}
     </div>
   );
