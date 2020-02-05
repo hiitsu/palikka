@@ -1,15 +1,12 @@
 import React from "react";
 import { Spinner } from "./Spinner";
 import PuzzleView from "./PuzzleView";
-
-import { Block } from "../primitives";
-
-import { randomPuzzle } from "../puzzle";
+import { Block, PositionedBlock, Puzzle } from "../primitives";
 import Button from "./Button";
 import Api from "./Api";
 
 type Props = {};
-type State = { completed: boolean; blocks: Block[] | null; loading: boolean };
+type State = { completed: boolean; blocks: Block[] | null; loading: boolean; puzzle?: Puzzle };
 
 export default class GameControllerView extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -28,10 +25,14 @@ export default class GameControllerView extends React.Component<Props, State> {
   async componentDidMount() {
     const puzzle = await Api.puzzle.newPuzzle();
     const blocks = puzzle.positionedBlocks.map(positionedBlock => positionedBlock.block);
-    this.setState({ blocks, loading: false, completed: false });
+    this.setState({ blocks, loading: false, completed: false, puzzle });
   }
 
-  handleCompleted() {
+  async handleCompleted(positionedBlocks: PositionedBlock[]) {
+    const puzzle = this.state.puzzle as Puzzle;
+    const solution = { ...puzzle, positionedBlocks, seconds: 10, puzzleId: puzzle.id };
+    delete solution.id;
+    await Api.solution.save(solution);
     this.setState({ completed: true, loading: false });
   }
 
@@ -39,7 +40,7 @@ export default class GameControllerView extends React.Component<Props, State> {
     this.setState({ loading: true, completed: false });
     const puzzle = await Api.puzzle.newPuzzle();
     const blocks = puzzle.positionedBlocks.map(positionedBlock => positionedBlock.block);
-    this.setState({ blocks, loading: false, completed: false });
+    this.setState({ blocks, loading: false, completed: false, puzzle });
   }
 
   render() {

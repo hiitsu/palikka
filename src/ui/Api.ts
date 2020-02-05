@@ -17,15 +17,17 @@ export default {
       if (localStorage && localStorage.getItem("auth")) {
         auth = JSON.parse(localStorage.getItem("auth") as string) as Auth;
       } else {
-        auth = await api.post("signup").then(res => {
-          console.log("Api.signup", res.data);
-          return res.data as Auth;
-        });
-        console.log("Auth info acquired from POST /signup", auth);
-        // TODO: handle QuotaExceededError
-        localStorage && localStorage.setItem("auth", JSON.stringify(auth));
+        const res = await api.post("signup");
+        auth = res.data.data as Auth;
+
+        try {
+          localStorage && localStorage.setItem("auth", JSON.stringify(auth));
+        } catch (err) {
+          // TODO: handle QuotaExceededError
+        }
       }
       api.defaults.headers.common["Authorization"] = `Bearer ${auth.token}`;
+      //console.log("Authorization set to", `Bearer ${auth.token}`);
       return auth;
     }
   },
@@ -36,11 +38,13 @@ export default {
     }
   },
   solution: {
-    list(): Promise<Puzzle[]> {
-      return api.get("/solution");
+    async list(): Promise<Puzzle[]> {
+      const res = await api.get("/solution");
+      return res.data.data;
     },
-    save(puzzleId: number, blocks: PositionedBlock[]): Promise<Puzzle> {
-      return api.post("/solution", { puzzleId, blocks });
+    async save(puzzle: Puzzle): Promise<Puzzle> {
+      const res = await api.post("/solution", puzzle);
+      return res.data.data;
     }
   }
 };
