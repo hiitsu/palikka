@@ -6,6 +6,7 @@ import { Block } from "../primitives";
 
 import { randomPuzzle } from "../puzzle";
 import Button from "./Button";
+import Api from "./Api";
 
 type Props = {};
 type State = { completed: boolean; blocks: Block[] | null; loading: boolean };
@@ -24,23 +25,21 @@ export default class GameControllerView extends React.Component<Props, State> {
     this.handlePlayAgain = this.handlePlayAgain.bind(this);
   }
 
-  componentDidMount() {
-    setTimeout(() => {
-      const blocks = randomPuzzle({ w: 6, h: 6 }).positionedBlocks.map(positionedBlock => positionedBlock.block);
-      this.setState({ blocks, loading: false, completed: false });
-    }, 500);
+  async componentDidMount() {
+    const puzzle = await Api.puzzle.newPuzzle();
+    const blocks = puzzle.positionedBlocks.map(positionedBlock => positionedBlock.block);
+    this.setState({ blocks, loading: false, completed: false });
   }
 
   handleCompleted() {
     this.setState({ completed: true, loading: false });
   }
 
-  handlePlayAgain() {
+  async handlePlayAgain() {
     this.setState({ loading: true, completed: false });
-    setTimeout(() => {
-      const blocks = randomPuzzle({ w: 6, h: 6 }).positionedBlocks.map(positionedBlock => positionedBlock.block);
-      this.setState({ blocks, loading: false });
-    }, 500);
+    const puzzle = await Api.puzzle.newPuzzle();
+    const blocks = puzzle.positionedBlocks.map(positionedBlock => positionedBlock.block);
+    this.setState({ blocks, loading: false, completed: false });
   }
 
   render() {

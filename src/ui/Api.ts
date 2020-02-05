@@ -30,8 +30,9 @@ export default {
     }
   },
   puzzle: {
-    new(size: Size): Promise<Puzzle> {
-      return api.post("puzzle", {});
+    async newPuzzle(width: number = 6, height: number = 6): Promise<Puzzle> {
+      const res = await api.post("puzzle", { width, height });
+      return res.data.data;
     }
   },
   solution: {
