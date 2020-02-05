@@ -15,11 +15,11 @@ describe("api", () => {
     return response.body.data;
   }
 
-  async function newPuzzle(auth: Auth): Promise<Puzzle> {
+  async function newPuzzle(auth: Auth, width: number = 4, height: number = 4): Promise<Puzzle> {
     const res = await supertest(fastify.server)
       .post("/puzzle")
       .set("Authorization", `Bearer ${auth.token}`)
-      .send({})
+      .send({ width, height })
       .expect(201);
 
     const puzzle: Puzzle = res.body.data;
@@ -220,12 +220,39 @@ describe("api", () => {
   });
 
   describe("puzzle", () => {
-    it("should create new random puzzle", async () => {
-      const res = await supertest(fastify.server)
+    it("asking new puzzle with invalid width should be 400", async () => {
+      await supertest(fastify.server)
         .post("/puzzle")
-        .expect(201);
-      expect(res.body.data.id).toBeGreaterThanOrEqual(1);
-      expect(res.body.data.positionedBlocks.length).toBeGreaterThanOrEqual(2);
+        .send({ width: "im string", height: 4 })
+        .expect(400);
+    });
+
+    it("asking new puzzle with invalid height should be 400", async () => {
+      await supertest(fastify.server)
+        .post("/puzzle")
+        .send({ width: 4, height: 1.234 })
+        .expect(400);
+    });
+
+    describe("new puzzle", () => {
+      let puzzle: Puzzle;
+      beforeAll(async () => {
+        const user = await signUp();
+        puzzle = await newPuzzle(user, 4, 7);
+      });
+
+      it("should have id set", async () => {
+        expect(puzzle.id).toBeGreaterThan(1);
+      });
+
+      it("should have positionedBlocks more than 2", async () => {
+        expect(puzzle.positionedBlocks.length).toBeGreaterThan(2);
+      });
+
+      it("should have mirror the request width and height", async () => {
+        expect(puzzle.width).toBe(4);
+        expect(puzzle.height).toBe(7);
+      });
     });
   });
 });

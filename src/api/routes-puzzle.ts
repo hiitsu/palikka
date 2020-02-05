@@ -8,10 +8,22 @@ export default function(
   _opts: any,
   done: Function
 ) {
+  const schema = {
+    body: {
+      type: "object",
+      required: ["width", "height"],
+      properties: {
+        width: { type: "integer", minimum: 2, maximum: 16 },
+        height: { type: "integer", minimum: 2, maximum: 16 }
+      }
+    }
+  };
+
   fastify.post(
     "/puzzle",
+    { schema },
     async (request: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
-      const puzzle = randomPuzzle({ w: 6, h: 6 }, 10);
+      const puzzle = randomPuzzle({ w: request.body.width, h: request.body.height }, 10);
       const [id] = await knex("puzzles")
         .insert({
           ...puzzle,
