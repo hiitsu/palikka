@@ -32,15 +32,17 @@ export default function(
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const userId = (req.user as any).sub;
       const solution = { ...req.body, positionedBlocks: JSON.stringify(req.body.positionedBlocks), userId };
-      const id = await knex("puzzles")
+      await knex("puzzles")
         .insert(solution)
         .returning("id")
         .then(ids => ids[0])
+        .then(id => {
+          reply
+            .header("Content-Type", "application/json")
+            .code(201)
+            .send({ data: { ...solution, id } });
+        })
         .catch(fastifyErrorHandler(reply));
-      reply
-        .header("Content-Type", "application/json")
-        .code(201)
-        .send({ data: { ...solution, id } });
     }
   );
 
@@ -49,14 +51,18 @@ export default function(
     { onRequest: onRequestVerifyJWT },
     async (req: fastify.FastifyRequest<http.IncomingMessage>, reply: fastify.FastifyReply<http.ServerResponse>) => {
       const userId = (req.user as any).sub;
-      const scores = await knex
+      await knex
         .from("puzzles")
         .select("seconds", "solutionFor", "positionedBlocks", "createdAt")
         .orderBy("createdAt", "asc")
         .where("userId", userId)
+        .then(scores => {
+          reply
+            .header("Content-Type", "application/json")
+            .code(200)
+            .send({ data: scores });
+        })
         .catch(fastifyErrorHandler(reply));
-      reply.header("Content-Type", "application/json").code(200);
-      reply.send({ data: scores });
     }
   );
 
