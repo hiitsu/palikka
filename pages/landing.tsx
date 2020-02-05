@@ -45,7 +45,7 @@ export default (props: any) => {
         <div className="container">
           <div className="row">
             <div className="col-8">
-              <p>Are you B-O-R-E-D? Or just at office and want to look busy?</p>
+              <p>Are you at the office and want to look busy?</p>
               <StyledNextLink text={"Play Now"} href="/" />
             </div>
           </div>
@@ -88,8 +88,8 @@ export default (props: any) => {
             <div className="col-4">
               <h2>Wanna be genius?</h2>
               <p>
-                Let's face it, this game will not make you smart, but it doesn't hurt to try. Unless you are on
-                pedestrian crossing it might.
+                Let's face it, this game will not make you smart, but it doesn't hurt to try unless you are on
+                pedestrian crossing.
               </p>
             </div>
           </div>
@@ -97,8 +97,8 @@ export default (props: any) => {
             <div className="col-4">
               <h2>Challenge your friends</h2>
               <p>
-                Assuming you have friends, now you can actually see if your they are actually dumb as you always thought
-                they were.
+                Assuming you have friends, you can now see if they are actually dumb as you always thought they were.
+                Solve some puzzles and send them same puzzles and compare results.
               </p>
             </div>
           </div>
@@ -261,7 +261,7 @@ export default (props: any) => {
         }
         .section-header h1 {
           line-height: 1em;
-          margin-bottom: 0.4em;
+          margin-bottom: 0;
         }
         .section-header p {
           margin: 0;
