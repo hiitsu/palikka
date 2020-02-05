@@ -1,13 +1,17 @@
 import { ColorGrid } from "../primitives";
 import colors from "../colors";
-import ParentWith from "./ParentWidth";
+import Sizer, { SizerState } from "./Sizer";
 
-function PuzzleVisualizedView(props: { grid: ColorGrid }) {
+function PuzzleVisualizedView(props: { grid: ColorGrid; height?: number }) {
+  const w = props.grid[0].length;
+  const h = props.grid.length;
   return (
-    <ParentWith>
-      {(info: any) => {
-        const w = props.grid[0].length;
-        const size = (info.width as number) / w;
+    <Sizer heightMultiplier={h / w}>
+      {(dimensions: SizerState) => {
+        let size = dimensions.width / w;
+        if (dimensions.height) {
+          size = dimensions.height / h;
+        }
         return (
           <div className="grid">
             {props.grid.map((row, index) => {
@@ -48,7 +52,7 @@ function PuzzleVisualizedView(props: { grid: ColorGrid }) {
           </div>
         );
       }}
-    </ParentWith>
+    </Sizer>
   );
 }
 

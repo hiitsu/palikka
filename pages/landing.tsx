@@ -240,7 +240,8 @@ export default (props: any) => {
             padding: 2em 0;
           }
         }
-
+        .section-hero .col-2 {
+        }
         .section-play-now {
           background: #ededed;
         }
