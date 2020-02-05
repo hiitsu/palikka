@@ -107,13 +107,13 @@ describe("database", () => {
   it("casing test: camelCase", async () => {
     await knex.schema.createTable("casingtest1", function(table) {
       table.increments("id").notNullable();
-      table.integer("puzzleId").notNullable();
+      table.integer("solutionFor").notNullable();
     });
     await knex("casingtest1").insert({
-      puzzleId: 123
+      solutionFor: 123
     });
     const rows = await knex("casingtest1").select("*");
     expect(rows).toHaveLength(1);
-    expect(rows[0].puzzleId).toStrictEqual(123);
+    expect(rows[0].solutionFor).toStrictEqual(123);
   });
 });

@@ -46,7 +46,7 @@ export default class GameControllerView extends React.Component<Props, State> {
   async handleCompleted(positionedBlocks: PositionedBlock[]) {
     const puzzle = this.state.puzzle as Puzzle;
     const seconds = this.state.seconds as number;
-    const solution = { ...puzzle, positionedBlocks, seconds, puzzleId: puzzle.id };
+    const solution = { ...puzzle, positionedBlocks, seconds, solutionFor: puzzle.id };
     delete solution.id;
     await Api.solution.save(solution);
     this.setState({ completed: true, loading: false, started: null });

@@ -28,7 +28,7 @@ export type Puzzle = {
   positionedBlocks: PositionedBlock[];
   userId?: number;
   seconds?: number;
-  puzzleId?: number;
+  solutionFor?: number;
 };
 
 export type Auth = { token: string; user: { id: number | string } };

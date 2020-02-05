@@ -34,7 +34,7 @@ describe("Api", () => {
         const scope = nock(baseUrl)
           .defaultReplyHeaders({ "access-control-allow-origin": "*" })
           .post("/signup")
-          .reply(201, auth);
+          .reply(201, { data: auth });
         const signup = await Api.user.signup();
         expect(signup).toEqual({ ...auth });
         scope.done();

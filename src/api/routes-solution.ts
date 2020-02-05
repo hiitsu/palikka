@@ -12,7 +12,7 @@ export default function(
   const schema = {
     body: {
       type: "object",
-      required: ["puzzleId", "positionedBlocks", "width", "height", "seconds"],
+      required: ["solutionFor", "positionedBlocks", "width", "height", "seconds"],
       properties: {
         blocks: {
           type: "array",
@@ -21,7 +21,7 @@ export default function(
         seconds: { type: "number", minimum: 1, maximum: 60 * 60 },
         width: { type: "integer", minimum: 2, maximum: 16 },
         height: { type: "integer", minimum: 2, maximum: 16 },
-        puzzleId: { type: "integer" }
+        solutionFor: { type: "integer" }
       }
     }
   };
@@ -51,7 +51,7 @@ export default function(
       const userId = (req.user as any).sub;
       const scores = await knex
         .from("puzzles")
-        .select("seconds", "puzzleId", "positionedBlocks", "createdAt")
+        .select("seconds", "solutionFor", "positionedBlocks", "createdAt")
         .orderBy("createdAt", "asc")
         .where("userId", userId)
         .catch(fastifyErrorHandler(reply));

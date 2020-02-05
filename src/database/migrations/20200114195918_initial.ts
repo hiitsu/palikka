@@ -8,7 +8,7 @@ module.exports.up = async (knex: Knex): Promise<any> => {
   return knex.schema.createTable("puzzles", function(table) {
     table.increments("id").notNullable();
     table
-      .integer("puzzleId")
+      .integer("solutionFor")
       .nullable()
       .defaultTo(null)
       .references("id")
