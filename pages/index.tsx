@@ -9,7 +9,7 @@ import StyledNextLink from "../src/ui/StyledNextLink";
 export default (props: any) => {
   return (
     <>
-      <CommonHead title="landing" />
+      <CommonHead title="Palikka - Dumbass puzzle game" />
 
       <header className="section-header">
         <div className="container">

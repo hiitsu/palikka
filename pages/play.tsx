@@ -6,7 +6,7 @@ import { AuthProvider } from "../src/ui/AuthContext";
 export default (props: any) => {
   return (
     <AuthProvider>
-      <CommonHead title="index" />
+      <CommonHead title="Palikka - Solve puzzles like a pro" />
       <GameControllerView />
     </AuthProvider>
   );
