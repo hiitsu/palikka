@@ -1,6 +1,27 @@
 import { PositionedBlock, Slot, Size } from "../primitives";
-import { SquareView } from "./SquareView";
 import { array2D } from "../util";
+
+export function SquareView(props: { highlight?: boolean; squareId: string }) {
+  return (
+    <div
+      data-square-id={props.squareId}
+      className="square"
+      draggable="false"
+      style={{ background: props.highlight ? "rgba(0, 0, 0, 0.3)" : "transparent" }}
+    >
+      <style jsx>{`
+        .square {
+          width: 1cm;
+          height: 1cm;
+          display: inline-block;
+          box-sizing: border-box;
+          z-index: 1;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        }
+      `}</style>
+    </div>
+  );
+}
 
 export function GridView(props: { size: Size; highlight?: PositionedBlock }) {
   const grid = array2D(props.size.w, props.size.h, () => 0);
@@ -29,11 +50,11 @@ export function GridView(props: { size: Size; highlight?: PositionedBlock }) {
           position: absolute;
           box-sizing: border-box;
           padding: 0;
-          background-color: #eee;
+          background-color: #f0f0f0;
           z-index: 1;
           top: calc(50% - 120px);
           left: calc(50% - 120px);
-          border: 1px solid black;
+          border: 1px solid rgba(0, 0, 0, 0.5);
         }
         .grid-row {
           box-sizing: border-box;

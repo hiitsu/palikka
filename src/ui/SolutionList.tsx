@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Api from "./Api";
 import { Puzzle } from "src/primitives";
 
@@ -7,13 +7,12 @@ export default (props: { signedUp: boolean }) => {
 
   useEffect(() => {
     if (!props.signedUp) return;
-    (async function anyNameFunction() {
+    (async function callApi() {
       const list = await Api.solution.list();
       setSolutions(list);
     })();
   });
 
-  console.log("solutions", solutions);
   return (
     <div>
       {(solutions || []).map((solution, index) => {
