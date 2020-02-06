@@ -3,8 +3,10 @@ import Link, { LinkProps } from "next/link";
 export type StyledNextLinkProps = LinkProps & { text: string; style?: any };
 
 export default function StyledNextLink(props: StyledNextLinkProps) {
+  const linkProps = { ...props };
+  delete linkProps.text;
   return (
-    <Link {...props}>
+    <Link {...linkProps}>
       <a className="button">
         {props.text}
         <style jsx>{`
