@@ -24,9 +24,8 @@ export default (props: { signedUp: boolean }) => {
   return (
     <>
       {solutions.map((solution, index) => {
-        console.log(solution);
         return (
-          <div style={{ width: "25%", float: "left", boxSizing: "border-box", padding: "1em" }} key={index}>
+          <div className="solution-card" key={index}>
             <PuzzleVisualizedView grid={renderColorGrid(solution)} />
             <p>Your time: {solution.seconds}s</p>
             <p>Played by {statistics[index].solutionCount} people</p>
@@ -35,6 +34,23 @@ export default (props: { signedUp: boolean }) => {
           </div>
         );
       })}
+      <style jsx>{`
+        .solution-card {
+          width: 100%;
+          float: left;
+          padding: 0 0.5em;
+        }
+        @media only screen and (min-width: 24em) {
+          .solution-card {
+            width: 50%;
+          }
+        }
+        @media only screen and (min-width: 48em) {
+          .solution-card {
+            width: 25%;
+          }
+        }
+      `}</style>
     </>
   );
 };
