@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Api from "./Api";
 import { Puzzle } from "src/primitives";
+import PuzzleVisualizedView from "./PuzzleVisualizedView";
+import { renderColorGrid } from "../puzzle";
 
 export default (props: { signedUp: boolean }) => {
   const [solutions, setSolutions] = useState<Puzzle[] | null>(null);
@@ -20,7 +22,14 @@ export default (props: { signedUp: boolean }) => {
   return (
     <>
       {solutions.map((solution, index) => {
-        return <p key={index}>{JSON.stringify(solution)}</p>;
+        console.log(solution);
+        return (
+          <div className="col-3" key={index}>
+            <PuzzleVisualizedView grid={renderColorGrid(solution)} />
+            <p>Time: {solution.seconds}s</p>
+            <p>Date: {solution.createdAt}</p>
+          </div>
+        );
       })}
     </>
   );

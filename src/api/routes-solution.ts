@@ -53,7 +53,7 @@ export default function(
       const userId = (req.user as any).sub;
       await knex
         .from("puzzles")
-        .select("seconds", "solutionFor", "positionedBlocks", "createdAt")
+        .select("seconds", "solutionFor", "positionedBlocks", "createdAt", "width", "height")
         .orderBy("createdAt", "asc")
         .where("userId", userId)
         .then(scores => {
