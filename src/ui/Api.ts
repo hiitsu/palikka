@@ -1,5 +1,5 @@
 import axios from "axios";
-import { PositionedBlock, Size, Puzzle, Auth } from "../primitives";
+import { PositionedBlock, Size, Puzzle, Auth, PuzzleStats } from "../primitives";
 
 const api = axios.create({
   baseURL: process.env.API_BASE_URL || "http://localhost:3001",
@@ -34,6 +34,10 @@ export default {
   puzzle: {
     async newPuzzle(width: number = 6, height: number = 6): Promise<Puzzle> {
       const res = await api.post("puzzle", { width, height });
+      return res.data.data;
+    },
+    async stats(id: number): Promise<PuzzleStats> {
+      const res = await api.get(`puzzle/${id}`);
       return res.data.data;
     }
   },

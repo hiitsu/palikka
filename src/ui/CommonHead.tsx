@@ -60,7 +60,7 @@ export default function CommonHead(props: { title: string }) {
         }
         .container {
           width: 100%;
-          max-width: 1023px;
+          max-width: 1024px;
         }
         .row {
           position: relative;
@@ -95,7 +95,7 @@ export default function CommonHead(props: { title: string }) {
           color: #333447;
         }
 
-        @media only screen and (min-width: 40em) {
+        @media only screen and (min-width: 24em) {
           .col-2 {
             width: 25%;
           }
@@ -141,6 +141,12 @@ export default function CommonHead(props: { title: string }) {
         .section-header p {
           margin: 0;
           line-height: 1em;
+        }
+        .section-my-solutions p {
+          line-height: 1em;
+          font-size: 1em;
+          margin: 0.1em 0 0.3em 0;
+          letter-spacing: -1px;
         }
       `}</style>
       <meta key="msapplication-tap-highlight" name="msapplication-tap-highlight" content="no" />

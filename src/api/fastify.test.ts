@@ -3,7 +3,7 @@ import http from "http";
 import buildFastify from "./fastify";
 import knex, { destroy } from "./knex";
 import supertest from "supertest";
-import { Auth, Puzzle } from "../primitives";
+import { Auth, Puzzle, PuzzleStats } from "../primitives";
 import { isComplete } from "../puzzle";
 
 type FastifyInstance = Fastify.FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>;
@@ -39,6 +39,14 @@ describe("api", () => {
       .send(solution)
       .expect(201);
 
+    return res.body.data;
+  }
+
+  async function puzzleStats(id: number): Promise<PuzzleStats> {
+    const res = await supertest(fastify.server)
+      .get(`/puzzle/${id}`)
+      //.set("Authorization", `Bearer ${auth.token}`)
+      .expect(200);
     return res.body.data;
   }
 
@@ -257,6 +265,42 @@ describe("api", () => {
       it("should have mirror the request width and height", async () => {
         expect(puzzle.width).toBe(4);
         expect(puzzle.height).toBe(7);
+      });
+    });
+
+    describe("statistics", () => {
+      let stats: PuzzleStats;
+      beforeAll(async () => {
+        const users = await Promise.all([1, 2, 3].map(num => signUp()));
+        const puzzle = {
+          width: 3,
+          height: 3,
+          positionedBlocks: JSON.stringify([
+            { x: 0, y: 0, block: [[1], [1], [1]] },
+            { x: 1, y: 0, block: [[1], [1], [1]] },
+            { x: 2, y: 0, block: [[1], [1], [1]] }
+          ])
+        };
+        const [id] = await knex("puzzles")
+          .insert(puzzle)
+          .returning("id");
+        saveSolution(users[0], { ...puzzle, seconds: 5, solutionFor: id } as any);
+        saveSolution(users[1], { ...puzzle, seconds: 6, solutionFor: id } as any);
+        saveSolution(users[2], { ...puzzle, seconds: 7, solutionFor: id } as any);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        stats = await puzzleStats(id);
+      });
+
+      it("should calculate averageTime correctly", async () => {
+        expect(stats.averageTime).toBe(6);
+      });
+
+      it("should calculate bestTime correctly", async () => {
+        expect(stats.bestTime).toBe(5);
+      });
+
+      it("should sum solutionCount correctly", async () => {
+        expect(stats.solutionCount).toBe(3);
       });
     });
   });

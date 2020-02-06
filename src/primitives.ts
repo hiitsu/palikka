@@ -31,4 +31,10 @@ export type Puzzle = {
   solutionFor?: number;
 };
 
+export type PuzzleStats = {
+  averageTime: number;
+  bestTime: number;
+  solutionCount: number;
+};
+
 export type Auth = { token: string; user: { id: number | string } };
