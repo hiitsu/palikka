@@ -49,6 +49,7 @@ type Partial<T> = {
 function blockInfo(el: Element): BlockInfo | null {
   const slotId = el.getAttribute("data-slot-id");
   if (!slotId) {
+    console.log("No slotId for", el);
     return null;
   }
   const [blockId, x, y] = slotId.split("-").map((s: string) => parseInt(s));
@@ -429,7 +430,15 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           style={{ position: "relative" }}
         >
           {this.state.blockTrackers.map((tracker, index) => {
-            return <BlockView tracker={tracker} canSelect={!this.state.dragging} key={index} color={index} />;
+            return (
+              <BlockView
+                tracker={tracker}
+                canSelect={!this.state.dragging}
+                dimBackground={this.state.state === "flipping" && this.state.selectedBlockInfo?.blockId === index}
+                key={index}
+                color={index}
+              />
+            );
           })}
           <GridView size={this.state.gridSize} highlight={this.state.proposedBlock || undefined} />
           {process.env.NODE_ENV != "production" && <div className="debug">{this.state.state}</div>}

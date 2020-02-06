@@ -1,7 +1,7 @@
 import { SlotView } from "./SlotView";
 import { BlockTracker } from "./PuzzleView";
 
-export function BlockView(props: { tracker: BlockTracker; color: number; canSelect: boolean }) {
+export function BlockView(props: { tracker: BlockTracker; color: number; canSelect: boolean; dimBackground: boolean }) {
   return (
     <div
       key={`block-${props.tracker.blockId}`}
@@ -10,7 +10,8 @@ export function BlockView(props: { tracker: BlockTracker; color: number; canSele
       style={{
         left: props.tracker.screenX,
         top: props.tracker.screenY,
-        zIndex: props.tracker.zIndex
+        zIndex: props.tracker.zIndex,
+        boxShadow: props.dimBackground ? "0 0 0 9999px rgba(0,0,0,0.2)" : "none"
       }}
     >
       {props.tracker.block.map((row, y) => {
@@ -18,6 +19,7 @@ export function BlockView(props: { tracker: BlockTracker; color: number; canSele
           <div key={`block-${props.tracker.blockId}-row-${y}`} className="block-row" draggable="false">
             {row.map((value, x) => (
               <SlotView
+                dimBackground={props.dimBackground}
                 canSelect={props.canSelect}
                 slotId={`${props.tracker.blockId}-${x}-${y}`}
                 value={value}
