@@ -14,7 +14,7 @@ export default function CommonHead(props: { title: string }) {
         href="https://fonts.googleapis.com/css?family=Inconsolata:400,700&display=swap"
         rel="stylesheet"
       />
-      <style global jsx>{`
+      <style>{`
         body,
         html {
           height: 100%;
@@ -31,6 +31,7 @@ export default function CommonHead(props: { title: string }) {
         }
         * {
           font-family: "Inconsolata", monospace;
+          box-sizing: border-box;
           line-height: 1.5;
         }
         h1 {
@@ -71,7 +72,7 @@ export default function CommonHead(props: { title: string }) {
           margin: 0;
           padding: 0 1em;
           min-height: 0.125em;
-          box-sizing: border-box;
+
           /*
           border: 1px solid #ccc;*/
         }
