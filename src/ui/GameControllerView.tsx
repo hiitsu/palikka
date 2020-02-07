@@ -108,13 +108,13 @@ export default class GameControllerView extends React.Component<Props, State> {
             .seconds {
               user-select: none;
               touch-action: none;
+              pointer-events: none;
               position: absolute;
-              left: 0;
-              right: 0;
+              left: calc(50% - 1.5em);
+              width: 3em;
               margin-left: auto;
               margin-right: auto;
-              display: block;
-              width: 3em;
+              display: inline-block;
               text-align: center;
               top: 0.2em;
               z-index: 1000000;
