@@ -58,8 +58,8 @@ function blockInfo(el: Element): BlockInfo | null {
 }
 
 function screenPosition(index: number, block: Block, squareSize: number = 38): { screenX: number; screenY: number } {
-  const x = window.screen.availWidth / window.devicePixelRatio / 2;
-  const y = window.screen.availHeight / window.devicePixelRatio / 5;
+  const x = 160; //window.screen.availWidth / window.devicePixelRatio / 2;
+  const y = 100; //window.screen.availHeight / window.devicePixelRatio / 5;
   const offsetX = (block[0].length / 2) * squareSize;
   const offsetY = (block.length / 2) * squareSize;
   const randomX = randomFloat(-1.2, 1.2) * squareSize;
