@@ -3,6 +3,7 @@ import Api from "./Api";
 import { Puzzle, PuzzleStats } from "../primitives";
 import PuzzleVisualizedView from "./PuzzleVisualizedView";
 import { renderColorGrid } from "../puzzle";
+import { Spinner } from "./Spinner";
 
 export default (props: { signedUp: boolean }) => {
   const [solutions, setSolutions] = useState<Puzzle[] | null>(null);
@@ -18,7 +19,10 @@ export default (props: { signedUp: boolean }) => {
       setSolutions(([] as Puzzle[]).concat(list, list, list, list, list));
     })();
   });
-  if (!solutions || !solutions.length) {
+  if (!solutions) {
+    return <Spinner width={128} height={128} />;
+  }
+  if (!solutions.length) {
     return <p>You haven't played anything yet</p>;
   }
   return (
