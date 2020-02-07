@@ -73,7 +73,7 @@ export default class GameControllerView extends React.Component<Props, State> {
             <Button text={"Play Again"} onClick={this.handlePlayAgain} />
           </div>
         )}
-        {this.state.seconds && <div className="seconds">{millisToMinutesAndSeconds(this.state.seconds * 1000)}</div>}
+        {<div className="seconds">{millisToMinutesAndSeconds((this.state.seconds || 0) * 1000)}</div>}
         {this.renderPuzzle()}
         <style jsx global>
           {`
