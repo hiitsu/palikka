@@ -7,6 +7,7 @@ import { GridView } from "./GridView";
 import { flipX, flipY, rotateClockWise90, corners } from "../block";
 import { canFit } from "../grid";
 import { elementWidth, elementTopLeft, squareTopLeft, isPointInside, elementOffset } from "../dom";
+import { randomInt, randomFloat } from "../util";
 
 type BlockInfo = {
   blockId: number;
@@ -56,11 +57,16 @@ function blockInfo(el: Element): BlockInfo | null {
   return { blockId, xy: { x, y } };
 }
 
-function screenPosition(index: number): { screenX: number; screenY: number } {
-  const offsetY = Math.floor((120.0 * index) / 320.0);
+function screenPosition(index: number, block: Block, squareSize: number = 38): { screenX: number; screenY: number } {
+  const x = window.screen.availWidth / window.devicePixelRatio / 2;
+  const y = window.screen.availHeight / window.devicePixelRatio / 5;
+  const offsetX = (block[0].length / 2) * squareSize;
+  const offsetY = (block.length / 2) * squareSize;
+  const randomX = randomFloat(-1.2, 1.2) * squareSize;
+  const randomY = randomFloat(-1.2, 1.2) * squareSize;
   return {
-    screenX: (120 * index) % 320,
-    screenY: 10 + 120 * offsetY
+    screenX: x - offsetX + randomX,
+    screenY: y - offsetY + randomY
   };
 }
 
@@ -282,16 +288,16 @@ const PuzzleStates: States = {
 };
 
 export default class PuzzleComponent extends React.Component<PuzzleProps, PuzzleState> {
-  el: HTMLDivElement | null;
   handlePanStart: (ev: any) => void;
   handlePan: (ev: any) => void;
   handlePanEnd: (ev: any) => void;
   handleTap: (ev: any) => void;
   handleDoubleTap: (ev: any) => void;
   handlePress: (ev: any) => void;
+
   constructor(props: PuzzleProps) {
     super(props);
-    this.el = null;
+
     this.state = this.resetWith(props);
 
     this.handleHammerEvent = this.handleHammerEvent.bind(this);
@@ -307,7 +313,6 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.handleWheel = this.handleWheel.bind(this);
 
     this.handleResize = this.handleResize.bind(this);
-    this.handleSetElement = this.handleSetElement.bind(this);
   }
 
   resetWith(props: PuzzleProps): PuzzleState {
@@ -322,7 +327,7 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
       blockSize: null,
       blockTrackers: props.blocks.map((block, index) => {
         return {
-          ...screenPosition(index),
+          ...screenPosition(index, block),
           zIndex: 10 + index + 2,
           block,
           blockId: index,
@@ -386,13 +391,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     this.mutateBlockTrackers(selectedBlockInfo.blockId, { block: flippedBlock });
   }
 
-  handleSetElement(el: HTMLDivElement) {
-    this.el = el;
-  }
-
   handleResize() {
     const blockTrackers = this.state.blockTrackers.map((blockTracker, index) => {
-      const naturalPosition = screenPosition(index);
+      const naturalPosition = screenPosition(index, blockTracker.block);
       if (!blockTracker.isPlaced) {
         return { ...blockTracker, ...naturalPosition };
       }
@@ -407,6 +408,9 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
     const handler = state && state[eventType];
     console.log("handleHammerEvent", this.state.state, eventType, handler ? "handler:yes" : "handler:no");
     if (handler) {
+      //const rect = this.el?.getBoundingClientRect();
+      //console.log(rect, ev.center);
+      //ev.center.x = rect?.x;
       handler.call(this, ev);
     }
   }
@@ -425,7 +429,6 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
           tabIndex={0}
           onWheel={this.handleWheel}
           onKeyDown={this.handleKeyDown}
-          ref={this.handleSetElement}
           className="puzzle"
           style={{ position: "relative" }}
         >
@@ -466,8 +469,10 @@ export default class PuzzleComponent extends React.Component<PuzzleProps, Puzzle
                 position:absolute;
                 top:4px;
                 left4px;
+                z-index:1000100;
               }
               .puzzle {
+                outline: none;
                 width: 100%;
                 height: 100%;
               }

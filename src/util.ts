@@ -30,6 +30,7 @@ export const arrayOfPoints = (width: number, height: number, includeNegatives?: 
 };
 
 export const randomInt = (from: number, to: number): number => from + Math.floor(Math.random() * to - from);
+export const randomFloat = (min: number, max: number): number => Math.random() * (max - min) + min;
 
 export default function snapToGrid(x: number, y: number, gridSize: number = 32) {
   const snappedX = Math.round(x / gridSize) * gridSize;

@@ -79,11 +79,10 @@ export default class GameControllerView extends React.Component<Props, State> {
           {`
             .game-controller-view {
               width: 100%;
-              max-width: 480px;
               height: 100%;
               position: relative;
-              margin-left: auto;
-              margin-right: auto;
+              margin: 0;
+              padding: 0;
             }
             .menu {
               width: 320px;
@@ -110,7 +109,13 @@ export default class GameControllerView extends React.Component<Props, State> {
               user-select: none;
               touch-action: none;
               position: absolute;
-              right: 0.2em;
+              left: 0;
+              right: 0;
+              margin-left: auto;
+              margin-right: auto;
+              display: block;
+              width: 3em;
+              text-align: center;
               top: 0.2em;
               z-index: 1000000;
               background: black;
